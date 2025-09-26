@@ -113,7 +113,7 @@
 
     <!-- Sidebar Message -->
     <div class="sidebar-card d-none d-lg-flex">
-        <img src="{{ Vite::asset('resources/assets/img/undraw_rocket.svg') }}" class="sidebar-card-illustration mb-2" alt="Rocket">
+        <i class="fas fa-rocket fa-3x text-primary mb-2"></i>
         <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components, and more!</p>
         <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to Pro!</a>
     </div>
