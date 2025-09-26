@@ -94,6 +94,125 @@
         </div>
     </div>
 
+    <!-- Exchange Management Navigation Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-exchange-alt text-primary mr-2"></i>Gestion des Échanges
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ route('admin.exchanges.index') }}" class="btn btn-primary btn-block">
+                                <i class="fas fa-list fa-sm mr-2"></i>
+                                Tous les Échanges
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ route('admin.exchanges.create') }}" class="btn btn-success btn-block">
+                                <i class="fas fa-plus fa-sm mr-2"></i>
+                                Nouvel Échange
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ route('exchanges.index') }}" class="btn btn-info btn-block">
+                                <i class="fas fa-eye fa-sm mr-2"></i>
+                                Vue Utilisateur
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="#exchangesTable" class="btn btn-warning btn-block">
+                                <i class="fas fa-gavel fa-sm mr-2"></i>
+                                Échanges en Attente
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Office Functionalities -->
+    <div class="row" id="exchangesTable">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-gavel text-primary mr-2"></i>Échanges en Attente - Administration
+                    </h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="actions mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ route('admin.exchanges.index') }}" class="btn btn-primary btn-block">
+                                    <i class="fas fa-list"></i> Tous les Échanges
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ route('admin.exchanges.create') }}" class="btn btn-success btn-block">
+                                    <i class="fas fa-plus"></i> Créer Échange
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ route('exchanges.index') }}" class="btn btn-info btn-block">
+                                    <i class="fas fa-user"></i> Vue Utilisateur
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <button onclick="location.reload()" class="btn btn-secondary btn-block">
+                                    <i class="fas fa-sync"></i> Actualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 mb-3">Échanges en cours</h2>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($ongoingExchanges as $exchange)
+                            <tr>
+                                <td>{{ $exchange->id }}</td>
+                                <td>{{ $exchange->type }}</td>
+                                <td>{{ $exchange->status }}</td>
+                                <td>
+                                    <form action="{{ route('admin.exchanges.arbitrate', $exchange->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-gavel"></i> Arbitrer
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.exchanges.cancel', $exchange->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir annuler cet échange ?')">
+                                            <i class="fas fa-times-circle"></i> Annuler
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Content Row -->
     <div class="row">
         <!-- Gestion des Utilisateurs -->
@@ -391,3 +510,20 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Smooth scrolling for internal links
+    $('a[href^="#"]').on('click', function(event) {
+        var target = $(this.getAttribute('href'));
+        if( target.length ) {
+            event.preventDefault();
+            $('html, body').stop().animate({
+                scrollTop: target.offset().top - 100
+            }, 1000);
+        }
+    });
+});
+</script>
+@endpush

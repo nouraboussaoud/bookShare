@@ -20,6 +20,25 @@
         </div>
     </div>
 
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
     <!-- Content Row -->
     <div class="row">
         <!-- Mes Livres Card -->
@@ -208,5 +227,42 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="container">
+        <h1>User Dashboard</h1>
+
+        <div class="actions">
+            <a href="{{ route('exchanges.create') }}" class="btn btn-success">Réserver un livre</a>
+            <a href="{{ route('exchanges.index') }}" class="btn btn-primary">Voir l’historique</a>
+        </div>
+
+        <h2>Échanges en attente</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($pendingExchanges as $exchange)
+                <tr>
+                    <td>{{ $exchange->id }}</td>
+                    <td>{{ $exchange->type }}</td>
+                    <td>{{ $exchange->status }}</td>
+                    <td>
+                        <form action="{{ route('user.confirmExchange', $exchange->id) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-warning">Confirmer</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 @endsection
