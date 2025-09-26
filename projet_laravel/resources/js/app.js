@@ -8,3 +8,4 @@ import "../vendor/datatables/dataTables.bootstrap4.min.js";
 // If you have custom scripts (e.g., sb-admin-2.min.js) place them under resources/vendor and import here
 // import "../assets/js/sb-admin-2.min.js";
 
+
