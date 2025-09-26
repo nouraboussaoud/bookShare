@@ -110,7 +110,7 @@
                 </h6>
                 <a class="dropdown-item d-flex align-items-center" href="#">
                     <div class="dropdown-list-image mr-3">
-                        <img src="{{ Vite::asset('resources/assets/img/undraw_profile_1.svg') }}" class="rounded-circle" alt="Profile">
+                        <i class="fas fa-user-circle fa-2x text-success"></i>
                         <div class="status-indicator bg-success"></div>
                     </div>
                     <div class="font-weight-bold">
@@ -121,7 +121,7 @@
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
                     <div class="dropdown-list-image mr-3">
-                        <img src="{{ Vite::asset('resources/assets/img/undraw_profile_2.svg') }}" class="rounded-circle" alt="Profile">
+                        <i class="fas fa-user-circle fa-2x text-primary"></i>
                         <div class="status-indicator"></div>
                     </div>
                     <div>
@@ -132,7 +132,7 @@
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
                     <div class="dropdown-list-image mr-3">
-                        <img src="{{ Vite::asset('resources/assets/img/undraw_profile_3.svg') }}" class="rounded-circle" alt="Profile">
+                        <i class="fas fa-user-circle fa-2x text-warning"></i>
                         <div class="status-indicator bg-warning"></div>
                     </div>
                     <div>
@@ -143,7 +143,7 @@
                 </a>
                 <a class="dropdown-item d-flex align-items-center" href="#">
                     <div class="dropdown-list-image mr-3">
-                        <img src="{{ Vite::asset('resources/assets/img/undraw_profile.svg') }}" class="rounded-circle" alt="Profile">
+                        <i class="fas fa-user-circle fa-2x text-success"></i>
                         <div class="status-indicator bg-success"></div>
                     </div>
                     <div>
@@ -158,34 +158,57 @@
 
         <div class="topbar-divider d-none d-sm-block"></div>
 
-        <!-- Nav Item - User Information -->
-        <li class="nav-item dropdown no-arrow">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
-                <img src="{{ Vite::asset('resources/assets/img/undraw_profile.svg') }}" class="img-profile rounded-circle" alt="Profile">
-            </a>
-            <!-- Dropdown - User Information -->
-            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="#">
-                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Profile
+        @auth
+            <!-- Nav Item - User Information -->
+            <li class="nav-item dropdown no-arrow">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
+                    <i class="fas fa-user-circle fa-2x text-gray-600"></i>
                 </a>
-                <a class="dropdown-item" href="#">
-                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Settings
+                <!-- Dropdown - User Information -->
+                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                    aria-labelledby="userDropdown">
+                    @if (Route::has('profile.edit'))
+                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Profil
+                        </a>
+                    @endif
+                    <a class="dropdown-item" href="#">
+                        <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Paramètres
+                    </a>
+                    <a class="dropdown-item" href="#">
+                        <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Activité
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline; width: 100%;">
+                        @csrf
+                        <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Déconnexion
+                        </button>
+                    </form>
+                </div>
+            </li>
+        @else
+            <!-- Nav Items - Guest User -->
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('login') }}">
+                    <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
+                    <span>Connexion</span>
                 </a>
-                <a class="dropdown-item" href="#">
-                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Activity Log
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                    Logout
-                </a>
-            </div>
-        </li>
+            </li>
+            @if (Route::has('register'))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('register') }}">
+                        <i class="fas fa-user-plus fa-sm fa-fw mr-2"></i>
+                        <span>Inscription</span>
+                    </a>
+                </li>
+            @endif
+        @endauth
     </ul>
 </nav>

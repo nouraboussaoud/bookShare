@@ -1,3 +1,10 @@
+import './bootstrap';
+
+import Alpine from 'alpinejs';
+
+window.Alpine = Alpine;
+
+Alpine.start();
 import "../vendor/jquery/jquery.min.js";
 import "../vendor/bootstrap/js/bootstrap.bundle.min.js";
 import "../vendor/jquery-easing/jquery.easing.min.js";

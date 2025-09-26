@@ -3,91 +3,90 @@
 @section('content')
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-download fa-sm text-white-50"></i> Generate Report
-        </a>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Administration BookShare</h1>
+            <p class="mb-0 text-gray-600">Bienvenue, {{ Auth::user()->name }} - <span class="badge badge-danger">Administrateur</span></p>
+        </div>
+        <div>
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mr-2">
+                <i class="fas fa-download fa-sm text-white-50"></i> Rapport Général
+            </a>
+            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-danger shadow-sm">
+                    <i class="fas fa-sign-out-alt fa-sm text-white-50"></i> Déconnexion
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Content Row -->
     <div class="row">
-        <!-- Earnings (Monthly) Card Example -->
+        <!-- Total Utilisateurs Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Earnings (Monthly)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
+                                Total Utilisateurs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
+        <!-- Utilisateurs Actifs Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Earnings (Annual)</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
+                                Utilisateurs Actifs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::where('status', 'active')->count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                            <i class="fas fa-user-check fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Earnings (Monthly) Card Example -->
+        <!-- Administrateurs Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
-                            </div>
-                            <div class="row no-gutters align-items-center">
-                                <div class="col-auto">
-                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-                                </div>
-                                <div class="col">
-                                    <div class="progress progress-sm mr-2">
-                                        <div class="progress-bar bg-info" role="progressbar"
-                                            style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                            aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Administrateurs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::where('role', 'admin')->count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                            <i class="fas fa-user-shield fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pending Requests Card Example -->
+        <!-- Utilisateurs Inactifs Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Pending Requests</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                Utilisateurs Inactifs</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::where('status', 'inactive')->count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            <i class="fas fa-user-times fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -97,32 +96,106 @@
 
     <!-- Content Row -->
     <div class="row">
-        <!-- Area Chart -->
-        <div class="col-xl-8 col-lg-7">
+        <!-- Gestion des Utilisateurs -->
+        <div class="col-xl-12">
             <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
-                <div
-                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                            aria-labelledby="dropdownMenuLink">
-                            <div class="dropdown-header">Dropdown Header:</div>
-                            <a class="dropdown-item" href="#">Action</a>
-                            <a class="dropdown-item" href="#">Another action</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Something else here</a>
-                        </div>
-                    </div>
+                <!-- Card Header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Gestion des Utilisateurs</h6>
+                    <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus fa-sm text-white-50"></i> Nouvel Utilisateur
+                    </a>
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="myAreaChart"></canvas>
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    @endif
+                    
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    @endif
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Rôle</th>
+                                    <th>Statut</th>
+                                    <th>Date d'inscription</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(\App\Models\User::orderBy('created_at', 'desc')->limit(10)->get() as $user)
+                                <tr>
+                                    <td>{{ $user->id }}</td>
+                                    <td>{{ $user->name }}</td>
+                                    <td>{{ $user->email }}</td>
+                                    <td>
+                                        @if($user->role === 'admin')
+                                            <span class="badge badge-danger">Admin</span>
+                                        @else
+                                            <span class="badge badge-primary">User</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($user->status === 'active')
+                                            <span class="badge badge-success">Actif</span>
+                                        @else
+                                            <span class="badge badge-warning">Inactif</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            
+                                            @if($user->id !== auth()->id())
+                                                <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" style="display: inline;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="btn btn-{{ $user->status === 'active' ? 'warning' : 'success' }} btn-sm">
+                                                        <i class="fas fa-{{ $user->status === 'active' ? 'ban' : 'check' }}"></i>
+                                                    </button>
+                                                </form>
+                                                
+                                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" style="display: inline;" 
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="{{ route('admin.users.index') }}" class="btn btn-primary">
+                            <i class="fas fa-list mr-2"></i>Voir tous les utilisateurs
+                        </a>
                     </div>
                 </div>
             </div>
@@ -291,7 +364,7 @@
                 </div>
                 <div class="card-body">
                     <div class="text-center">
-                        <img src="{{ Vite::asset('resources/assets/img/undraw_posting_photo.svg') }}" class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;" alt="Illustration">
+                        <i class="fas fa-image fa-10x text-gray-300 mb-4"></i>
                     </div>
                     <p>Add some quality, svg illustrations to your project courtesy of <a
                             target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
