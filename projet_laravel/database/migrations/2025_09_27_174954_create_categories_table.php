@@ -15,8 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->integer('age_allowed')->default(0); // 0 = all ages, 12+ = 12 and up, etc.
-            $table->string('color', 7)->default('#3B82F6'); // Hex color for UI
+            $table->string('age_allowed')->nullable();
+            $table->string('color')->nullable();
+            $table->string('icon')->nullable();
+            $table->boolean('is_featured')->default(false);
+            $table->integer('sort_order')->default(0);
+            $table->text('reading_tips')->nullable();
+            $table->json('popular_authors')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
