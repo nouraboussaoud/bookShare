@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+         // Create more regular users
+        User::factory(5)->create();
         // Create admin and test users first
         $this->call([
             AdminUserSeeder::class,
@@ -23,13 +25,15 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
-
-        // Create more regular users
-        User::factory(5)->create();
-
-        // Create books (this will use the existing users)
+         // Create books (this will use the existing users)
         $this->call([
             BookSeeder::class,
         ]);
+        
+        // Appeler le seeder pour créer les utilisateurs admin et user
+        $this->call(AdminUserSeeder::class);
+        
+        // Appeler le seeder pour créer les catégories
+        $this->call(CategorySeeder::class);
     }
 }

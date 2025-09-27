@@ -140,7 +140,7 @@
                 </div>
                 <div class="card-body">
                     <h6 class="font-weight-bold text-gray-800">{{ $exchange->bookDemande->title }}</h6>
-                    <p class="text-gray-600">Propriétaire: {{ $exchange->bookDemande->owner?->name ?? 'N/A' }}</p>
+                    <p class="text-gray-600">Propriétaire: {{ $exchange->bookDemande->user?->name ?? 'N/A' }}</p>
                 </div>
             </div>
             @endif

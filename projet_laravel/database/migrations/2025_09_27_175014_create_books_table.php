@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
             $table->string('title');
+            $table->string('author');
+            $table->enum('status', ['available', 'borrowed', 'reserved'])->default('available');
+            $table->text('description')->nullable();
+            $table->integer('recommended_age')->default(0)->comment('Recommended minimum age (0 = all ages)');
+            $table->string('photo')->nullable();
             $table->timestamps();
         });
     }

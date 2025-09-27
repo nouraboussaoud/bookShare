@@ -118,7 +118,7 @@
                                         <option value="">Sélectionner un livre</option>
                                         @foreach($books as $book)
                                             <option value="{{ $book->id }}" {{ old('bookDemandeId') == $book->id ? 'selected' : '' }}>
-                                                {{ $book->title }} - Propriétaire: {{ $book->owner->name }}
+                                                {{ $book->title }} - Propriétaire: {{ $book->user->name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -138,7 +138,7 @@
                                         <option value="">Sélectionner un livre à offrir</option>
                                         @foreach($books as $book)
                                             <option value="{{ $book->id }}" {{ old('bookOffertId') == $book->id ? 'selected' : '' }}>
-                                                {{ $book->title }} - Propriétaire: {{ $book->owner->name }}
+                                                {{ $book->title }} - Propriétaire: {{ $book->user->name }}
                                             </option>
                                         @endforeach
                                     </select>

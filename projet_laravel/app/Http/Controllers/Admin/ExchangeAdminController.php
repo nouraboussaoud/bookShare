@@ -13,7 +13,7 @@ class ExchangeAdminController extends Controller
     // Display all exchanges for admin management
     public function index()
     {
-        $exchanges = Exchange::with(['initiateur', 'recepteur', 'bookDemande.owner'])
+        $exchanges = Exchange::with(['initiateur', 'recepteur', 'bookDemande.user'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -23,7 +23,7 @@ class ExchangeAdminController extends Controller
     // Show a specific exchange for admin
     public function show(Exchange $exchange)
     {
-        $exchange->load(['initiateur', 'recepteur', 'bookDemande.owner']);
+        $exchange->load(['initiateur', 'recepteur', 'bookDemande.user']);
         return view('admin.exchanges.show', compact('exchange'));
     }
 
@@ -31,7 +31,7 @@ class ExchangeAdminController extends Controller
     public function create()
     {
         $users = User::all();
-        $books = Book::with('owner')->get();
+        $books = Book::with('user')->get();
         
         return view('admin.exchanges.create', compact('users', 'books'));
     }
@@ -81,8 +81,8 @@ class ExchangeAdminController extends Controller
     public function edit(Exchange $exchange)
     {
         $users = User::all();
-        $books = Book::with('owner')->get();
-        $exchange->load(['initiateur', 'recepteur', 'bookDemande.owner']);
+        $books = Book::with('user')->get();
+        $exchange->load(['initiateur', 'recepteur', 'bookDemande.user']);
         
         return view('admin.exchanges.edit', compact('exchange', 'users', 'books'));
     }
@@ -184,7 +184,7 @@ class ExchangeAdminController extends Controller
     {
         $status = $request->query('status');
 
-        $exchanges = Exchange::with(['initiateur', 'recepteur', 'bookDemande.owner'])
+        $exchanges = Exchange::with(['initiateur', 'recepteur', 'bookDemande.user'])
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
             })->get();

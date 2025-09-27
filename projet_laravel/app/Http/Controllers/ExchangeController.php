@@ -13,7 +13,7 @@ class ExchangeController extends Controller
     public function index()
     {
         // Show exchanges where user is either initiator or receiver
-        $exchanges = Exchange::with(['initiateur', 'recepteur', 'bookDemande.owner'])
+        $exchanges = Exchange::with(['initiateur', 'recepteur', 'bookDemande.user'])
             ->where(function($query) {
                 $query->where('userInitiateurId', Auth::id())
                       ->orWhere('userRecepteurId', Auth::id());
@@ -101,8 +101,8 @@ class ExchangeController extends Controller
     // Display the form for creating a new exchange
     public function create()
     {
-        $books = \App\Models\Book::with('owner')->where('owner_id', '!=', Auth::id())->get();
-        $userBooks = \App\Models\Book::where('owner_id', Auth::id())->get();
+        $books = \App\Models\Book::with('user')->where('user_id', '!=', Auth::id())->get();
+        $userBooks = \App\Models\Book::where('user_id', Auth::id())->get();
         return view('exchanges.create', compact('books', 'userBooks'));
     }
 
@@ -162,7 +162,7 @@ class ExchangeController extends Controller
             'dateDebut' => $validated['dateDebut'],
             'dateFin' => $validated['dateFin'],
             'userInitiateurId' => Auth::id(),
-            'userRecepteurId' => $book->owner_id,
+            'userRecepteurId' => $book->user_id,
             'bookDemandeId' => $validated['bookDemandeId'],
         ];
 
@@ -191,7 +191,7 @@ class ExchangeController extends Controller
             abort(403, 'Vous n\'êtes pas autorisé à voir cet échange.');
         }
 
-        $exchange->load(['initiateur', 'recepteur', 'bookDemande.owner']);
+        $exchange->load(['initiateur', 'recepteur', 'bookDemande.user']);
         return view('exchanges.show', compact('exchange'));
     }
 
@@ -269,7 +269,7 @@ class ExchangeController extends Controller
         // Check if user is trying to create exchange with their own book
         if ($bookDemandeId) {
             $book = \App\Models\Book::find($bookDemandeId);
-            if ($book && $book->owner_id == Auth::id()) {
+            if ($book && $book->user_id == Auth::id()) {
                 return redirect()->back()
                     ->withErrors(['bookDemandeId' => 'Vous ne pouvez pas créer un échange avec votre propre livre.'])
                     ->withInput();
@@ -279,7 +279,7 @@ class ExchangeController extends Controller
         // For exchanges, validate that offered book belongs to current user
         if ($type === 'ECHANGE' && $bookOffertId) {
             $offeredBook = \App\Models\Book::find($bookOffertId);
-            if ($offeredBook && $offeredBook->owner_id != Auth::id()) {
+            if ($offeredBook && $offeredBook->user_id != Auth::id()) {
                 return redirect()->back()
                     ->withErrors(['bookOffertId' => 'Vous ne pouvez offrir que vos propres livres.'])
                     ->withInput();

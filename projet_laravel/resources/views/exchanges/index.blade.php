@@ -182,10 +182,10 @@
                                                     <div class="font-weight-bold text-gray-800">
                                                         {{ $exchange->bookDemande ? $exchange->bookDemande->title : 'Livre non spécifié' }}
                                                     </div>
-                                                    @if($exchange->bookDemande && $exchange->bookDemande->owner)
+                                                    @if($exchange->bookDemande && $exchange->bookDemande->user)
                                                         <small class="text-muted">
                                                             <i class="fas fa-user fa-sm mr-1"></i>
-                                                            Propriétaire: {{ $exchange->bookDemande->owner->name }}
+                                                            Propriétaire: {{ $exchange->bookDemande->user->name }}
                                                         </small>
                                                     @endif
                                                 </div>

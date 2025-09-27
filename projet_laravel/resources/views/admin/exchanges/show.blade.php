@@ -142,7 +142,7 @@
                                     <div class="card-body py-3">
                                         <h6 class="font-weight-bold text-gray-800">{{ $exchange->bookDemande->title }}</h6>
                                         <p class="text-gray-600 mb-1">Auteur: {{ $exchange->bookDemande->author ?? 'N/A' }}</p>
-                                        <p class="text-gray-600 mb-0">Propriétaire: {{ $exchange->bookDemande->owner?->name ?? 'N/A' }}</p>
+                                        <p class="text-gray-600 mb-0">Propriétaire: {{ $exchange->bookDemande->user?->name ?? 'N/A' }}</p>
                                         <div class="small text-muted">ID: {{ $exchange->bookDemandeId }}</div>
                                     </div>
                                 </div>
@@ -157,7 +157,7 @@
                                     <div class="card-body py-3">
                                         <h6 class="font-weight-bold text-gray-800">{{ $exchange->bookOffert->title }}</h6>
                                         <p class="text-gray-600 mb-1">Auteur: {{ $exchange->bookOffert->author ?? 'N/A' }}</p>
-                                        <p class="text-gray-600 mb-0">Propriétaire: {{ $exchange->bookOffert->owner?->name ?? 'N/A' }}</p>
+                                        <p class="text-gray-600 mb-0">Propriétaire: {{ $exchange->bookOffert->user?->name ?? 'N/A' }}</p>
                                         <div class="small text-muted">ID: {{ $exchange->bookOffertId }}</div>
                                     </div>
                                 </div>
