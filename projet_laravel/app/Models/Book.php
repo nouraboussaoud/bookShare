@@ -18,7 +18,24 @@ class Book extends Model
         'recommended_age',
         'photo',
         'description',
+        'owner_id',
     ];
+
+    // Relations
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function exchangesDemande()
+    {
+        return $this->hasMany(Exchange::class, 'bookDemandeId');
+    }
+
+    public function exchangesOffert()
+    {
+        return $this->hasMany(Exchange::class, 'bookOffertId');
+    }
 
     public function user()
     {
