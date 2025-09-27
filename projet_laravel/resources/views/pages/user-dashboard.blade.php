@@ -358,8 +358,8 @@
                         <a href="{{ route('books.create') }}" class="btn btn-info btn-lg mr-2">
                             <i class="fas fa-plus"></i> Ajouter mon premier livre
                         </a>
-                        <a href="{{ route('categories.index') }}" class="btn btn-outline-info btn-lg">
-                            <i class="fas fa-tags"></i> Voir les catégories
+                        <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-outline-info btn-lg">
+                            <i class="fas fa-book-open"></i> Découvrir les livres
                         </a>
                     </div>
                 </div>

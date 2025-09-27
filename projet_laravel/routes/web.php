@@ -29,11 +29,18 @@ Route::get('/admin/dashboard', function () {
     return view('pages.dashboard');
 })->middleware(['auth', 'admin'])->name('admin.dashboard');
 
-// Routes Admin pour la gestion des utilisateurs
+// Routes Admin pour la gestion des utilisateurs et catégories
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserManagementController::class);
     Route::patch('users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserManagementController::class, 'toggleStatus'])
         ->name('users.toggle-status');
+    
+    // Categories management routes
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryManagementController::class);
+    Route::patch('categories/{category}/toggle-status', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'toggleStatus'])
+        ->name('categories.toggle-status');
+    Route::patch('categories/{category}/toggle-featured', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'toggleFeatured'])
+        ->name('categories.toggle-featured');
     
     // Admin routes for reviews management
     Route::resource('reviews', \App\Http\Controllers\Admin\ReviewManagementController::class);
@@ -82,9 +89,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('books', BookController::class);
     // Toggle book status (AVAILABLE <-> RESERVED)
     Route::patch('books/{book}/toggle-status', [BookController::class, 'toggleStatus'])->name('books.toggleStatus');
-    
-    // Categories resource routes
-    Route::resource('categories', CategoryController::class);
     
     // Reviews resource routes - Users can manage their own reviews
     Route::resource('reviews', ReviewController::class);

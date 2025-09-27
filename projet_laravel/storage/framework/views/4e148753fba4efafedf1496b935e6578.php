@@ -46,25 +46,6 @@
         </div>
     </li>
 
-    <!-- Nav Item - Categories -->
-    <li class="nav-item <?php echo e(request()->routeIs('categories.*') ? 'active' : ''); ?>">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCategories"
-            aria-expanded="<?php echo e(request()->routeIs('categories.*') ? 'true' : 'false'); ?>" aria-controls="collapseCategories">
-            <i class="fas fa-fw fa-tags"></i>
-            <span>Catégories</span>
-        </a>
-        <div id="collapseCategories" class="collapse <?php echo e(request()->routeIs('categories.*') ? 'show' : ''); ?>" aria-labelledby="headingCategories" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Gestion des Catégories:</h6>
-                <a class="collapse-item <?php echo e(request()->routeIs('categories.index') ? 'active' : ''); ?>" href="<?php echo e(route('categories.index')); ?>">
-                    <i class="fas fa-list"></i> Toutes les Catégories
-                </a>
-                <a class="collapse-item <?php echo e(request()->routeIs('categories.create') ? 'active' : ''); ?>" href="<?php echo e(route('categories.create')); ?>">
-                    <i class="fas fa-plus"></i> Ajouter une Catégorie
-                </a>
-            </div>
-        </div>
-    </li>
 
     <!-- Nav Item - Reviews -->
     <li class="nav-item <?php echo e(request()->routeIs('reviews.*') ? 'active' : ''); ?>">
@@ -100,6 +81,14 @@
             <a class="nav-link" href="<?php echo e(route('admin.users.index')); ?>">
                 <i class="fas fa-fw fa-users"></i>
                 <span>Gestion Utilisateurs</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Categories Management -->
+        <li class="nav-item <?php echo e(request()->routeIs('admin.categories.*') ? 'active' : ''); ?>">
+            <a class="nav-link" href="<?php echo e(route('admin.categories.index')); ?>">
+                <i class="fas fa-fw fa-tags"></i>
+                <span>Gestion Catégories</span>
             </a>
         </li>
 
