@@ -40,7 +40,7 @@
                         </div>
                     @endif
                     
-                    <form action="{{ route('admin.exchanges.store') }}" method="POST">
+                    <form action="{{ route('admin.exchanges.store') }}" method="POST" novalidate>
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
@@ -229,6 +229,155 @@ $(document).ready(function() {
     if (currentType) {
         updateFormBasedOnType(currentType);
     }
+    
+    // Admin-specific validation functions
+    function showValidationError(fieldId, message) {
+        const field = $('#' + fieldId);
+        field.addClass('is-invalid');
+        field.siblings('.invalid-feedback').remove();
+        field.after('<div class="invalid-feedback" style="color: #dc3545; font-size: 0.875em; margin-top: 0.25rem;">' + message + '</div>');
+    }
+    
+    function clearValidationError(fieldId) {
+        const field = $('#' + fieldId);
+        field.removeClass('is-invalid');
+        field.siblings('.invalid-feedback').remove();
+    }
+    
+    function validateRequiredFields() {
+        let isValid = true;
+        
+        // Validate Type
+        const type = $('#type').val();
+        if (!type) {
+            showValidationError('type', 'Veuillez sélectionner un type d\'échange');
+            isValid = false;
+        } else {
+            clearValidationError('type');
+        }
+        
+        // Validate Status
+        const status = $('#status').val();
+        if (!status) {
+            showValidationError('status', 'Veuillez sélectionner un statut');
+            isValid = false;
+        } else {
+            clearValidationError('status');
+        }
+        
+        // Validate Initiateur
+        const initiateur = $('#userInitiateurId').val();
+        if (!initiateur) {
+            showValidationError('userInitiateurId', 'Veuillez sélectionner un utilisateur initiateur');
+            isValid = false;
+        } else {
+            clearValidationError('userInitiateurId');
+        }
+        
+        // Validate Recepteur
+        const recepteur = $('#userRecepteurId').val();
+        if (!recepteur) {
+            showValidationError('userRecepteurId', 'Veuillez sélectionner un utilisateur récepteur');
+            isValid = false;
+        } else {
+            clearValidationError('userRecepteurId');
+        }
+        
+        // Validate Book
+        const book = $('#bookDemandeId').val();
+        if (!book) {
+            showValidationError('bookDemandeId', 'Veuillez sélectionner un livre');
+            isValid = false;
+        } else {
+            clearValidationError('bookDemandeId');
+        }
+        
+        // Validate dates
+        const dateDebut = $('#dateDebut').val();
+        const dateFin = $('#dateFin').val();
+        
+        if (!dateDebut) {
+            showValidationError('dateDebut', 'Veuillez sélectionner une date de début');
+            isValid = false;
+        } else {
+            clearValidationError('dateDebut');
+        }
+        
+        if (!dateFin) {
+            showValidationError('dateFin', 'Veuillez sélectionner une date de fin');
+            isValid = false;
+        } else {
+            clearValidationError('dateFin');
+        }
+        
+        return isValid;
+    }
+    
+    function validateAdminForm() {
+        let isValid = validateRequiredFields();
+        
+        // Validate dates
+        const dateDebut = $('#dateDebut').val();
+        const dateFin = $('#dateFin').val();
+        
+        if (dateDebut && dateFin && dateFin <= dateDebut) {
+            showValidationError('dateFin', 'La date de fin doit être postérieure à la date de début');
+            isValid = false;
+        } else {
+            clearValidationError('dateFin');
+        }
+        
+        // Validate that initiator and receiver are different
+        const initiateur = $('#userInitiateurId').val();
+        const recepteur = $('#userRecepteurId').val();
+        
+        if (initiateur && recepteur && initiateur === recepteur) {
+            showValidationError('userRecepteurId', 'L\'utilisateur récepteur doit être différent de l\'initiateur');
+            isValid = false;
+        } else {
+            clearValidationError('userRecepteurId');
+        }
+        
+        // Validate exchange type specific requirements
+        const exchangeType = $('#type').val();
+        if (exchangeType === 'ECHANGE') {
+            const bookOffered = $('#bookOffertId').val();
+            const bookDemande = $('#bookDemandeId').val();
+            
+            if (bookOffered === bookDemande) {
+                showValidationError('bookOffertId', 'Le livre offert ne peut pas être le même que le livre demandé');
+                isValid = false;
+            } else {
+                clearValidationError('bookOffertId');
+            }
+        }
+        
+        return isValid;
+    }
+    
+    // Real-time validation on all fields
+    $('#type, #status, #userInitiateurId, #userRecepteurId, #bookDemandeId, #bookOffertId, #dateDebut, #dateFin').on('change blur', function() {
+        validateAdminForm();
+    });
+    
+    // Form submission validation
+    $('form').on('submit', function(e) {
+        if (!validateAdminForm()) {
+            e.preventDefault();
+            $('.is-invalid').first().focus();
+        }
+    });
+    
+    // Set minimum date for date fields
+    const today = new Date().toISOString().split('T')[0];
+    $('#dateDebut').attr('min', today);
+    
+    $('#dateDebut').on('change', function() {
+        const startDate = $(this).val();
+        if (startDate) {
+            $('#dateFin').attr('min', startDate);
+        }
+    });
 });
 </script>
 @endpush

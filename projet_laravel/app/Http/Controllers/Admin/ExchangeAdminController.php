@@ -137,17 +137,36 @@ class ExchangeAdminController extends Controller
     // Arbitrate exchanges (resolve conflicts)
     public function arbitrate(Request $request, Exchange $exchange)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:TERMINE,ANNULE',
-            'admin_note' => 'nullable|string|max:500'
-        ]);
+        // If request has specific status, use it (for detailed arbitration)
+        if ($request->has('status')) {
+            $validated = $request->validate([
+                'status' => 'required|in:TERMINE,ANNULE',
+                'admin_note' => 'nullable|string|max:500'
+            ]);
 
-        $exchange->status = $validated['status'];
-        $exchange->admin_note = $validated['admin_note'] ?? null;
+            $exchange->status = $validated['status'];
+            $exchange->admin_note = $validated['admin_note'] ?? null;
+        } else {
+            // Simple arbitration from dashboard button
+            // Change status based on current status
+            if ($exchange->status === 'EN_ATTENTE') {
+                $exchange->status = 'EN_COURS';
+                $message = 'Échange mis en cours par arbitrage administratif.';
+            } elseif ($exchange->status === 'EN_COURS') {
+                $exchange->status = 'TERMINE';
+                $message = 'Échange terminé par arbitrage administratif.';
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Cet échange ne peut pas être arbitré dans son état actuel.');
+            }
+            
+            $exchange->admin_note = $message;
+        }
+
         $exchange->save();
 
         return redirect()->back()
-            ->with('success', 'Exchange arbitrated successfully.');
+            ->with('success', 'Échange arbitré avec succès.');
     }
 
     // Cancel an exchange (admin override)

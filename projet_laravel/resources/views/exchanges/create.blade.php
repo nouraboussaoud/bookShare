@@ -40,7 +40,7 @@
                         </div>
                     @endif
                     
-                    <form action="{{ route('exchanges.store') }}" method="POST">
+                    <form action="{{ route('exchanges.store') }}" method="POST" novalidate>
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
@@ -184,6 +184,148 @@ $(document).ready(function() {
     if (currentType) {
         updateFormBasedOnType(currentType);
     }
+    
+    // Date validation
+    function validateDates() {
+        const dateDebut = $('#dateDebut').val();
+        const dateFin = $('#dateFin').val();
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Start date validation
+        if (dateDebut && dateDebut < today) {
+            showValidationError('dateDebut', 'La date de début ne peut pas être antérieure à aujourd\'hui');
+            return false;
+        }
+        
+        // End date validation
+        if (dateFin && dateDebut && dateFin < dateDebut) {
+            showValidationError('dateFin', 'La date de fin doit être postérieure à la date de début');
+            return false;
+        }
+        
+        // Clear previous errors
+        clearValidationError('dateDebut');
+        clearValidationError('dateFin');
+        return true;
+    }
+    
+    // Show validation error
+    function showValidationError(fieldId, message) {
+        const field = $('#' + fieldId);
+        field.addClass('is-invalid');
+        
+        // Remove existing error message
+        field.siblings('.invalid-feedback').remove();
+        
+        // Add new error message with red styling
+        field.after('<div class="invalid-feedback" style="color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: block;">' + message + '</div>');
+    }
+    
+    // Clear validation error
+    function clearValidationError(fieldId) {
+        const field = $('#' + fieldId);
+        field.removeClass('is-invalid');
+        field.siblings('.invalid-feedback').remove();
+    }
+    
+    // Real-time date validation
+    $('#dateDebut, #dateFin').on('change', function() {
+        validateDates();
+    });
+    
+    // Validate required fields function
+    function validateRequiredFields() {
+        let isValid = true;
+        
+        // Validate Type
+        const type = $('#type').val();
+        if (!type) {
+            showValidationError('type', 'Veuillez sélectionner un type d\'échange');
+            isValid = false;
+        } else {
+            clearValidationError('type');
+        }
+        
+        // Validate Book
+        const book = $('#bookDemandeId').val();
+        if (!book) {
+            showValidationError('bookDemandeId', 'Veuillez sélectionner un livre');
+            isValid = false;
+        } else {
+            clearValidationError('bookDemandeId');
+        }
+        
+        // Validate dates
+        const dateDebut = $('#dateDebut').val();
+        const dateFin = $('#dateFin').val();
+        
+        if (!dateDebut) {
+            showValidationError('dateDebut', 'Veuillez sélectionner une date de début');
+            isValid = false;
+        } else {
+            clearValidationError('dateDebut');
+        }
+        
+        if (!dateFin) {
+            showValidationError('dateFin', 'Veuillez sélectionner une date de fin');
+            isValid = false;
+        } else {
+            clearValidationError('dateFin');
+        }
+        
+        return isValid;
+    }
+    
+    // Real-time validation on all fields
+    $('#type, #bookDemandeId, #bookOffertId, #dateDebut, #dateFin').on('change blur', function() {
+        validateRequiredFields();
+        validateDates();
+    });
+    
+    // Form submission validation
+    $('form').on('submit', function(e) {
+        let isValid = validateRequiredFields();
+        
+        // Validate dates
+        if (!validateDates()) {
+            isValid = false;
+        }
+        
+        // Validate exchange type specific requirements
+        const exchangeType = $('#type').val();
+        if (exchangeType === 'ECHANGE') {
+            const bookOffered = $('#bookOffertId').val();
+            const bookDemande = $('#bookDemandeId').val();
+            
+            if (!bookOffered) {
+                showValidationError('bookOffertId', 'Vous devez sélectionner un livre à offrir pour un échange');
+                isValid = false;
+            }
+            
+            if (bookOffered === bookDemande) {
+                showValidationError('bookOffertId', 'Le livre offert ne peut pas être le même que le livre demandé');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            $('.is-invalid').first().focus();
+        }
+    });
+    
+    // Auto-set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    $('#dateDebut').attr('min', today);
+    
+    // Update minimum end date when start date changes
+    $('#dateDebut').on('change', function() {
+        const startDate = $(this).val();
+        if (startDate) {
+            $('#dateFin').attr('min', startDate);
+        }
+    });
 });
 </script>
 @endpush

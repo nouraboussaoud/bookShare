@@ -113,17 +113,40 @@ class ExchangeController extends Controller
         $rules = [
             'type' => 'required|string|in:RESERVATION,PRET,ECHANGE',
             'status' => 'required|string',
-            'dateDebut' => 'required|date',
+            'dateDebut' => 'required|date|after_or_equal:today',
             'dateFin' => 'required|date|after:dateDebut',
             'bookDemandeId' => 'required|exists:books,id',
         ];
 
+        // Custom validation messages
+        $messages = [
+            'type.required' => 'Le type d\'échange est obligatoire.',
+            'type.in' => 'Le type d\'échange doit être : Réservation, Prêt ou Échange.',
+            'dateDebut.required' => 'La date de début est obligatoire.',
+            'dateDebut.date' => 'La date de début doit être une date valide.',
+            'dateDebut.after_or_equal' => 'La date de début ne peut pas être antérieure à aujourd\'hui.',
+            'dateFin.required' => 'La date de fin est obligatoire.',
+            'dateFin.date' => 'La date de fin doit être une date valide.',
+            'dateFin.after' => 'La date de fin doit être postérieure à la date de début.',
+            'bookDemandeId.required' => 'Vous devez sélectionner un livre.',
+            'bookDemandeId.exists' => 'Le livre sélectionné n\'existe pas.',
+            'bookOffertId.required' => 'Vous devez sélectionner un livre à offrir pour un échange.',
+            'bookOffertId.exists' => 'Le livre offert n\'existe pas.',
+            'bookOffertId.different' => 'Le livre offert doit être différent du livre demandé.',
+        ];
+
         // Add bookOffertId validation only for ECHANGE type
         if ($request->input('type') === 'ECHANGE') {
-            $rules['bookOffertId'] = 'required|exists:books,id';
+            $rules['bookOffertId'] = 'required|exists:books,id|different:bookDemandeId';
         }
 
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, $messages);
+
+        // Custom business logic validations
+        $businessValidation = $this->validateExchangeBusinessRules($request);
+        if ($businessValidation !== true) {
+            return $businessValidation; // Return the redirect response with errors
+        }
 
         // Default status to EN_ATTENTE if not set
         if (empty($validated['status'])) {
@@ -232,6 +255,61 @@ class ExchangeController extends Controller
         $notificationService->notifyExchangeStatusChange($exchange, $oldStatus, 'EN_COURS');
 
         return redirect()->back()->with('success', 'Échange accepté avec succès !');
+    }
+
+    /**
+     * Validate business rules for exchange creation
+     */
+    private function validateExchangeBusinessRules(Request $request)
+    {
+        $bookDemandeId = $request->input('bookDemandeId');
+        $bookOffertId = $request->input('bookOffertId');
+        $type = $request->input('type');
+        
+        // Check if user is trying to create exchange with their own book
+        if ($bookDemandeId) {
+            $book = \App\Models\Book::find($bookDemandeId);
+            if ($book && $book->owner_id == Auth::id()) {
+                return redirect()->back()
+                    ->withErrors(['bookDemandeId' => 'Vous ne pouvez pas créer un échange avec votre propre livre.'])
+                    ->withInput();
+            }
+        }
+        
+        // For exchanges, validate that offered book belongs to current user
+        if ($type === 'ECHANGE' && $bookOffertId) {
+            $offeredBook = \App\Models\Book::find($bookOffertId);
+            if ($offeredBook && $offeredBook->owner_id != Auth::id()) {
+                return redirect()->back()
+                    ->withErrors(['bookOffertId' => 'Vous ne pouvez offrir que vos propres livres.'])
+                    ->withInput();
+            }
+        }
+        
+        // Check for duplicate pending exchanges
+        $existingExchange = Exchange::where('userInitiateurId', Auth::id())
+            ->where('bookDemandeId', $bookDemandeId)
+            ->where('status', 'EN_ATTENTE')
+            ->first();
+            
+        if ($existingExchange) {
+            return redirect()->back()
+                ->withErrors(['bookDemandeId' => 'Vous avez déjà une demande d\'échange en attente pour ce livre.'])
+                ->withInput();
+        }
+        
+        // Validate date range (max 6 months)
+        $dateDebut = \Carbon\Carbon::parse($request->input('dateDebut'));
+        $dateFin = \Carbon\Carbon::parse($request->input('dateFin'));
+        
+        if ($dateFin->diffInMonths($dateDebut) > 6) {
+            return redirect()->back()
+                ->withErrors(['dateFin' => 'La durée de l\'échange ne peut pas dépasser 6 mois.'])
+                ->withInput();
+        }
+        
+        // All validations passed
+        return true;
     }
 
     // Reject an exchange request (for book owners)

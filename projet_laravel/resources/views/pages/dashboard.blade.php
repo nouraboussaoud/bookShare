@@ -94,47 +94,6 @@
         </div>
     </div>
 
-    <!-- Exchange Management Navigation Row -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-exchange-alt text-primary mr-2"></i>Gestion des Échanges
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('admin.exchanges.index') }}" class="btn btn-primary btn-block">
-                                <i class="fas fa-list fa-sm mr-2"></i>
-                                Tous les Échanges
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('admin.exchanges.create') }}" class="btn btn-success btn-block">
-                                <i class="fas fa-plus fa-sm mr-2"></i>
-                                Nouvel Échange
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ route('exchanges.index') }}" class="btn btn-info btn-block">
-                                <i class="fas fa-eye fa-sm mr-2"></i>
-                                Vue Utilisateur
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="#exchangesTable" class="btn btn-warning btn-block">
-                                <i class="fas fa-gavel fa-sm mr-2"></i>
-                                Échanges en Attente
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Back Office Functionalities -->
     <div class="row" id="exchangesTable">
         <div class="col-xl-12">
@@ -172,11 +131,30 @@
                         </div>
                     </div>
 
+                    <!-- Success/Error Messages for Exchanges -->
+                    @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @endif
+
+                    @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    @endif
+
                     <h2 class="h6 mb-3">Échanges en cours</h2>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>ID</th>
                                 <th>Type</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -227,24 +205,6 @@
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    @endif
-                    
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            {{ session('error') }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    @endif
-
                     <div class="table-responsive">
                         <table class="table table-bordered" width="100%" cellspacing="0">
                             <thead>

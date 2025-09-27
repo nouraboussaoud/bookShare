@@ -18,6 +18,7 @@ class Exchange extends Model
         'userRecepteurId',
         'bookDemandeId',
         'bookOffertId',
+        'admin_note',
     ];
 
     // Relations

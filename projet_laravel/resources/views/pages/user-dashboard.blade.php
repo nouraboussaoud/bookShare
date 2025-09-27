@@ -4,11 +4,18 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h3 mb-0 text-gray-800">Mon Espace BookShare</h1>
+            <h1 class="h3 mb-0 text-gray-8    <div class="container">
+        <h2>Échanges en attente</h2>space BookShare</h1>
             <p class="mb-0 text-gray-600">Bienvenue, {{ Auth::user()->name }} !</p>
         </div>
         <div>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
+            <a href="{{ route('exchanges.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
+                <i class="fas fa-book fa-sm text-white-50 mr-1"></i> Réserver un Livre
+            </a>
+            <a href="{{ route('user.exchangeHistory') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
+                <i class="fas fa-history fa-sm text-white-50 mr-1"></i> Voir l'Historique
+            </a>
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mr-2">
                 <i class="fas fa-plus fa-sm text-white-50"></i> Ajouter un Livre
             </a>
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
