@@ -3,6 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserDashboardController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -30,12 +34,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('users', \App\Http\Controllers\Admin\UserManagementController::class);
     Route::patch('users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserManagementController::class, 'toggleStatus'])
         ->name('users.toggle-status');
+    
+    // Admin routes for reviews management
+    Route::resource('reviews', \App\Http\Controllers\Admin\ReviewManagementController::class);
+    Route::patch('reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'approve'])->name('reviews.approve');
+    Route::patch('reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'reject'])->name('reviews.reject');
 });
 
-// Dashboard User
-Route::get('/user/dashboard', function () {
-    return view('pages.user-dashboard');
-})->middleware(['auth', 'user'])->name('user.dashboard');
+// Dashboard User -> now uses controller for dynamic data
+Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
+    ->middleware(['auth', 'user'])->name('user.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -68,6 +76,18 @@ Route::middleware('auth')->group(function () {
         $user->save();
         return redirect('/dashboard')->with('message', 'Vous êtes maintenant administrateur!');
     });
+
+
+    // Books resource routes
+    Route::resource('books', BookController::class);
+    // Toggle book status (AVAILABLE <-> RESERVED)
+    Route::patch('books/{book}/toggle-status', [BookController::class, 'toggleStatus'])->name('books.toggleStatus');
+    
+    // Categories resource routes
+    Route::resource('categories', CategoryController::class);
+    
+    // Reviews resource routes - Users can manage their own reviews
+    Route::resource('reviews', ReviewController::class);
 });
 
 require __DIR__.'/auth.php';

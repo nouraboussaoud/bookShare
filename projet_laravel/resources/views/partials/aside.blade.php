@@ -2,19 +2,20 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('dashboard') }}">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+            <i class="fas fa-book"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+        <div class="sidebar-brand-text mx-3">BookShare</div>
     </a>
 
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
 
     <!-- Nav Item - Dashboard -->
-    <li class="nav-item active">
+    <li class="nav-item {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') || request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
+            <span>Dashboard</span>
+        </a>
     </li>
 
     <!-- Divider -->
@@ -22,86 +23,94 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        Interface
+        Gestion des Livres
     </div>
 
-    <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-            aria-expanded="true" aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-cog"></i>
-            <span>Components</span>
+    <!-- Nav Item - Books -->
+    <li class="nav-item {{ request()->routeIs('books.*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBooks"
+            aria-expanded="{{ request()->routeIs('books.*') ? 'true' : 'false' }}" aria-controls="collapseBooks">
+            <i class="fas fa-fw fa-book"></i>
+            <span>Livres</span>
         </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseBooks" class="collapse {{ request()->routeIs('books.*') ? 'show' : '' }}" aria-labelledby="headingBooks" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Components:</h6>
-                <a class="collapse-item" href="buttons.html">Buttons</a>
-                <a class="collapse-item" href="cards.html">Cards</a>
+                <h6 class="collapse-header">Gestion des Livres:</h6>
+                <a class="collapse-item {{ request()->routeIs('books.index') ? 'active' : '' }}" href="{{ route('books.index') }}">
+                    <i class="fas fa-list"></i> Tous les Livres
+                </a>
+                <a class="collapse-item {{ request()->routeIs('books.create') ? 'active' : '' }}" href="{{ route('books.create') }}">
+                    <i class="fas fa-plus"></i> Ajouter un Livre
+                </a>
             </div>
         </div>
     </li>
 
-    <!-- Nav Item - Utilities Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-            aria-expanded="true" aria-controls="collapseUtilities">
-            <i class="fas fa-fw fa-wrench"></i>
-            <span>Utilities</span>
+    <!-- Nav Item - Categories -->
+    <li class="nav-item {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCategories"
+            aria-expanded="{{ request()->routeIs('categories.*') ? 'true' : 'false' }}" aria-controls="collapseCategories">
+            <i class="fas fa-fw fa-tags"></i>
+            <span>Catégories</span>
         </a>
-        <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
-            data-parent="#accordionSidebar">
+        <div id="collapseCategories" class="collapse {{ request()->routeIs('categories.*') ? 'show' : '' }}" aria-labelledby="headingCategories" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Custom Utilities:</h6>
-                <a class="collapse-item" href="utilities-color.html">Colors</a>
-                <a class="collapse-item" href="utilities-border.html">Borders</a>
-                <a class="collapse-item" href="utilities-animation.html">Animations</a>
-                <a class="collapse-item" href="utilities-other.html">Other</a>
+                <h6 class="collapse-header">Gestion des Catégories:</h6>
+                <a class="collapse-item {{ request()->routeIs('categories.index') ? 'active' : '' }}" href="{{ route('categories.index') }}">
+                    <i class="fas fa-list"></i> Toutes les Catégories
+                </a>
+                <a class="collapse-item {{ request()->routeIs('categories.create') ? 'active' : '' }}" href="{{ route('categories.create') }}">
+                    <i class="fas fa-plus"></i> Ajouter une Catégorie
+                </a>
             </div>
         </div>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Addons
-    </div>
-
-    <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-            aria-expanded="true" aria-controls="collapsePages">
-            <i class="fas fa-fw fa-folder"></i>
-            <span>Pages</span>
+    <!-- Nav Item - Reviews -->
+    <li class="nav-item {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReviews"
+            aria-expanded="{{ request()->routeIs('reviews.*') ? 'true' : 'false' }}" aria-controls="collapseReviews">
+            <i class="fas fa-fw fa-star"></i>
+            <span>Avis</span>
         </a>
-        <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+        <div id="collapseReviews" class="collapse {{ request()->routeIs('reviews.*') ? 'show' : '' }}" aria-labelledby="headingReviews" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Login Screens:</h6>
-                <a class="collapse-item" href="login.html">Login</a>
-                <a class="collapse-item" href="register.html">Register</a>
-                <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-                <div class="collapse-divider"></div>
-                <h6 class="collapse-header">Other Pages:</h6>
-                <a class="collapse-item" href="404.html">404 Page</a>
-                <a class="collapse-item" href="blank.html">Blank Page</a>
+                <h6 class="collapse-header">Gestion des Avis:</h6>
+                <a class="collapse-item {{ request()->routeIs('reviews.index') ? 'active' : '' }}" href="{{ route('reviews.index') }}">
+                    <i class="fas fa-list"></i> Tous les Avis
+                </a>
+                <a class="collapse-item {{ request()->routeIs('reviews.create') ? 'active' : '' }}" href="{{ route('reviews.create') }}">
+                    <i class="fas fa-plus"></i> Ajouter un Avis
+                </a>
             </div>
         </div>
     </li>
 
-    <!-- Nav Item - Charts -->
-    <li class="nav-item">
-        <a class="nav-link" href="charts.html">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>Charts</span></a>
-    </li>
+    @if(Auth::user()->isAdmin())
+        <!-- Divider -->
+        <hr class="sidebar-divider">
 
-    <!-- Nav Item - Tables -->
-    <li class="nav-item">
-        <a class="nav-link" href="tables.html">
-            <i class="fas fa-fw fa-table"></i>
-            <span>Tables</span></a>
-    </li>
+        <!-- Heading -->
+        <div class="sidebar-heading">
+            Administration
+        </div>
+
+        <!-- Nav Item - User Management -->
+        <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.users.index') }}">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Gestion Utilisateurs</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Admin Reviews Management -->
+        <li class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.reviews.index') }}">
+                <i class="fas fa-fw fa-star-half-alt"></i>
+                <span>Gestion Avis (Admin)</span>
+            </a>
+        </li>
+    @endif
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
@@ -109,12 +118,5 @@
     <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
-    </div>
-
-    <!-- Sidebar Message -->
-    <div class="sidebar-card d-none d-lg-flex">
-        <i class="fas fa-rocket fa-3x text-primary mb-2"></i>
-        <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components, and more!</p>
-        <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to Pro!</a>
     </div>
 </ul>

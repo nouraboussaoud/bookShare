@@ -19,5 +19,14 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+<<<<<<< Updated upstream
+=======
+        
+        // Appeler le seeder pour créer les utilisateurs admin et user
+        $this->call(AdminUserSeeder::class);
+        
+        // Appeler le seeder pour créer les catégories
+        $this->call(CategorySeeder::class);
+>>>>>>> Stashed changes
     }
 }
