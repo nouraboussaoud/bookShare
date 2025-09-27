@@ -12,7 +12,7 @@
             <a href="{{ route('exchanges.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
                 <i class="fas fa-book fa-sm text-white-50 mr-1"></i> Réserver un Livre
             </a>
-            <a href="{{ route('user.exchangeHistory') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
+            <a href="{{ route('exchanges.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
                 <i class="fas fa-history fa-sm text-white-50 mr-1"></i> Voir l'Historique
             </a>
             <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mr-2">
