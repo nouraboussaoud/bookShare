@@ -87,4 +87,12 @@ class User extends Authenticatable
     {
         return $this->status === 'inactive';
     }
+
+    /**
+     * Get books owned by user
+     */
+    public function books()
+    {
+        return $this->hasMany(\App\Models\Book::class);
+    }
 }

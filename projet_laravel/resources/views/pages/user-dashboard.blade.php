@@ -8,8 +8,8 @@
             <p class="mb-0 text-gray-600">Bienvenue, {{ Auth::user()->name }} !</p>
         </div>
         <div>
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
-                <i class="fas fa-plus fa-sm text-white-50"></i> Ajouter un Livre
+            <a href="{{ route('books.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
+                <i class="fas fa-book fa-sm text-white-50"></i> Mes Livres
             </a>
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                 @csrf
@@ -30,7 +30,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Mes Livres</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">12</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $myBooksCount }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-book fa-2x text-gray-300"></i>
@@ -113,8 +113,8 @@
                         <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
                             aria-labelledby="dropdownMenuLink">
                             <div class="dropdown-header">Actions:</div>
-                            <a class="dropdown-item" href="#">Voir tous</a>
-                            <a class="dropdown-item" href="#">Ajouter un livre</a>
+                            <a class="dropdown-item" href="{{ route('books.index') }}">Voir tous</a>
+                            <a class="dropdown-item" href="{{ route('books.create') }}">Ajouter un livre</a>
                         </div>
                     </div>
                 </div>
@@ -128,30 +128,37 @@
                                     <th>Genre</th>
                                     <th>Statut</th>
                                     <th>Date d'ajout</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Le Petit Prince</td>
-                                    <td>Antoine de Saint-Exupéry</td>
-                                    <td>Fiction</td>
-                                    <td><span class="badge badge-success">Lu</span></td>
-                                    <td>2025-09-20</td>
-                                </tr>
-                                <tr>
-                                    <td>1984</td>
-                                    <td>George Orwell</td>
-                                    <td>Science-Fiction</td>
-                                    <td><span class="badge badge-warning">En cours</span></td>
-                                    <td>2025-09-18</td>
-                                </tr>
-                                <tr>
-                                    <td>L'Étranger</td>
-                                    <td>Albert Camus</td>
-                                    <td>Philosophie</td>
-                                    <td><span class="badge badge-info">À lire</span></td>
-                                    <td>2025-09-15</td>
-                                </tr>
+                                @forelse($recentMyBooks as $b)
+                                    <tr>
+                                        <td>{{ $b->title }}</td>
+                                        <td>{{ $b->author }}</td>
+                                        <td>—</td>
+                                        <td>
+                                            <span class="badge {{ $b->status === 'AVAILABLE' ? 'badge-success' : 'badge-warning' }}">{{ $b->status }}</span>
+                                        </td>
+                                        <td>{{ $b->created_at->format('Y-m-d') }}</td>
+                                        <td class="d-flex gap-2">
+                                            <a href="{{ route('books.edit', $b) }}" class="btn btn-sm btn-secondary" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form action="{{ route('books.destroy', $b) }}" method="POST" onsubmit="return confirm('Supprimer ce livre ?');" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Aucun livre récent.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -166,12 +173,20 @@
                     <h6 class="m-0 font-weight-bold text-primary">Recommandations</h6>
                 </div>
                 <div class="card-body">
-                    <div class="text-center">
-                        <i class="fas fa-lightbulb fa-3x text-gray-300 mb-4"></i>
-                    </div>
-                    <p>Découvrez de nouveaux livres recommandés par la communauté BookShare !</p>
-                    <a href="#" class="btn btn-primary btn-sm btn-block">
-                        <i class="fas fa-search mr-2"></i>Explorer les recommandations
+                    @forelse($recommendations as $r)
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>{{ $r->title }}</strong> — <small>{{ $r->author }}</small>
+                                <div class="text-muted" style="font-size: 12px;">par {{ $r->user?->name }}</div>
+                            </div>
+                            <span class="badge {{ $r->status === 'AVAILABLE' ? 'badge-success' : 'badge-warning' }}">{{ $r->status }}</span>
+                        </div>
+                    @empty
+                        <p class="mb-0 text-muted">Pas encore de recommandations.</p>
+                    @endforelse
+
+                    <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-primary btn-sm btn-block mt-3">
+                        <i class="fas fa-search mr-2"></i>Explorer les livres
                     </a>
                 </div>
             </div>

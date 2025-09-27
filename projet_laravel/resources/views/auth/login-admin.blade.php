@@ -12,13 +12,32 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome - Version locale -->
+    <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <!-- SB Admin 2 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Overrides: force local images instead of Unsplash to avoid 503 -->
+    <style>
+        .bg-login-image{
+            background: url("/img/undraw_profile.svg");
+            background-position: center;
+            background-size: cover;
+        }
+        .bg-register-image{
+            background: url("/img/undraw_profile_1.svg");
+            background-position: center;
+            background-size: cover;
+        }
+        .bg-password-image{
+            background: url("/img/undraw_profile_2.svg");
+            background-position: center;
+            background-size: cover;
+        }
+    </style>
 </head>
 
 <body class="bg-gradient-primary">

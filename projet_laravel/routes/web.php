@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\UserDashboardController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -32,10 +34,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('users.toggle-status');
 });
 
-// Dashboard User
-Route::get('/user/dashboard', function () {
-    return view('pages.user-dashboard');
-})->middleware(['auth', 'user'])->name('user.dashboard');
+// Dashboard User -> now uses controller for dynamic data
+Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
+    ->middleware(['auth', 'user'])->name('user.dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -68,6 +69,11 @@ Route::middleware('auth')->group(function () {
         $user->save();
         return redirect('/dashboard')->with('message', 'Vous êtes maintenant administrateur!');
     });
+
+    // Books resource routes
+    Route::resource('books', BookController::class);
+    // Toggle book status (AVAILABLE <-> RESERVED)
+    Route::patch('books/{book}/toggle-status', [BookController::class, 'toggleStatus'])->name('books.toggle-status');
 });
 
 require __DIR__.'/auth.php';

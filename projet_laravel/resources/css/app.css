@@ -5,3 +5,22 @@
 @import url("./sb-admin-2.min.css");
 
 
+/* Overrides to avoid external Unsplash dependencies */
+.bg-login-image {
+    background: url("/img/undraw_profile.svg");
+    background-position: center;
+    background-size: cover;
+}
+
+.bg-register-image {
+    background: url("/img/undraw_profile_1.svg");
+    background-position: center;
+    background-size: cover;
+}
+
+.bg-password-image {
+    background: url("/img/undraw_profile_2.svg");
+    background-position: center;
+    background-size: cover;
+}
+
