@@ -5,3 +5,4 @@
         </div>
     </div>
 </footer>
+<?php /**PATH C:\Users\Lenovo\Desktop\bookShare\projet_laravel\resources\views/partials/footer.blade.php ENDPATH**/ ?>

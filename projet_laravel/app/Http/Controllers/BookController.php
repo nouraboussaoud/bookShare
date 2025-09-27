@@ -16,7 +16,7 @@ class BookController extends Controller
         $user = Auth::user();
         $scope = $request->query('scope'); // null | 'others'
 
-        $query = Book::query()->with(['user', 'category']);
+        $query = Book::query()->with(['user', 'category', 'reviews']);
 
         if ($user->isAdmin()) {
             // Admin: show all by default, but allow filtering to others if requested
@@ -68,7 +68,7 @@ class BookController extends Controller
         $validated['user_id'] = Auth::id();
         Book::create($validated);
 
-        return redirect()->route('books.index')->with('success', 'Livre créé avec succès.');
+        return redirect()->route('user.dashboard')->with('success', 'Livre créé avec succès.');
     }
 
     public function edit(Book $book)

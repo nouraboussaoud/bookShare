@@ -104,7 +104,7 @@
                     <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
                 </div>
                 <div class="card-body">
-                    @if($review->status === 'PENDING')
+                    @if($review->status == 'PENDING')
                         <a href="{{ route('reviews.edit', $review) }}" class="btn btn-warning btn-block mb-2">
                             <i class="fas fa-edit"></i> Modifier l'Avis
                         </a>
@@ -144,7 +144,7 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Statut:</strong> 
-                        <span class="badge {{ $review->book->status === 'AVAILABLE' ? 'badge-success' : 'badge-warning' }}">
+                        <span class="badge {{ $review->book->status == 'AVAILABLE' ? 'badge-success' : 'badge-warning' }}">
                             {{ $review->book->status }}
                         </span>
                     </p>
@@ -163,7 +163,7 @@
         </div>
     </div>
 
-    @if(Auth::user()->isAdmin() && $review->status === 'PENDING')
+    @if(Auth::user()->isAdmin() && $review->status == 'PENDING')
         <!-- Approve Modal -->
         <div class="modal fade" id="approveModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">

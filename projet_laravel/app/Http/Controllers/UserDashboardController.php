@@ -33,7 +33,7 @@ class UserDashboardController extends Controller
         // Available books with filters
         $booksQuery = Book::where('user_id', '!=', $user->id)
             ->where('status', 'AVAILABLE')
-            ->with(['user', 'category', 'review']);
+            ->with(['user', 'category', 'reviews']);
 
         // Apply filters
         if ($categoryId) {

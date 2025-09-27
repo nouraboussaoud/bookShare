@@ -16,9 +16,14 @@ class ReviewController extends Controller
      */
     public function index(): View
     {
-        $reviews = Review::with(['book.user', 'book.category'])
-            ->latest()
-            ->paginate(10);
+        // Users see only their own reviews, admins see all reviews
+        $query = Review::with(['book.user', 'book.category', 'user']);
+        
+        if (!Auth::user()->isAdmin()) {
+            $query->where('user_id', Auth::id());
+        }
+        
+        $reviews = $query->latest()->paginate(10);
         
         return view('reviews.index', compact('reviews'));
     }
@@ -34,11 +39,13 @@ class ReviewController extends Controller
         if ($bookId) {
             $book = Book::with(['user', 'category'])->findOrFail($bookId);
             
-            // Check if user already reviewed this book
-            $existingReview = Review::where('book_id', $bookId)->first();
+            // Check if THIS USER already reviewed this book
+            $existingReview = Review::where('book_id', $bookId)
+                                  ->where('user_id', Auth::id())
+                                  ->first();
             if ($existingReview) {
                 return redirect()->route('books.show', $book)
-                    ->with('error', 'This book already has a review.');
+                    ->with('error', 'You have already reviewed this book.');
             }
         }
         
@@ -57,11 +64,13 @@ class ReviewController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        // Check if book already has a review
-        $existingReview = Review::where('book_id', $validated['book_id'])->first();
+        // Check if THIS USER already reviewed this book
+        $existingReview = Review::where('book_id', $validated['book_id'])
+                              ->where('user_id', Auth::id())
+                              ->first();
         if ($existingReview) {
             return redirect()->back()
-                ->with('error', 'This book already has a review.');
+                ->with('error', 'You have already reviewed this book.');
         }
 
         $validated['status'] = 'PENDING';

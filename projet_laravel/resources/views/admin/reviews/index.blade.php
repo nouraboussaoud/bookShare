@@ -106,7 +106,7 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         
-                                        @if($review->status === 'PENDING')
+                                        @if($review->status == 'PENDING')
                                             <button type="button" class="btn btn-sm btn-success" 
                                                     data-toggle="modal" data-target="#approveModal{{ $review->id }}" 
                                                     title="Approuver">
@@ -132,7 +132,7 @@
                                 </td>
                             </tr>
 
-                            @if($review->status === 'PENDING')
+                            @if($review->status == 'PENDING')
                                 <!-- Approve Modal -->
                                 <div class="modal fade" id="approveModal{{ $review->id }}" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">

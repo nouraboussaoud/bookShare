@@ -3,24 +3,28 @@
 @section('title', 'Mes Livres')
 
 @section('content')
+@php
+    $isAdmin = auth()->check() ? auth()->user()->isAdmin() : false;
+    $isOthers = isset($scope) && $scope == 'others';
+@endphp
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 text-gray-800 mb-2">
             @auth
-                @php($isAdmin = auth()->user()->isAdmin())
                 @if($isAdmin)
-                    {{ ($scope ?? null) === 'others' ? 'Livres de la communauté' : 'Tous les livres' }}
+                    {{ $isOthers ? 'Livres de la communauté' : 'Tous les livres' }}
                 @else
-                    {{ ($scope ?? null) === 'others' ? 'Livres de la communauté' : 'Mes livres' }}
+                    {{ $isOthers ? 'Livres de la communauté' : 'Mes livres' }}
                 @endif
             @endauth
         </h1>
         @auth
             <div class="btn-group" role="group">
                 @if(!$isAdmin)
-                    <a href="{{ route('books.index') }}" class="btn btn-sm {{ ($scope ?? null) === 'others' ? 'btn-outline-secondary' : 'btn-secondary' }}">Mes livres</a>
+                    <a href="{{ route('books.index') }}" class="btn btn-sm {{ $isOthers ? 'btn-outline-secondary' : 'btn-secondary' }}">Mes livres</a>
                 @endif
-                <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-sm {{ ($scope ?? null) === 'others' ? 'btn-secondary' : 'btn-outline-secondary' }}">Livres de la communauté</a>
+                <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-sm {{ $isOthers ? 'btn-secondary' : 'btn-outline-secondary' }}">Livres de la communauté</a>
                 @if($isAdmin)
                     <a href="{{ route('books.index') }}" class="btn btn-sm btn-outline-secondary">Tous</a>
                 @endif
@@ -65,7 +69,7 @@
                     <p class="card-text text-muted mb-2 small">par {{ $book->author }}</p>
                     
                     <div class="mb-2">
-                        <span class="badge badge-{{ $book->status === 'AVAILABLE' ? 'success' : 'warning' }}">
+                        <span class="badge badge-{{ $book->status == 'AVAILABLE' ? 'success' : 'warning' }}">
                             {{ $book->status }}
                         </span>
                         <span class="badge badge-info">{{ $book->age_display }}</span>
@@ -88,7 +92,7 @@
                             </a>
                             
                             @auth
-                                @if(auth()->user()->isAdmin() || auth()->id() === $book->user_id)
+                                @if(auth()->user()->isAdmin() || auth()->id() == $book->user_id)
                                     <a href="{{ route('books.edit', $book) }}" class="btn btn-sm btn-outline-warning" title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -110,10 +114,18 @@
                                         </button>
                                     </form>
                                 @else
-                                    @if(!$book->review)
+                                    @php
+                                        $userReview = $book->reviews->where('user_id', Auth::id())->first();
+                                    @endphp
+                                    @if(!$userReview)
                                         <a href="{{ route('reviews.create', ['book_id' => $book->id]) }}" 
                                            class="btn btn-sm btn-outline-primary" title="Donner un avis">
                                             <i class="fas fa-star"></i>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('reviews.edit', $userReview) }}" 
+                                           class="btn btn-sm btn-outline-warning" title="Modifier mon avis">
+                                            <i class="fas fa-edit"></i>
                                         </a>
                                     @endif
                                 @endif
@@ -130,7 +142,7 @@
                     <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
                     <h5 class="text-muted">Aucun livre trouvé</h5>
                     <p class="text-muted">
-                        @if(($scope ?? null) === 'others')
+                        @if($isOthers)
                             La communauté n'a pas encore partagé de livres.
                         @else
                             Vous n'avez pas encore ajouté de livres.

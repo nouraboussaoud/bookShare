@@ -146,14 +146,14 @@
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->email }}</td>
                                     <td>
-                                        @if($user->role === 'admin')
+                                        @if($user->role == 'admin')
                                             <span class="badge badge-danger">Admin</span>
                                         @else
                                             <span class="badge badge-primary">User</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if($user->status === 'active')
+                                        @if($user->status == 'active')
                                             <span class="badge badge-success">Actif</span>
                                         @else
                                             <span class="badge badge-warning">Inactif</span>
@@ -170,8 +170,8 @@
                                                 <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" style="display: inline;">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" class="btn btn-{{ $user->status === 'active' ? 'warning' : 'success' }} btn-sm">
-                                                        <i class="fas fa-{{ $user->status === 'active' ? 'ban' : 'check' }}"></i>
+                                                    <button type="submit" class="btn btn-{{ $user->status == 'active' ? 'warning' : 'success' }} btn-sm">
+                                                        <i class="fas fa-{{ $user->status == 'active' ? 'ban' : 'check' }}"></i>
                                                     </button>
                                                 </form>
                                                 

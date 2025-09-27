@@ -35,6 +35,11 @@ class Book extends Model
         return $this->hasOne(Review::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function getAgeDisplayAttribute()
     {
         return $this->recommended_age == 0 ? 'Tout âge' : $this->recommended_age . '+';

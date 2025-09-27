@@ -158,23 +158,23 @@
 
         <div class="topbar-divider d-none d-sm-block"></div>
 
-        @auth
+        <?php if(auth()->guard()->check()): ?>
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
                 <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small"><?php echo e(Auth::user()->name); ?></span>
                     <i class="fas fa-user-circle fa-2x text-gray-600"></i>
                 </a>
                 <!-- Dropdown - User Information -->
                 <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                     aria-labelledby="userDropdown">
-                    @if (Route::has('profile.edit'))
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                    <?php if(Route::has('profile.edit')): ?>
+                        <a class="dropdown-item" href="<?php echo e(route('profile.edit')); ?>">
                             <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                             Profil
                         </a>
-                    @endif
+                    <?php endif; ?>
                     <a class="dropdown-item" href="#">
                         <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                         Paramètres
@@ -184,8 +184,8 @@
                         Activité
                     </a>
                     <div class="dropdown-divider"></div>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline; width: 100%;">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('logout')); ?>" style="display: inline; width: 100%;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
                             <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                             Déconnexion
@@ -193,22 +193,23 @@
                     </form>
                 </div>
             </li>
-        @else
+        <?php else: ?>
             <!-- Nav Items - Guest User -->
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('login') }}">
+                <a class="nav-link" href="<?php echo e(route('login')); ?>">
                     <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
                     <span>Connexion</span>
                 </a>
             </li>
-            @if (Route::has('register'))
+            <?php if(Route::has('register')): ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('register') }}">
+                    <a class="nav-link" href="<?php echo e(route('register')); ?>">
                         <i class="fas fa-user-plus fa-sm fa-fw mr-2"></i>
                         <span>Inscription</span>
                     </a>
                 </li>
-            @endif
-        @endauth
+            <?php endif; ?>
+        <?php endif; ?>
     </ul>
 </nav>
+<?php /**PATH C:\Users\Lenovo\Desktop\bookShare\projet_laravel\resources\views/partials/navbar.blade.php ENDPATH**/ ?>

@@ -8,11 +8,11 @@
     <meta name="author" content="">
 
     <title>
-        @hasSection('title')
-            @yield('title')
-        @else
+        <?php if (! empty(trim($__env->yieldContent('title')))): ?>
+            <?php echo $__env->yieldContent('title'); ?>
+        <?php else: ?>
             SB Admin 2
-        @endif
+        <?php endif; ?>
     </title>
 
     <!-- Bootstrap CSS -->
@@ -99,25 +99,25 @@
 </head>
 <body id="page-top">
     <div id="wrapper">
-        @auth
+        <?php if(auth()->guard()->check()): ?>
             <!-- Sidebar -->
-            @include('partials.aside')
-        @endauth
+            <?php echo $__env->make('partials.aside', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php endif; ?>
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column"@guest style="margin-left: 0;"@endguest>
+        <div id="content-wrapper" class="d-flex flex-column"<?php if(auth()->guard()->guest()): ?> style="margin-left: 0;"<?php endif; ?>>
             <!-- Main Content -->
             <div id="content">
                 <!-- Topbar -->
-                @include('partials.navbar')
+                <?php echo $__env->make('partials.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    @yield('content')
+                    <?php echo $__env->yieldContent('content'); ?>
                 </div>
                 <!-- /.container-fluid -->
             </div>
             <!-- End of Main Content -->
             <!-- Footer -->
-            @include('partials.footer')
+            <?php echo $__env->make('partials.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
         <!-- End of Content Wrapper -->
     </div>
@@ -154,3 +154,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH C:\Users\Lenovo\Desktop\bookShare\projet_laravel\resources\views/layouts/layout.blade.php ENDPATH**/ ?>

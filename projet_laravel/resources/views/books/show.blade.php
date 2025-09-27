@@ -45,7 +45,7 @@
                             <button class="btn btn-success">
                                 <i class="fas fa-envelope"></i> Contacter le Propriétaire
                             </button>
-                            @if(Auth::id() === $book->user_id)
+                            @if(Auth::id() == $book->user_id)
                                 <a href="{{ route('books.edit', $book) }}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Modifier
                                 </a>
@@ -96,8 +96,8 @@
                                 @endif
                             </div>
                             <div class="col-md-6 text-md-end">
-                                <span class="badge badge-{{ $book->status === 'AVAILABLE' ? 'success' : 'warning' }} badge-lg p-2">
-                                    <i class="fas fa-{{ $book->status === 'AVAILABLE' ? 'check-circle' : 'clock' }}"></i>
+                                <span class="badge badge-{{ $book->status == 'AVAILABLE' ? 'success' : 'warning' }} badge-lg p-2">
+                                    <i class="fas fa-{{ $book->status == 'AVAILABLE' ? 'check-circle' : 'clock' }}"></i>
                                     {{ $book->status }}
                                 </span>
                             </div>
@@ -176,7 +176,7 @@
                                         @endif
                                         
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="badge badge-{{ $book->review->status === 'APPROVED' ? 'success' : ($book->review->status === 'REJECTED' ? 'danger' : 'warning') }}">
+                                            <span class="badge badge-{{ $book->review->status == 'APPROVED' ? 'success' : ($book->review->status == 'REJECTED' ? 'danger' : 'warning') }}">
                                                 {{ ucfirst(strtolower($book->review->status)) }}
                                             </span>
                                             @if($book->review->admin_reply)
