@@ -202,7 +202,7 @@
                                 <td>
                                     <div>
                                         <div class="font-weight-bold text-gray-800">{{ $exchange->bookDemande?->title ?? 'N/A' }}</div>
-                                        <div class="small text-gray-600">Propriétaire: {{ $exchange->bookDemande?->owner?->name ?? 'N/A' }}</div>
+                                        <div class="small text-gray-600">Propriétaire: {{ $exchange->bookDemande?->user?->name ?? 'N/A' }}</div>
                                     </div>
                                 </td>
                                 <td>

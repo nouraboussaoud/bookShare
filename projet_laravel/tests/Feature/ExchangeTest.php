@@ -25,7 +25,7 @@ class ExchangeTest extends TestCase
         // Create a book owned by the receiver
         $book = Book::factory()->create([
             'title' => 'Test Book',
-            'owner_id' => $receiver->id
+            'user_id' => $receiver->id
         ]);
         
         // Create an exchange
@@ -59,7 +59,7 @@ class ExchangeTest extends TestCase
         $receiver = User::factory()->create();
         
         // Create a book owned by the receiver
-        $book = Book::factory()->create(['owner_id' => $receiver->id]);
+        $book = Book::factory()->create(['user_id' => $receiver->id]);
         
         // Act as the initiator
         $this->actingAs($initiator);
@@ -97,7 +97,7 @@ class ExchangeTest extends TestCase
         // Create a book
         $book = Book::factory()->create([
             'title' => 'Test Book Title',
-            'owner_id' => $receiver->id
+            'user_id' => $receiver->id
         ]);
         
         // Create an exchange
@@ -144,7 +144,7 @@ class ExchangeTest extends TestCase
         // Create a book
         $book = Book::factory()->create([
             'title' => 'Detailed Test Book',
-            'owner_id' => $receiver->id
+            'user_id' => $receiver->id
         ]);
         
         // Create an exchange
@@ -188,7 +188,7 @@ class ExchangeTest extends TestCase
         $otherUser = User::factory()->create();
         
         // Create a book
-        $book = Book::factory()->create(['owner_id' => $receiver->id]);
+        $book = Book::factory()->create(['user_id' => $receiver->id]);
         
         // Create an exchange
         $exchange = Exchange::create([

@@ -47,8 +47,8 @@
                                 <div>
                                     <h6 class="alert-heading mb-1">Livre concerné</h6>
                                     <strong>{{ $exchange->bookDemande->title }}</strong>
-                                    @if($exchange->bookDemande->owner)
-                                        <br><small class="text-muted">Propriétaire: {{ $exchange->bookDemande->owner->name }}</small>
+                                    @if($exchange->bookDemande->user)
+                                        <br><small class="text-muted">Propriétaire: {{ $exchange->bookDemande->user->name }}</small>
                                     @endif
                                 </div>
                             </div>
