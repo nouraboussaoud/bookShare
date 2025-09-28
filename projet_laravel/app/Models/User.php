@@ -87,4 +87,15 @@ class User extends Authenticatable
     {
         return $this->status === 'inactive';
     }
+
+    // Report relationships
+    public function reportsCreated()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    public function reportsReceived()
+    {
+        return $this->hasMany(Report::class, 'reported_user_id');
+    }
 }

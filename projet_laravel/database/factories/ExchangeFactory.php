@@ -16,7 +16,7 @@ class ExchangeFactory extends Factory
     {
         return [
             'type' => $this->faker->randomElement(['RESERVATION', 'ECHANGE']),
-            'status' => $this->faker->randomElement(['EN_ATTENTE', 'EN_COURS', 'TERMINE', 'ANNULE']),
+            'status' => $this->faker->randomElement(['EN_ATTENTE', 'APPROUVE', 'REFUSE', 'EN_COURS', 'TERMINE']),
             'dateDebut' => $this->faker->date(),
             'dateFin' => $this->faker->dateTimeBetween('+1 day', '+30 days')->format('Y-m-d'),
             'userInitiateurId' => \App\Models\User::factory(),

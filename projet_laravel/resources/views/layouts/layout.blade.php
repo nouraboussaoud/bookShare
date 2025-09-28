@@ -268,5 +268,10 @@
     </script>
     
     @stack('scripts')
+    
+    <!-- Report Modal -->
+    @auth
+        @include('components.report-modal')
+    @endauth
 </body>
 </html>

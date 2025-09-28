@@ -100,31 +100,65 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <h6 class="font-weight-bold text-gray-800">Initiateur:</h6>
-                        <div class="d-flex align-items-center">
-                            <div class="mr-3">
-                                <div class="icon-circle bg-primary">
-                                    <i class="fas fa-user text-white"></i>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-primary">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    @if($exchange->initiateur)
+                                        <div class="font-weight-bold">
+                                            <a href="{{ route('users.show', $exchange->initiateur) }}" class="text-decoration-none">
+                                                {{ $exchange->initiateur->name }}
+                                            </a>
+                                        </div>
+                                        <div class="text-gray-600">{{ $exchange->initiateur->email }}</div>
+                                    @else
+                                        <div class="font-weight-bold">N/A</div>
+                                        <div class="text-gray-600">N/A</div>
+                                    @endif
                                 </div>
                             </div>
-                            <div>
-                                <div class="font-weight-bold">{{ $exchange->initiateur?->name ?? 'N/A' }}</div>
-                                <div class="text-gray-600">{{ $exchange->initiateur?->email ?? 'N/A' }}</div>
-                            </div>
+                            @if($exchange->initiateur && auth()->id() !== $exchange->initiateur->id)
+                                <button type="button" onclick="openReportModal('user', {{ $exchange->initiateur->id }})" 
+                                        class="btn btn-sm btn-outline-warning" title="Signaler cet utilisateur">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                            @endif
                         </div>
                     </div>
                     <hr>
                     <div>
                         <h6 class="font-weight-bold text-gray-800">Récepteur:</h6>
-                        <div class="d-flex align-items-center">
-                            <div class="mr-3">
-                                <div class="icon-circle bg-secondary">
-                                    <i class="fas fa-user text-white"></i>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-secondary">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    @if($exchange->recepteur)
+                                        <div class="font-weight-bold">
+                                            <a href="{{ route('users.show', $exchange->recepteur) }}" class="text-decoration-none">
+                                                {{ $exchange->recepteur->name }}
+                                            </a>
+                                        </div>
+                                        <div class="text-gray-600">{{ $exchange->recepteur->email }}</div>
+                                    @else
+                                        <div class="font-weight-bold">N/A</div>
+                                        <div class="text-gray-600">N/A</div>
+                                    @endif
                                 </div>
                             </div>
-                            <div>
-                                <div class="font-weight-bold">{{ $exchange->recepteur?->name ?? 'N/A' }}</div>
-                                <div class="text-gray-600">{{ $exchange->recepteur?->email ?? 'N/A' }}</div>
-                            </div>
+                            @if($exchange->recepteur && auth()->id() !== $exchange->recepteur->id)
+                                <button type="button" onclick="openReportModal('user', {{ $exchange->recepteur->id }})" 
+                                        class="btn btn-sm btn-outline-warning" title="Signaler cet utilisateur">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>

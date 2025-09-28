@@ -99,6 +99,18 @@
                 <span>Gestion Avis (Admin)</span>
             </a>
         </li>
+
+        <!-- Nav Item - Reports Management -->
+        <li class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.reports.index') }}">
+                <i class="fas fa-fw fa-flag"></i>
+                <span>Gestion Signalements</span>
+                @php $pendingReports = \App\Models\Report::pending()->count(); @endphp
+                @if($pendingReports > 0)
+                    <span class="badge badge-danger ml-2">{{ $pendingReports }}</span>
+                @endif
+            </a>
+        </li>
     @endif
 
     <!-- Divider -->
