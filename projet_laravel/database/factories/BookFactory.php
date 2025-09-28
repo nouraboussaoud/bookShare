@@ -16,7 +16,12 @@ class BookFactory extends Factory
     {
         return [
             'title' => $this->faker->sentence(3),
-            'owner_id' => \App\Models\User::factory(),
+            'author' => $this->faker->name(),
+            'user_id' => \App\Models\User::factory(),
+            'category_id' => \App\Models\Category::factory(),
+            'status' => $this->faker->randomElement(['available', 'borrowed', 'reserved']),
+            'description' => $this->faker->paragraph(2),
+            'recommended_age' => $this->faker->numberBetween(0, 18),
         ];
     }
 }

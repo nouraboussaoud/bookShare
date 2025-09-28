@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDashboardController;
 
 Route::get('/', function () {
@@ -49,6 +50,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('reviews', \App\Http\Controllers\Admin\ReviewManagementController::class);
     Route::patch('reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'approve'])->name('reviews.approve');
     Route::patch('reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'reject'])->name('reviews.reject');
+    
+    // Admin routes for reports management
+    Route::resource('reports', \App\Http\Controllers\Admin\ReportAdminController::class)->only(['index', 'show', 'destroy']);
+    Route::patch('reports/{report}/status', [\App\Http\Controllers\Admin\ReportAdminController::class, 'updateStatus'])->name('reports.updateStatus');
+    Route::post('reports/bulk-status', [\App\Http\Controllers\Admin\ReportAdminController::class, 'bulkUpdateStatus'])->name('reports.bulkUpdateStatus');
 });
 
 // Dashboard User -> now uses controller for dynamic data
@@ -104,6 +110,9 @@ Route::middleware('auth')->group(function () {
     
     // Reviews resource routes - Users can manage their own reviews
     Route::resource('reviews', ReviewController::class);
+    
+    // Report routes for users
+    Route::resource('reports', \App\Http\Controllers\ReportController::class)->only(['index', 'create', 'store', 'show']);
 });
 
 // Routes Front Office
@@ -129,6 +138,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
 // Route for creating an exchange
 Route::get('/exchanges/create', [ExchangeController::class, 'create'])->name('exchanges.create');
+
+// Route for user profiles
+Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
 
 // Route for listing exchanges
 Route::get('/exchanges', [ExchangeController::class, 'index'])->name('exchanges.index');

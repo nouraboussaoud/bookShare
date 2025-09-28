@@ -76,6 +76,10 @@
                                     </a>
                                     
                                     @if($user->id !== auth()->id())
+                                        <button type="button" onclick="openReportModal('user', {{ $user->id }})" 
+                                                class="btn btn-warning btn-sm" title="Signaler cet utilisateur">
+                                            <i class="fas fa-flag"></i>
+                                        </button>
                                         <form method="POST" action="{{ route('admin.users.toggle-status', $user) }}" style="display: inline;">
                                             @csrf
                                             @method('PATCH')

@@ -13,27 +13,39 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-         // Create more regular users
-        User::factory(5)->create();
         // Create admin and test users first
         $this->call([
             AdminUserSeeder::class,
         ]);
 
-        // Create additional test user
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create more regular users (only if they don't exist)
+        if (User::count() <= 2) { // Only admin and test user from AdminUserSeeder
+            User::factory(8)->create();
+        }
+        
+        // Create categories
+        $this->call([
+            CategorySeeder::class,
         ]);
-         // Create books (this will use the existing users)
+        
+        // Create books (this will use the existing users)
         $this->call([
             BookSeeder::class,
         ]);
         
-        // Appeler le seeder pour créer les utilisateurs admin et user
-        $this->call(AdminUserSeeder::class);
+        // Create exchanges (depends on users and books)
+        $this->call([
+            ExchangeSeeder::class,
+        ]);
         
-        // Appeler le seeder pour créer les catégories
-        $this->call(CategorySeeder::class);
+        // Create reports (depends on users and exchanges)
+        $this->call([
+            ReportSeeder::class,
+        ]);
+        
+        // Create notifications (depends on users, exchanges, and reports)
+        $this->call([
+            NotificationSeeder::class,
+        ]);
     }
 }

@@ -167,13 +167,6 @@
                                 <td>{{ $exchange->type }}</td>
                                 <td>{{ $exchange->status }}</td>
                                 <td>
-                                    <form action="{{ route('admin.exchanges.arbitrate', $exchange->id) }}" method="POST" style="display:inline;">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-gavel"></i> Arbitrer
-                                        </button>
-                                    </form>
                                     <form action="{{ route('admin.exchanges.cancel', $exchange->id) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('PATCH')

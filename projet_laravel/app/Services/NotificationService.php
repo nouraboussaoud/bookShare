@@ -116,4 +116,72 @@ class NotificationService
                 'read_at' => now(),
             ]);
     }
+
+    /**
+     * Notify all admins when a new report is created
+     */
+    public function notifyAdminsOfNewReport($report)
+    {
+        $admins = User::where('role', 'admin')->get();
+        $reporter = $report->reporter;
+        $reportType = $report->type === 'CONFLIT_ECHANGE' ? 'conflit d\'échange' : 'comportement inapproprié';
+
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'new_report',
+                'title' => 'Nouveau signalement',
+                'message' => "Un nouveau signalement de {$reportType} a été créé par {$reporter->name}. Veuillez examiner ce signalement.",
+                'data' => [
+                    'report_id' => $report->id,
+                    'reporter_id' => $reporter->id,
+                    'reporter_name' => $reporter->name,
+                    'report_type' => $report->type,
+                    'reported_user_id' => $report->reported_user_id,
+                    'exchange_id' => $report->exchange_id,
+                ],
+            ]);
+        }
+    }
+
+    /**
+     * Notify the reporter when report status changes
+     */
+    public function notifyReportStatusChange($report, $oldStatus, $newStatus)
+    {
+        $reporter = $report->reporter;
+        
+        if (!$reporter) {
+            return;
+        }
+
+        $statusMessages = [
+            'TRAITE' => "Votre signalement a été examiné et traité par les administrateurs.",
+            'REJETE' => "Votre signalement a été examiné et rejeté par les administrateurs.",
+        ];
+
+        $statusTitles = [
+            'TRAITE' => 'Signalement traité',
+            'REJETE' => 'Signalement rejeté',
+        ];
+
+        if (!isset($statusMessages[$newStatus])) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $reporter->id,
+            'type' => 'report_status_change',
+            'title' => $statusTitles[$newStatus],
+            'message' => $statusMessages[$newStatus],
+            'data' => [
+                'report_id' => $report->id,
+                'report_type' => $report->type,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'reported_user_id' => $report->reported_user_id,
+                'exchange_id' => $report->exchange_id,
+            ],
+        ]);
+    }
 }

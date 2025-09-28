@@ -190,14 +190,6 @@
                     @endif
 
                     @if(in_array($exchange->status, ['EN_ATTENTE', 'EN_COURS']))
-                        <form method="POST" action="{{ route('admin.exchanges.arbitrate', $exchange->id) }}" class="mb-3">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="btn btn-warning btn-block">
-                                <i class="fas fa-gavel mr-2"></i>Arbitrer l'Échange
-                            </button>
-                        </form>
-
                         <form method="POST" action="{{ route('admin.exchanges.cancel', $exchange->id) }}" 
                               onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cet échange ?')" class="mb-3">
                             @csrf

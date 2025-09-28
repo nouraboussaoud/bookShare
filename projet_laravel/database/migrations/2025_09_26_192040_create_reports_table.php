@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->enum('type', ['CONFLIT_ECHANGE', 'COMPORTEMENT']);
             $table->text('description');
-            $table->unsignedBigInteger('reportedUserId');
-            $table->unsignedBigInteger('reporterId');
-            $table->unsignedBigInteger('exchangeId')->nullable();
-            $table->enum('status', ['EN_ATTENTE', 'TRAITE', 'CLOTURE']);
+            $table->enum('status', ['EN_ATTENTE', 'TRAITE', 'REJETE'])->default('EN_ATTENTE');
+            $table->unsignedBigInteger('reporter_id');
+            $table->unsignedBigInteger('reported_user_id')->nullable();
+            $table->unsignedBigInteger('exchange_id')->nullable();
             $table->timestamps();
 
-            $table->foreign('reportedUserId')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('reporterId')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('exchangeId')->references('id')->on('exchanges')->onDelete('cascade');
+            $table->foreign('reporter_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('reported_user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('exchange_id')->references('id')->on('exchanges')->onDelete('cascade');
         });
     }
 

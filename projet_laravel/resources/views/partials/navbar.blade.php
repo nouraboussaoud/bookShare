@@ -43,6 +43,50 @@
             </div>
         </li>
 
+        <!-- Nav Item - Reports (Admin Only) -->
+        @if(Auth::user()->isAdmin())
+        <li class="nav-item dropdown no-arrow mx-1">
+            <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-flag fa-fw"></i>
+                <!-- Counter - Pending Reports -->
+                @php $pendingReports = \App\Models\Report::pending()->count(); @endphp
+                @if($pendingReports > 0)
+                    <span class="badge badge-danger badge-counter">{{ $pendingReports }}</span>
+                @endif
+            </a>
+            <!-- Dropdown - Reports -->
+            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                aria-labelledby="reportsDropdown">
+                <h6 class="dropdown-header">
+                    <i class="fas fa-flag mr-2"></i>Signalements en attente
+                </h6>
+                @php $recentReports = \App\Models\Report::with(['reporter', 'reportedUser'])->pending()->latest()->limit(5)->get(); @endphp
+                @forelse($recentReports as $report)
+                    <a class="dropdown-item d-flex align-items-center" href="{{ route('admin.reports.show', $report) }}">
+                        <div class="mr-3">
+                            <div class="icon-circle bg-warning">
+                                <i class="fas fa-flag text-white"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="small text-gray-500">{{ $report->created_at->diffForHumans() }}</div>
+                            <span class="font-weight-bold">{{ $report->type === 'COMPORTEMENT' ? 'Comportement' : 'Conflit d\'échange' }}</span>
+                            <div class="small text-gray-500">Par: {{ $report->reporter->name }}</div>
+                        </div>
+                    </a>
+                @empty
+                    <div class="text-center py-3 text-gray-500">
+                        <i class="fas fa-check-circle"></i> Aucun signalement en attente
+                    </div>
+                @endforelse
+                <a class="dropdown-item text-center small text-gray-500" href="{{ route('admin.reports.index') }}">
+                    <i class="fas fa-eye mr-1"></i>Voir tous les signalements
+                </a>
+            </div>
+        </li>
+        @endif
+
         <!-- Nav Item - Notifications -->
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button"
@@ -149,6 +193,10 @@
                             Profil
                         </a>
                     @endif
+                    <a class="dropdown-item" href="{{ route('reports.index') }}">
+                        <i class="fas fa-flag fa-sm fa-fw mr-2 text-gray-400"></i>
+                        Mes Signalements
+                    </a>
                     <a class="dropdown-item" href="#">
                         <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                         Paramètres
