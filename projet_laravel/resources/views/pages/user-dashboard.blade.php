@@ -8,7 +8,23 @@
             <p class="mb-0 text-gray-600">Bienvenue, {{ Auth::user()->name }} !</p>
         </div>
         <div>
+<<<<<<< Updated upstream
             <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
+=======
+            <a href="{{ route('locations.marketplace') }}" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm mr-2">
+                <i class="fas fa-store fa-sm text-white-50 mr-1"></i> Marketplace Locations
+            </a>
+            <a href="{{ route('locations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
+                <i class="fas fa-handshake fa-sm text-white-50 mr-1"></i> Mes Locations
+            </a>
+            <a href="{{ route('exchanges.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
+                <i class="fas fa-exchange-alt fa-sm text-white-50 mr-1"></i> Réserver un Livre
+            </a>
+            <a href="{{ route('exchanges.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm mr-2">
+                <i class="fas fa-history fa-sm text-white-50 mr-1"></i> Historique Échanges
+            </a>
+            <a href="{{ route('books.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mr-2">
+>>>>>>> Stashed changes
                 <i class="fas fa-plus fa-sm text-white-50"></i> Ajouter un Livre
             </a>
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
@@ -119,6 +135,7 @@
                     </div>
                 </div>
                 <div class="card-body">
+<<<<<<< Updated upstream
                     <div class="table-responsive">
                         <table class="table table-bordered" width="100%" cellspacing="0">
                             <thead>
@@ -155,6 +172,85 @@
                             </tbody>
                         </table>
                     </div>
+=======
+                    @if(isset($recentMyBooks) && $recentMyBooks->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Auteur</th>
+                                        <th>Genre</th>
+                                        <th>Statut</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentMyBooks as $book)
+                                    <tr>
+                                        <td>{{ $book->title }}</td>
+                                        <td>{{ $book->author }}</td>
+                                        <td>{{ $book->category->name ?? 'N/A' }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $book->status == 'available' ? 'success' : ($book->status == 'borrowed' ? 'warning' : 'info') }}">
+                                                {{ $book->status == 'available' ? 'Disponible' : ($book->status == 'borrowed' ? 'Emprunté' : 'Réservé') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $book->created_at->format('Y-m-d') }}</td>
+                                        <td>
+                                            <a href="{{ route('books.show', $book) }}" class="btn btn-sm btn-info" title="Voir">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('books.edit', $book) }}" class="btn btn-sm btn-warning" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <!-- Default static data if no books available -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Titre</th>
+                                        <th>Auteur</th>
+                                        <th>Genre</th>
+                                        <th>Statut</th>
+                                        <th>Date d'ajout</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Le Petit Prince</td>
+                                        <td>Antoine de Saint-Exupéry</td>
+                                        <td>Fiction</td>
+                                        <td><span class="badge badge-success">Lu</span></td>
+                                        <td>2025-09-20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>1984</td>
+                                        <td>George Orwell</td>
+                                        <td>Science-Fiction</td>
+                                        <td><span class="badge badge-warning">En cours</span></td>
+                                        <td>2025-09-18</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L'Étranger</td>
+                                        <td>Albert Camus</td>
+                                        <td>Philosophie</td>
+                                        <td><span class="badge badge-info">À lire</span></td>
+                                        <td>2025-09-15</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+>>>>>>> Stashed changes
                 </div>
             </div>
         </div>

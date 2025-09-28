@@ -3,6 +3,14 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+<<<<<<< Updated upstream
+=======
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\LocationController;
+>>>>>>> Stashed changes
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -68,6 +76,35 @@ Route::middleware('auth')->group(function () {
         $user->save();
         return redirect('/dashboard')->with('message', 'Vous êtes maintenant administrateur!');
     });
+<<<<<<< Updated upstream
+=======
+
+
+    // Books resource routes
+    Route::resource('books', BookController::class);
+    // Toggle book status (AVAILABLE <-> RESERVED)
+    Route::patch('books/{book}/toggle-status', [BookController::class, 'toggleStatus'])->name('books.toggleStatus');
+    
+    // Reviews resource routes - Users can manage their own reviews
+    Route::resource('reviews', ReviewController::class);
+    
+    // Location resource routes
+    Route::resource('locations', LocationController::class);
+    
+    // Routes spécifiques pour les actions de location
+    Route::post('locations/{location}/confirmer', [LocationController::class, 'confirmer'])->name('locations.confirmer');
+    Route::post('locations/{location}/refuser', [LocationController::class, 'refuser'])->name('locations.refuser');
+    Route::post('locations/{location}/demarrer', [LocationController::class, 'demarrer'])->name('locations.demarrer');
+    Route::post('locations/{location}/terminer', [LocationController::class, 'terminer'])->name('locations.terminer');
+    
+    // Route pour le marketplace des locations
+    Route::get('locations-marketplace', [LocationController::class, 'marketplace'])->name('locations.marketplace');
+    
+    // Route pour l'aide des locations
+    Route::get('locations-help', function () {
+        return view('locations.help');
+    })->name('locations.help');
+>>>>>>> Stashed changes
 });
 
 require __DIR__.'/auth.php';
