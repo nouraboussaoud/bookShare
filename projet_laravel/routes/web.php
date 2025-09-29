@@ -11,6 +11,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\ReadingGroupController;
+use App\Http\Controllers\GroupMembershipController;
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -113,6 +116,25 @@ Route::middleware('auth')->group(function () {
     
     // Report routes for users
     Route::resource('reports', \App\Http\Controllers\ReportController::class)->only(['index', 'create', 'store', 'show']);
+    
+// -----------------------
+// Reading Groups
+// -----------------------
+// Add this to enable the create view/route
+Route::get('reading-groups/create', [ReadingGroupController::class, 'create'])->name('reading-groups.create');
+
+// Full CRUD (index, store, show, update, destroy)
+// excluding only create/edit since you don’t use blade forms
+Route::resource('reading-groups', ReadingGroupController::class)
+    ->except(['create','edit']);
+
+// Membership actions (join / leave)
+Route::post('reading-groups/{readingGroup}/join', [GroupMembershipController::class, 'join'])
+    ->name('reading-groups.join');
+Route::delete('reading-groups/{readingGroup}/leave', [GroupMembershipController::class, 'leave'])
+    ->name('reading-groups.leave');
+
+
 });
 
 // Routes Front Office

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->dropColumn('owner_id');
+           // $table->dropColumn('owner_id');
         });
     }
 
