@@ -127,7 +127,7 @@ Route::get('reading-groups/create', [ReadingGroupController::class, 'create'])->
 // excluding only create/edit since you don’t use blade forms
 Route::resource('reading-groups', ReadingGroupController::class)
     ->except(['create','edit']);
-
+ Route::get('reading-groups/{readingGroup}/edit', [ReadingGroupController::class, 'edit'])->name('reading-groups.edit');
 // Membership actions (join / leave)
 Route::post('reading-groups/{readingGroup}/join', [GroupMembershipController::class, 'join'])
     ->name('reading-groups.join');
