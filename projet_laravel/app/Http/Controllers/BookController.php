@@ -53,7 +53,7 @@ class BookController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'author' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'in:AVAILABLE,RESERVED'],
+            'status' => ['required', 'in:available,reserved'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'recommended_age' => ['required', 'integer', 'min:0', 'max:18'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
@@ -85,7 +85,7 @@ class BookController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'author' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'in:AVAILABLE,RESERVED'],
+            'status' => ['required', 'in:available,reserved'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'recommended_age' => ['required', 'integer', 'min:0', 'max:18'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
@@ -115,7 +115,7 @@ class BookController extends Controller
     public function toggleStatus(Book $book)
     {
         $this->authorizeAccess($book);
-        $book->status = $book->status === 'AVAILABLE' ? 'RESERVED' : 'AVAILABLE';
+        $book->status = $book->status === 'available' ? 'reserved' : 'available';
         $book->save();
 
         return redirect()->route('books.index')->with('success', 'Statut du livre mis à jour.');

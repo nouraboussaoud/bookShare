@@ -69,8 +69,8 @@
                     <p class="card-text text-muted mb-2 small">par {{ $book->author }}</p>
                     
                     <div class="mb-2">
-                        <span class="badge badge-{{ $book->status == 'AVAILABLE' ? 'success' : 'warning' }}">
-                            {{ $book->status }}
+                        <span class="badge badge-{{ $book->status == 'available' ? 'success' : 'warning' }}">
+                            {{ $book->status == 'available' ? 'Disponible' : 'Réservé' }}
                         </span>
                         <span class="badge badge-info">{{ $book->age_display }}</span>
                     </div>
@@ -165,3 +165,55 @@
 @endif
 
 @endsection
+
+@push('styles')
+<style>
+    .book-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .book-card .card-img-top {
+        transition: transform 0.3s ease;
+    }
+    
+    .book-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    .btn-group .btn {
+        border-radius: 0;
+        font-size: 0.8rem;
+    }
+    
+    .btn-group .btn:first-child {
+        border-top-left-radius: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
+    }
+    
+    .btn-group .btn:last-child {
+        border-top-right-radius: 0.25rem;
+        border-bottom-right-radius: 0.25rem;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .card-title a {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .card-title a:hover {
+        color: #007bff;
+    }
+</style>
+@endpush

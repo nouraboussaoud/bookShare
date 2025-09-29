@@ -164,8 +164,8 @@
                                         <td>{{ $book->author }}</td>
                                         <td>{{ $book->user->name }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $book->status == 'AVAILABLE' ? 'success' : 'warning' }}">
-                                                {{ $book->status }}
+                                            <span class="badge badge-{{ $book->status == 'available' ? 'success' : 'warning' }}">
+                                                {{ $book->status == 'available' ? 'Disponible' : 'Réservé' }}
                                             </span>
                                         </td>
                                         <td>{{ $book->created_at->format('d/m/Y') }}</td>

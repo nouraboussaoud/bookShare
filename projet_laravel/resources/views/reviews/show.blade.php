@@ -144,8 +144,8 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Statut:</strong> 
-                        <span class="badge {{ $review->book->status == 'AVAILABLE' ? 'badge-success' : 'badge-warning' }}">
-                            {{ $review->book->status }}
+                        <span class="badge {{ $review->book->status == 'available' ? 'badge-success' : 'badge-warning' }}">
+                            {{ $review->book->status == 'available' ? 'Disponible' : 'Réservé' }}
                         </span>
                     </p>
                     @if($review->book->category)
