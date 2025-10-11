@@ -11,23 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exchanges', function (Blueprint $table) {
-            $table->id();
-            $table->enum('type', ['RESERVATION', 'ECHANGE']);
-            $table->enum('status', ['EN_ATTENTE', 'APPROUVE', 'REFUSE', 'EN_COURS', 'TERMINE']);
-            $table->date('dateDebut');
-            $table->date('dateFin');
-            $table->unsignedBigInteger('userInitiateurId');
-            $table->unsignedBigInteger('userRecepteurId');
-            $table->unsignedBigInteger('bookDemandeId');
-            $table->unsignedBigInteger('bookOffertId')->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('exchanges')) {
+            Schema::create('exchanges', function (Blueprint $table) {
+                $table->id();
+                $table->enum('type', ['RESERVATION', 'ECHANGE']);
+                $table->enum('status', ['EN_ATTENTE', 'APPROUVE', 'REFUSE', 'EN_COURS', 'TERMINE']);
+                $table->date('dateDebut');
+                $table->date('dateFin');
+                $table->unsignedBigInteger('userInitiateurId');
+                $table->unsignedBigInteger('userRecepteurId');
+                $table->unsignedBigInteger('bookDemandeId');
+                $table->unsignedBigInteger('bookOffertId')->nullable();
+                $table->timestamps();
 
-            $table->foreign('userInitiateurId')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('userRecepteurId')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('bookDemandeId')->references('id')->on('books')->onDelete('cascade');
-            $table->foreign('bookOffertId')->references('id')->on('books')->onDelete('cascade');
-        });
+                $table->foreign('userInitiateurId')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('userRecepteurId')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('bookDemandeId')->references('id')->on('books')->onDelete('cascade');
+                $table->foreign('bookOffertId')->references('id')->on('books')->onDelete('cascade');
+            });
+        }
     }
 
     /**
