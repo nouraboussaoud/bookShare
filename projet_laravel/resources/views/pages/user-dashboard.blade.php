@@ -26,20 +26,39 @@
             <h1 class="h3 mb-0 text-gray-800">📚 Mon Espace BookShare</h1>
             <p class="mb-0 text-gray-600">Bienvenue, {{ Auth::user()->name }} ! Trouvez votre prochain livre à lire</p>
         </div>
-        <div>
-            <a href="{{ route('exchanges.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
-                <i class="fas fa-book fa-sm text-white-50 mr-1"></i> Réserver un Livre
-            </a>
-            <a href="{{ route('exchanges.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
-                <i class="fas fa-history fa-sm text-white-50 mr-1"></i> Voir l'Historique
-            </a>
-            <a href="{{ route('books.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mr-2">
-                <i class="fas fa-plus fa-sm text-white-50"></i> Ajouter un Livre
-            </a>
-            <a href="{{ route('books.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
-                <i class="fas fa-book fa-sm text-white-50"></i> Mes Livres
-            </a>
-            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+        <div class="d-flex flex-wrap align-items-center">
+            <!-- Actions principales -->
+            <div class="btn-group mr-2 mb-2" role="group">
+                <a href="{{ route('books.create') }}" class="btn btn-sm btn-primary shadow-sm">
+                    <i class="fas fa-plus fa-sm text-white-50"></i> Ajouter un Livre
+                </a>
+                <a href="{{ route('books.index') }}" class="btn btn-sm btn-outline-primary shadow-sm">
+                    <i class="fas fa-book fa-sm"></i> Mes Livres
+                </a>
+            </div>
+            
+            <!-- Locations -->
+            <div class="btn-group mr-2 mb-2" role="group">
+                <a href="{{ route('locations.marketplace') }}" class="btn btn-sm btn-warning shadow-sm">
+                    <i class="fas fa-store fa-sm text-white-50"></i> Marketplace
+                </a>
+                <a href="{{ route('locations.index') }}" class="btn btn-sm btn-outline-warning shadow-sm">
+                    <i class="fas fa-handshake fa-sm"></i> Mes Locations
+                </a>
+            </div>
+            
+            <!-- Échanges -->
+            <div class="btn-group mr-2 mb-2" role="group">
+                <a href="{{ route('exchanges.create') }}" class="btn btn-sm btn-success shadow-sm">
+                    <i class="fas fa-exchange-alt fa-sm text-white-50"></i> Réserver
+                </a>
+                <a href="{{ route('exchanges.index') }}" class="btn btn-sm btn-outline-success shadow-sm">
+                    <i class="fas fa-history fa-sm"></i> Historique
+                </a>
+            </div>
+            
+            <!-- Déconnexion -->
+            <form method="POST" action="{{ route('logout') }}" style="display: inline;" class="mb-2">
                 @csrf
                 <button type="submit" class="btn btn-sm btn-danger shadow-sm">
                     <i class="fas fa-sign-out-alt fa-sm text-white-50"></i> Déconnexion
@@ -286,7 +305,7 @@
                                         <td>{{ $book->author }}</td>
                                         <td>{{ $book->category->name ?? 'N/A' }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $book->status == 'AVAILABLE' ? 'success' : ($book->status == 'BORROWED' ? 'warning' : 'info') }}">
+                                            <span class="badge badge-{{ $book->status == 'available' ? 'success' : ($book->status == 'borrowed' ? 'warning' : 'info') }}">
                                                 {{ $book->status }}
                                             </span>
                                         </td>
@@ -526,3 +545,61 @@
     </div>
     @endif
 @endsection
+
+@push('styles')
+<style>
+    .btn-group .btn {
+        border-radius: 0;
+    }
+    
+    .btn-group .btn:first-child {
+        border-top-left-radius: 0.375rem;
+        border-bottom-left-radius: 0.375rem;
+    }
+    
+    .btn-group .btn:last-child {
+        border-top-right-radius: 0.375rem;
+        border-bottom-right-radius: 0.375rem;
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    .book-card .card-img-top {
+        transition: all 0.3s ease;
+    }
+    
+    .book-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .d-flex.flex-wrap .btn-group {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .d-flex.flex-wrap .btn-group .btn {
+            flex: 1;
+        }
+    }
+</style>
+@endpush

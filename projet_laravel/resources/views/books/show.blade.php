@@ -36,19 +36,41 @@
                     <div class="card-body">
                         <h6 class="card-title text-primary">Actions Rapides</h6>
                         <div class="d-grid gap-2">
-                            @if(!$book->review)
-                                <a href="{{ route('reviews.create', ['book_id' => $book->id]) }}" 
-                                   class="btn btn-warning">
-                                    <i class="fas fa-star"></i> Donner un Avis
-                                </a>
-                            @endif
-                            <button class="btn btn-success">
-                                <i class="fas fa-envelope"></i> Contacter le Propriétaire
-                            </button>
-                            @if(Auth::id() == $book->user_id)
+                            @if(Auth::id() != $book->user_id)
+                                <!-- Actions pour les autres utilisateurs -->
+                                @if($book->estDisponiblePourLocation())
+                                    <a href="{{ route('locations.create', ['book_id' => $book->id]) }}" 
+                                       class="btn btn-primary">
+                                        <i class="fas fa-handshake"></i> Louer ce livre
+                                    </a>
+                                @else
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> Non disponible
+                                    </button>
+                                @endif
+                                
+                                @if(!$book->review)
+                                    <a href="{{ route('reviews.create', ['book_id' => $book->id]) }}" 
+                                       class="btn btn-warning">
+                                        <i class="fas fa-star"></i> Donner un Avis
+                                    </a>
+                                @endif
+                                
+                                <button class="btn btn-success">
+                                    <i class="fas fa-envelope"></i> Contacter le Propriétaire
+                                </button>
+                            @else
+                                <!-- Actions pour le propriétaire -->
                                 <a href="{{ route('books.edit', $book) }}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Modifier
                                 </a>
+                                
+                                @if($book->estEnLocation())
+                                    <div class="alert alert-info mt-2 mb-0">
+                                        <i class="fas fa-info-circle"></i>
+                                        Ce livre est actuellement en location.
+                                    </div>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -96,9 +118,9 @@
                                 @endif
                             </div>
                             <div class="col-md-6 text-md-end">
-                                <span class="badge badge-{{ $book->status == 'AVAILABLE' ? 'success' : 'warning' }} badge-lg p-2">
-                                    <i class="fas fa-{{ $book->status == 'AVAILABLE' ? 'check-circle' : 'clock' }}"></i>
-                                    {{ $book->status }}
+                                <span class="badge badge-{{ $book->status == 'available' ? 'success' : 'warning' }} badge-lg p-2">
+                                    <i class="fas fa-{{ $book->status == 'available' ? 'check-circle' : 'clock' }}"></i>
+                                    {{ $book->status == 'available' ? 'Disponible' : 'Réservé' }}
                                 </span>
                             </div>
                         </div>
@@ -202,7 +224,7 @@
                             @php
                                 $similarBooks = \App\Models\Book::where('category_id', $book->category->id)
                                     ->where('id', '!=', $book->id)
-                                    ->where('status', 'AVAILABLE')
+                                    ->where('status', 'available')
                                     ->with(['user', 'category'])
                                     ->limit(3)
                                     ->get();

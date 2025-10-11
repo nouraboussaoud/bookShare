@@ -74,8 +74,8 @@
                     <div class="mb-3">
                         <label class="form-label">Statut</label>
                         <select name="status" class="form-select @error('status') is-invalid @enderror" required>
-                            <option value="AVAILABLE" {{ old('status', $book->status) == 'AVAILABLE' ? 'selected' : '' }}>AVAILABLE</option>
-                            <option value="RESERVED" {{ old('status', $book->status) == 'RESERVED' ? 'selected' : '' }}>RESERVED</option>
+                            <option value="available" {{ old('status', $book->status) == 'available' ? 'selected' : '' }}>Disponible</option>
+                            <option value="reserved" {{ old('status', $book->status) == 'reserved' ? 'selected' : '' }}>Réservé</option>
                         </select>
                         @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>

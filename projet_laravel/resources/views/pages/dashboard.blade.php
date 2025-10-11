@@ -30,7 +30,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 Total Utilisateurs</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $totalUsers }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
@@ -48,7 +48,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Utilisateurs Actifs</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::where('status', 'active')->count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $activeUsers }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user-check fa-2x text-gray-300"></i>
@@ -65,7 +65,7 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Administrateurs</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::where('role', 'admin')->count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $adminUsers }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user-shield fa-2x text-gray-300"></i>
@@ -83,7 +83,7 @@
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 Utilisateurs Inactifs</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ \App\Models\User::where('status', 'inactive')->count() }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $inactiveUsers }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user-times fa-2x text-gray-300"></i>
@@ -212,7 +212,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach(\App\Models\User::orderBy('created_at', 'desc')->limit(10)->get() as $user)
+                                @foreach($recentUsers as $user)
                                 <tr>
                                     <td>{{ $user->id }}</td>
                                     <td>{{ $user->name }}</td>

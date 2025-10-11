@@ -21,7 +21,7 @@ class UserDashboardController extends Controller
         // Statistics
         $myBooksCount = Book::where('user_id', $user->id)->count();
         $totalBooksCount = Book::count();
-        $availableBooksCount = Book::where('status', 'AVAILABLE')->count();
+        $availableBooksCount = Book::where('status', 'available')->count();
 
         // Recent user books
         $recentMyBooks = Book::where('user_id', $user->id)
@@ -32,7 +32,7 @@ class UserDashboardController extends Controller
 
         // Available books with filters
         $booksQuery = Book::where('user_id', '!=', $user->id)
-            ->where('status', 'AVAILABLE')
+            ->where('status', 'available')
             ->with(['user', 'category', 'reviews']);
 
         // Apply filters

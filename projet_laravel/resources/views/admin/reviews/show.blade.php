@@ -177,8 +177,8 @@
                         </span><br>
                     @endif
                     <strong>Statut:</strong> 
-                    <span class="badge badge-{{ $review->book->status == 'AVAILABLE' ? 'success' : 'warning' }}">
-                        {{ $review->book->status }}
+                    <span class="badge badge-{{ $review->book->status == 'available' ? 'success' : 'warning' }}">
+                        {{ $review->book->status == 'available' ? 'Disponible' : 'Réservé' }}
                     </span>
                 </p>
 

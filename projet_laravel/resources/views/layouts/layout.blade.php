@@ -96,6 +96,8 @@
             border-left: 4px solid #f6c23e !important;
         }
     </style>
+    
+    @stack('styles')
 </head>
 <body id="page-top">
     <div id="wrapper">
