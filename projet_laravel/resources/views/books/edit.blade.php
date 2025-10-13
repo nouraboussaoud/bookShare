@@ -63,7 +63,7 @@
                         @endif
                         <input type="file" name="photo" class="form-control @error('photo') is-invalid @enderror" accept="image/*">
                         @error('photo')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <small class="form-text text-muted">Formats acceptés: JPEG, PNG, JPG, GIF. Taille max: 2MB. Laissez vide pour conserver l'image actuelle.</small>
+                        <small class="form-text text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WebP. Taille max: 2MB. Laissez vide pour conserver l'image actuelle.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description</label>

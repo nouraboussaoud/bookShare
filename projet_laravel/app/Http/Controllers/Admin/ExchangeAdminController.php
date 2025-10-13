@@ -42,7 +42,7 @@ class ExchangeAdminController extends Controller
         // Base validation rules
         $rules = [
             'type' => 'required|string|in:RESERVATION,PRET,ECHANGE',
-            'status' => 'required|string|in:EN_ATTENTE,EN_COURS,TERMINE,ANNULE',
+            'status' => 'required|string|in:EN_ATTENTE,APPROUVE,REFUSE,EN_COURS,TERMINE,ANNULE',
             'dateDebut' => 'required|date',
             'dateFin' => 'required|date|after:dateDebut',
             'userInitiateurId' => 'required|exists:users,id',
@@ -56,6 +56,14 @@ class ExchangeAdminController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        // Convert datetime to date format if needed
+        if (isset($validated['dateDebut'])) {
+            $validated['dateDebut'] = date('Y-m-d', strtotime($validated['dateDebut']));
+        }
+        if (isset($validated['dateFin'])) {
+            $validated['dateFin'] = date('Y-m-d', strtotime($validated['dateFin']));
+        }
 
         $exchangeData = [
             'type' => $validated['type'],
@@ -91,14 +99,24 @@ class ExchangeAdminController extends Controller
     public function update(Request $request, Exchange $exchange)
     {
         $validated = $request->validate([
-            'type' => 'required|string',
-            'status' => 'required|string',
+            'type' => 'required|string|in:RESERVATION,ECHANGE,PRET',
+            'status' => 'required|string|in:EN_ATTENTE,APPROUVE,REFUSE,EN_COURS,TERMINE,ANNULE',
             'dateDebut' => 'required|date',
-            'dateFin' => 'required|date',
+            'dateFin' => 'required|date|after:dateDebut',
             'userInitiateurId' => 'required|exists:users,id',
             'userRecepteurId' => 'nullable|exists:users,id',
-            'bookDemandeId' => 'nullable|exists:books,id',
+            'bookDemandeId' => 'required|exists:books,id',
+            'bookOffertId' => 'nullable|exists:books,id',
+            'admin_note' => 'nullable|string|max:1000',
         ]);
+
+        // Convert datetime to date format if needed
+        if (isset($validated['dateDebut'])) {
+            $validated['dateDebut'] = date('Y-m-d', strtotime($validated['dateDebut']));
+        }
+        if (isset($validated['dateFin'])) {
+            $validated['dateFin'] = date('Y-m-d', strtotime($validated['dateFin']));
+        }
 
         $exchange->update($validated);
 

@@ -215,11 +215,19 @@ class ExchangeController extends Controller
         }
 
         $validated = $request->validate([
-            'type' => 'required|string',
-            'status' => 'required|string',
+            'type' => 'required|string|in:RESERVATION,ECHANGE,PRET',
+            'status' => 'required|string|in:EN_ATTENTE,APPROUVE,REFUSE,EN_COURS,TERMINE,ANNULE',
             'dateDebut' => 'required|date',
-            'dateFin' => 'required|date',
+            'dateFin' => 'required|date|after:dateDebut',
         ]);
+
+        // Convert datetime to date format if needed
+        if (isset($validated['dateDebut'])) {
+            $validated['dateDebut'] = date('Y-m-d', strtotime($validated['dateDebut']));
+        }
+        if (isset($validated['dateFin'])) {
+            $validated['dateFin'] = date('Y-m-d', strtotime($validated['dateFin']));
+        }
 
         $oldStatus = $exchange->status;
         $exchange->update($validated);

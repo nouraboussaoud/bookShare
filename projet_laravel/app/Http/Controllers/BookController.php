@@ -56,7 +56,7 @@ class BookController extends Controller
             'status' => ['required', 'in:available,reserved'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'recommended_age' => ['required', 'integer', 'min:0', 'max:18'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -88,7 +88,7 @@ class BookController extends Controller
             'status' => ['required', 'in:available,reserved'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'recommended_age' => ['required', 'integer', 'min:0', 'max:18'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
 
