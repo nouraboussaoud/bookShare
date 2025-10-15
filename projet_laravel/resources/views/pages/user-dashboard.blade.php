@@ -44,7 +44,7 @@
                         </select>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-sm px-4">
+                    <button type="submit" class="btn btn-purple btn-sm px-4">
                         <i class="fas fa-filter me-1"></i> Filtrer
                     </button>
                     
@@ -130,56 +130,65 @@
     </div>
 
 
-    <!-- Statistics Cards Row -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card stat-card-primary">
-                <div class="stat-icon">
+    <!-- News Ticker Bar -->
+    <div class="news-ticker-wrapper mb-4">
+        <div class="news-ticker-container">
+            <div class="news-ticker-content">
+                <div class="ticker-item">
                     <i class="fas fa-book"></i>
+                    <span class="ticker-label">MES LIVRES</span>
+                    <span class="ticker-value">{{ $myBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Total</span>
                 </div>
-                <div class="stat-content">
-                    <p class="stat-label">Mes Livres</p>
-                    <h3 class="stat-value">{{ $myBooksCount ?? 0 }}</h3>
-                    <span class="stat-badge">Total</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card stat-card-success">
-                <div class="stat-icon">
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
                     <i class="fas fa-book-open"></i>
+                    <span class="ticker-label">DISPONIBLES</span>
+                    <span class="ticker-value">{{ $availableBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Dans la communauté</span>
                 </div>
-                <div class="stat-content">
-                    <p class="stat-label">Disponibles</p>
-                    <h3 class="stat-value">{{ $availableBooksCount ?? 0 }}</h3>
-                    <span class="stat-badge">Dans la communauté</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card stat-card-info">
-                <div class="stat-icon">
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
                     <i class="fas fa-exchange-alt"></i>
+                    <span class="ticker-label">ÉCHANGES</span>
+                    <span class="ticker-value">{{ $totalBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Total</span>
                 </div>
-                <div class="stat-content">
-                    <p class="stat-label">Échanges</p>
-                    <h3 class="stat-value">{{ $totalBooksCount ?? 0 }}</h3>
-                    <span class="stat-badge">Total</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="stat-card stat-card-warning">
-                <div class="stat-icon">
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
                     <i class="fas fa-users"></i>
+                    <span class="ticker-label">COMMUNAUTÉ</span>
+                    <span class="ticker-value">{{ $totalBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Membres actifs</span>
                 </div>
-                <div class="stat-content">
-                    <p class="stat-label">Communauté</p>
-                    <h3 class="stat-value">{{ $totalBooksCount ?? 0 }}</h3>
-                    <span class="stat-badge">Membres actifs</span>
+                <!-- Duplicate content for seamless loop -->
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
+                    <i class="fas fa-book"></i>
+                    <span class="ticker-label">MES LIVRES</span>
+                    <span class="ticker-value">{{ $myBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Total</span>
+                </div>
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
+                    <i class="fas fa-book-open"></i>
+                    <span class="ticker-label">DISPONIBLES</span>
+                    <span class="ticker-value">{{ $availableBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Dans la communauté</span>
+                </div>
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="ticker-label">ÉCHANGES</span>
+                    <span class="ticker-value">{{ $totalBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Total</span>
+                </div>
+                <div class="ticker-separator">•</div>
+                <div class="ticker-item">
+                    <i class="fas fa-users"></i>
+                    <span class="ticker-label">COMMUNAUTÉ</span>
+                    <span class="ticker-value">{{ $totalBooksCount ?? 0 }}</span>
+                    <span class="ticker-badge">Membres actifs</span>
                 </div>
             </div>
         </div>
@@ -236,9 +245,9 @@
                 <div class="card-header-modern">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="section-title mb-0">
-                            <i class="fas fa-book-open me-2 text-primary"></i>Mes Livres Récents
+                            <i class="fas fa-book-open me-2 text-purple"></i>Mes Livres Récents
                         </h5>
-                        <a href="{{ route('books.index') }}" class="btn btn-sm btn-outline-primary btn-modern">
+                        <a href="{{ route('books.index') }}" class="btn btn-sm btn-outline-purple btn-modern">
                             Voir tout <i class="fas fa-arrow-right ms-1"></i>
                         </a>
                     </div>
@@ -297,7 +306,7 @@
                             <i class="fas fa-book fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">Aucun livre pour le moment</h5>
                             <p class="text-muted">Commencez par ajouter votre premier livre à votre bibliothèque.</p>
-                            <a href="{{ route('books.create') }}" class="btn btn-primary btn-modern mt-3">
+                            <a href="{{ route('books.create') }}" class="btn btn-purple btn-modern mt-3">
                                 <i class="fas fa-plus me-2"></i>Ajouter un livre
                             </a>
                         </div>
@@ -316,7 +325,7 @@
                 <div class="card-header-modern">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="section-title mb-0">
-                            <i class="fas fa-globe me-2 text-success"></i>Livres Disponibles dans la Communauté
+                            <i class="fas fa-globe me-2 text-purple"></i>Livres Disponibles dans la Communauté
                         </h5>
                         @if(($categoryId ?? false) || ($ageFilter ?? false) || ($search ?? false))
                             <a href="{{ route('user.dashboard') }}" class="btn btn-sm btn-outline-secondary btn-modern">
@@ -355,21 +364,21 @@
                                         </div>
                                         <p class="card-text text-muted mb-2">par {{ $book->author }}</p>
                                         <p class="card-text">
-                                            <small class="text-info">
+                                            <small class="text-purple">
                                                 <i class="fas fa-user"></i> {{ $book->user->name }}
                                             </small>
                                         </p>
                                         <div class="mb-3">
-                                            <span class="badge badge-info">{{ $book->age_display ?? 'Tous âges' }}</span>
+                                            <span class="badge badge-purple">{{ $book->age_display ?? 'Tous âges' }}</span>
                                             @if(isset($book->review) && $book->review)
-                                                <span class="badge badge-warning">
+                                                <span class="badge badge-purple">
                                                     <i class="fas fa-star"></i> {{ $book->review->rating }}/5
                                                 </span>
                                             @endif
                                         </div>
                                         <div class="btn-group btn-group-sm w-100" role="group">
                                             <a href="{{ route('books.show', $book) }}" 
-                                               class="btn btn-outline-info" title="Voir détails">
+                                               class="btn btn-outline-purple" title="Voir détails">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             @if(isset($book->reviews))
@@ -378,12 +387,12 @@
                                                 @endphp
                                                 @if(!$userReview)
                                                     <a href="{{ route('reviews.create', ['book_id' => $book->id]) }}" 
-                                                       class="btn btn-outline-primary" title="Donner un avis">
+                                                       class="btn btn-outline-purple" title="Donner un avis">
                                                         <i class="fas fa-star"></i>
                                                     </a>
                                                 @else
                                                     <a href="{{ route('reviews.edit', $userReview) }}" 
-                                                       class="btn btn-outline-warning" title="Modifier mon avis">
+                                                       class="btn btn-outline-purple" title="Modifier mon avis">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endif
@@ -413,6 +422,64 @@
         </div>
     </div>
     @endif
+
+    <!-- Footer -->
+    <footer class="bookshare-footer mt-5">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="footer-title">
+                        <i class="fas fa-book-open me-2"></i>BookShare
+                    </h5>
+                    <p class="footer-text">
+                        Partagez vos livres, découvrez de nouvelles lectures et échangez avec une communauté passionnée de lecteurs.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h6 class="footer-subtitle">Navigation</h6>
+                    <ul class="footer-links">
+                        <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ route('books.index') }}">Livres</a></li>
+                        <li><a href="{{ route('locations.marketplace') }}">Marketplace</a></li>
+                        <li><a href="{{ route('exchanges.index') }}">Échanges</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="footer-subtitle">Ressources</h6>
+                    <ul class="footer-links">
+                        <li><a href="#">À propos</a></li>
+                        <li><a href="#">Aide & Support</a></li>
+                        <li><a href="#">Conditions d'utilisation</a></li>
+                        <li><a href="#">Politique de confidentialité</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="footer-subtitle">Contact</h6>
+                    <ul class="footer-contact">
+                        <li><i class="fas fa-envelope me-2"></i>contact@bookshare.com</li>
+                        <li><i class="fas fa-phone me-2"></i>+33 1 23 45 67 89</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>Paris, France</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <p class="mb-0">&copy; {{ date('Y') }} BookShare. Tous droits réservés.</p>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <p class="mb-0">Fait avec <i class="fas fa-heart text-danger"></i> pour les amoureux des livres</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
 @endsection
 
@@ -915,82 +982,103 @@
         font-size: 0.9375rem;
     }
     
-    /* Statistics Cards */
-    .stat-card {
-        background: white;
-        border-radius: 16px;
-        padding: 1.5rem;
-        border: 1px solid #f1f5f9;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
+    /* News Ticker Bar */
+    .news-ticker-wrapper {
+        width: 100%;
         overflow: hidden;
+        position: relative;
+        z-index: 1;
     }
     
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: currentColor;
-        opacity: 0;
-        transition: opacity 0.3s ease;
+    .news-ticker-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem 0;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
     }
     
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-    }
-    
-    .stat-card:hover::before {
-        opacity: 1;
-    }
-    
-    .stat-card-primary { color: #3b82f6; }
-    .stat-card-success { color: #10b981; }
-    .stat-card-info { color: #06b6d4; }
-    .stat-card-warning { color: #f59e0b; }
-    
-    .stat-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 0px;
+    .news-ticker-content {
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        background: currentColor;
+        gap: 2rem;
+        animation: ticker-scroll 30s linear infinite;
+        white-space: nowrap;
+    }
+    
+    @keyframes ticker-scroll {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+    
+    .news-ticker-content:hover {
+        animation-play-state: paused;
+    }
+    
+    .ticker-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
         color: white;
+        padding: 0.5rem 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .ticker-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+    
+    .ticker-item i {
+        font-size: 1.25rem;
         opacity: 0.9;
     }
     
-    .stat-label {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        background: #f1f5f9;
-        color: #64748b;
-        border-radius: 0px;
+    .ticker-label {
         font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        opacity: 0.9;
+    }
+    
+    .ticker-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0.25rem;
+    }
+    
+    .ticker-badge {
+        font-size: 0.7rem;
+        opacity: 0.8;
         font-weight: 500;
+    }
+    
+    .ticker-separator {
+        color: white;
+        font-size: 1.5rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .news-ticker-content {
+            animation-duration: 20s;
+        }
+        
+        .ticker-item {
+            padding: 0.4rem 1rem;
+            gap: 0.5rem;
+        }
+        
+        .ticker-value {
+            font-size: 1.25rem;
+        }
     }
     
     /* Action Card */
@@ -1089,6 +1177,51 @@
         font-size: 1.125rem;
         font-weight: 600;
         color: #1e293b;
+    }
+    
+    /* Purple Text Color */
+    .text-purple {
+        color: #667eea !important;
+    }
+    
+    /* Purple Outline Button */
+    .btn-outline-purple {
+        color: #667eea;
+        border-color: #667eea;
+        background: transparent;
+    }
+    
+    .btn-outline-purple:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Purple Badge */
+    .badge-purple {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.35rem 0.65rem;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+    
+    /* Purple Button */
+    .btn-purple {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-purple:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
     
     /* Book Card Modern */
@@ -1225,6 +1358,150 @@
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
     }
     
+    /* Pagination Violet Style */
+    .pagination {
+        gap: 0.5rem;
+    }
+    
+    .pagination .page-link {
+        color: #667eea;
+        background-color: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 0.875rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin: 0 0.25rem;
+    }
+    
+    .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .pagination .page-item.disabled .page-link {
+        color: #cbd5e1;
+        background-color: #f8f9fc;
+        border-color: #e2e8f0;
+    }
+    
+    /* Footer Styles */
+    .bookshare-footer {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0 1rem;
+        margin-top: 4rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .footer-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: white;
+    }
+    
+    .footer-subtitle {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .footer-text {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .footer-social {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .social-link {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .social-link:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+        color: white;
+    }
+    
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .footer-links li {
+        margin-bottom: 0.75rem;
+    }
+    
+    .footer-links a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    
+    .footer-links a:hover {
+        color: white;
+        transform: translateX(5px);
+    }
+    
+    .footer-contact {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .footer-contact li {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .footer-contact i {
+        opacity: 0.8;
+    }
+    
+    .footer-bottom {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .footer-bottom p {
+        font-size: 0.875rem;
+    }
+    
     /* Responsive Design */
     @media (max-width: 768px) {
         .dashboard-title {
@@ -1237,6 +1514,14 @@
         
         .book-image-wrapper {
             height: 180px;
+        }
+        
+        .bookshare-footer {
+            padding: 2rem 0 1rem;
+        }
+        
+        .footer-title {
+            font-size: 1.25rem;
         }
     }
 </style>
