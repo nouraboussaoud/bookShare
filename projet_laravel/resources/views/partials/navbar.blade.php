@@ -1,105 +1,54 @@
-<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-    <!-- Sidebar Toggle (Topbar) -->
-    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-        <i class="fa fa-bars"></i>
-    </button>
+<nav class="navbar navbar-expand-lg navbar-light navbar-min shadow-sm mb-4">
+    <div class="container-fluid">
+        <!-- Sidebar Toggle (Mobile) -->
+        <button id="sidebarToggleTop" class="btn btn-link d-md-none me-3">
+            <i class="fa fa-bars"></i>
+        </button>
 
-    <!-- Topbar Search -->
-    <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-        <div class="input-group">
-            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                aria-label="Search" aria-describedby="basic-addon2">
-            <div class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                    <i class="fas fa-search fa-sm"></i>
+        <!-- Logo BookShare -->
+        <a class="navbar-brand d-flex align-items-center d-none d-lg-block" href="{{ route('dashboard') }}" style="font-weight:600; letter-spacing:.3px;">
+            <i class="fas fa-book-open me-2" style="color: var(--accent-strong);"></i>
+            BookShare
+        </a>
+
+        <!-- Menu Navigation -->
+        <ul class="navbar-nav me-auto mb-0 d-none d-lg-flex">
+            @auth
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('books.*') ? 'active' : '' }}" href="{{ route('books.index') }}">Livres</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.marketplace') ? 'active' : '' }}" href="{{ route('locations.marketplace') }}">Marketplace</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}">Locations</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('exchanges.*') ? 'active' : '' }}" href="{{ route('exchanges.index') }}">Échanges</a></li>
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}" href="{{ route('reviews.index') }}">Avis</a></li>
+            @endauth
+        </ul>
+
+        <!-- Recherche -->
+        @auth
+        <form class="d-none d-lg-flex me-lg-3" method="GET" action="{{ route('user.dashboard') }}">
+            <div class="input-group">
+                <input class="form-control border-0" name="search" type="search" placeholder="Rechercher un livre..." value="{{ request('search') }}" style="background:#f1f5f9; border-radius: 24px 0 0 24px;">
+                <button class="btn btn-primary" type="submit" style="border-radius: 0 24px 24px 0;">
+                    <i class="fas fa-search"></i>
                 </button>
             </div>
-        </div>
-    </form>
+        </form>
+        @endauth
 
-    <!-- Topbar Navbar -->
-    <ul class="navbar-nav ml-auto">
-        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-        <li class="nav-item dropdown no-arrow d-sm-none">
-            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-search fa-fw"></i>
-            </a>
-            <!-- Dropdown - Messages -->
-            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                aria-labelledby="searchDropdown">
-                <form class="form-inline mr-auto w-100 navbar-search">
-                    <div class="input-group">
-                        <input type="text" class="form-control bg-light border-0 small"
-                            placeholder="Search for..." aria-label="Search"
-                            aria-describedby="basic-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="button">
-                                <i class="fas fa-search fa-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </li>
-
-        <!-- Nav Item - Reports (Admin Only) -->
-        @if(Auth::user()->isAdmin())
-        <li class="nav-item dropdown no-arrow mx-1">
-            <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-flag fa-fw"></i>
-                <!-- Counter - Pending Reports -->
-                @php $pendingReports = \App\Models\Report::pending()->count(); @endphp
-                @if($pendingReports > 0)
-                    <span class="badge badge-danger badge-counter">{{ $pendingReports }}</span>
-                @endif
-            </a>
-            <!-- Dropdown - Reports -->
-            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                aria-labelledby="reportsDropdown">
-                <h6 class="dropdown-header">
-                    <i class="fas fa-flag mr-2"></i>Signalements en attente
-                </h6>
-                @php $recentReports = \App\Models\Report::with(['reporter', 'reportedUser'])->pending()->latest()->limit(5)->get(); @endphp
-                @forelse($recentReports as $report)
-                    <a class="dropdown-item d-flex align-items-center" href="{{ route('admin.reports.show', $report) }}">
-                        <div class="mr-3">
-                            <div class="icon-circle bg-warning">
-                                <i class="fas fa-flag text-white"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="small text-gray-500">{{ $report->created_at->diffForHumans() }}</div>
-                            <span class="font-weight-bold">{{ $report->type === 'COMPORTEMENT' ? 'Comportement' : 'Conflit d\'échange' }}</span>
-                            <div class="small text-gray-500">Par: {{ $report->reporter->name }}</div>
-                        </div>
-                    </a>
-                @empty
-                    <div class="text-center py-3 text-gray-500">
-                        <i class="fas fa-check-circle"></i> Aucun signalement en attente
-                    </div>
-                @endforelse
-                <a class="dropdown-item text-center small text-gray-500" href="{{ route('admin.reports.index') }}">
-                    <i class="fas fa-eye mr-1"></i>Voir tous les signalements
-                </a>
-            </div>
-        </li>
-        @endif
-
-        <!-- Nav Item - Notifications -->
+        <!-- Notifications & User -->
+        <ul class="navbar-nav mb-0">
+        @auth
+        <!-- Notifications -->
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
-                <!-- Counter - Notifications -->
                 <span class="badge badge-danger badge-counter" id="notification-counter" style="display: none;">0</span>
             </a>
-            <!-- Dropdown - Notifications -->
-            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
                 aria-labelledby="notificationsDropdown">
                 <h6 class="dropdown-header">
-                    <i class="fas fa-bell mr-2"></i>Centre de Notifications
+                    <i class="fas fa-bell me-2"></i>Notifications
                 </h6>
                 <div id="notifications-list">
                     <div class="dropdown-item text-center">
@@ -107,130 +56,41 @@
                     </div>
                 </div>
                 <a class="dropdown-item text-center small text-gray-500" href="{{ route('notifications.index') }}">
-                    <i class="fas fa-eye mr-1"></i>Voir toutes les notifications
+                    <i class="fas fa-eye me-1"></i>Voir toutes
                 </a>
             </div>
         </li>
 
-        <!-- Nav Item - Messages -->
-        <li class="nav-item dropdown no-arrow mx-1">
-            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-envelope fa-fw"></i>
-                <!-- Counter - Messages -->
-                <span class="badge badge-danger badge-counter">7</span>
+        <!-- User Menu -->
+        <li class="nav-item dropdown no-arrow">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}
             </a>
-            <!-- Dropdown - Messages -->
-            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                aria-labelledby="messagesDropdown">
-                <h6 class="dropdown-header">
-                    Message Center
-                </h6>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="dropdown-list-image mr-3">
-                        <i class="fas fa-user-circle fa-2x text-success"></i>
-                        <div class="status-indicator bg-success"></div>
-                    </div>
-                    <div class="font-weight-bold">
-                        <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                            problem I've been having.</div>
-                        <div class="small text-gray-500">Emily Fowler · 58m</div>
-                    </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="dropdown-list-image mr-3">
-                        <i class="fas fa-user-circle fa-2x text-primary"></i>
-                        <div class="status-indicator"></div>
-                    </div>
-                    <div>
-                        <div class="text-truncate">I have the photos that you ordered last month, how
-                            would you like them sent to you?</div>
-                        <div class="small text-gray-500">Jae Chun · 1d</div>
-                    </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="dropdown-list-image mr-3">
-                        <i class="fas fa-user-circle fa-2x text-warning"></i>
-                        <div class="status-indicator bg-warning"></div>
-                    </div>
-                    <div>
-                        <div class="text-truncate">Last month's report looks great, I am very happy with
-                            the progress so far, keep up the good work!</div>
-                        <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                    </div>
-                </a>
-                <a class="dropdown-item d-flex align-items-center" href="#">
-                    <div class="dropdown-list-image mr-3">
-                        <i class="fas fa-user-circle fa-2x text-success"></i>
-                        <div class="status-indicator bg-success"></div>
-                    </div>
-                    <div>
-                        <div class="text-truncate">Am I a good boy? The reason I ask is because someone
-                            told me that people say this to all dogs, even if they aren't good...</div>
-                        <div class="small text-gray-500">Chicken the Dog · 2w</div>
-                    </div>
-                </a>
-                <a class="dropdown-item text-center small text-gray-500" href="#">Read More Messages</a>
+            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
+                aria-labelledby="userDropdown">
+                @if (Route::has('profile.edit'))
+                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                        <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
+                        Profil
+                    </a>
+                @endif
+                <div class="dropdown-divider"></div>
+                <form method="POST" action="{{ route('logout') }}" style="display: inline; width: 100%;">
+                    @csrf
+                    <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                        <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
+                        Déconnexion
+                    </button>
+                </form>
             </div>
         </li>
-
-        <div class="topbar-divider d-none d-sm-block"></div>
-
-        @auth
-            <!-- Nav Item - User Information -->
-            <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
-                    <i class="fas fa-user-circle fa-2x text-gray-600"></i>
-                </a>
-                <!-- Dropdown - User Information -->
-                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                    aria-labelledby="userDropdown">
-                    @if (Route::has('profile.edit'))
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Profil
-                        </a>
-                    @endif
-                    <a class="dropdown-item" href="{{ route('reports.index') }}">
-                        <i class="fas fa-flag fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Mes Signalements
-                    </a>
-                    <a class="dropdown-item" href="#">
-                        <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Paramètres
-                    </a>
-                    <a class="dropdown-item" href="#">
-                        <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Activité
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline; width: 100%;">
-                        @csrf
-                        <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
-                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Déconnexion
-                        </button>
-                    </form>
-                </div>
-            </li>
         @else
-            <!-- Nav Items - Guest User -->
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('login') }}">
-                    <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
-                    <span>Connexion</span>
-                </a>
-            </li>
-            @if (Route::has('register'))
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('register') }}">
-                        <i class="fas fa-user-plus fa-sm fa-fw mr-2"></i>
-                        <span>Inscription</span>
-                    </a>
-                </li>
-            @endif
+        <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Connexion</a></li>
+        @if (Route::has('register'))
+        <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Inscription</a></li>
+        @endif
         @endauth
-    </ul>
+        </ul>
+    </div>
 </nav>

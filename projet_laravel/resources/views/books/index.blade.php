@@ -6,32 +6,71 @@
 @php
     $isAdmin = auth()->check() ? auth()->user()->isAdmin() : false;
     $isOthers = isset($scope) && $scope == 'others';
+    $myBooksCount = auth()->check() ? \App\Models\Book::where('user_id', auth()->id())->count() : 0;
+    $totalBooks = \App\Models\Book::count();
+    $availableBooks = \App\Models\Book::where('status', 'available')->count();
+    $reservedBooks = \App\Models\Book::where('status', 'reserved')->count();
 @endphp
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 text-gray-800 mb-2">
-            @auth
-                @if($isAdmin)
-                    {{ $isOthers ? 'Livres de la communauté' : 'Tous les livres' }}
-                @else
-                    {{ $isOthers ? 'Livres de la communauté' : 'Mes livres' }}
-                @endif
-            @endauth
-        </h1>
-        @auth
-            <div class="btn-group" role="group">
-                @if(!$isAdmin)
-                    <a href="{{ route('books.index') }}" class="btn btn-sm {{ $isOthers ? 'btn-outline-secondary' : 'btn-secondary' }}">Mes livres</a>
-                @endif
-                <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-sm {{ $isOthers ? 'btn-secondary' : 'btn-outline-secondary' }}">Livres de la communauté</a>
-                @if($isAdmin)
-                    <a href="{{ route('books.index') }}" class="btn btn-sm btn-outline-secondary">Tous</a>
-                @endif
+<!-- Header "Welcome to ShareBooks" -->
+<div class="mb-5">
+    <h1 class="text-center mb-4" style="font-family: 'Georgia', serif; font-size: 2.5rem; font-weight: 400; color: #2c3e50;">
+        welcome to sharebooks
+    </h1>
+    
+    <div class="card smooth" style="overflow: hidden; border-radius: 16px;">
+        <div class="row g-0">
+            <!-- Image à gauche -->
+            <div class="col-md-5 d-none d-md-block" style="background: #f5f5f5; position: relative; min-height: 300px;">
+                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=400&fit=crop" 
+                     alt="Open book" 
+                     style="width: 100%; height: 100%; object-fit: cover;">
             </div>
-        @endauth
+            
+            <!-- Statistiques à droite -->
+            <div class="col-md-7" style="background: #f8f9fa;">
+                <div class="p-4 p-md-5">
+                    <!-- Statistiques compactes -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="p-3 bg-white rounded shadow-sm text-center">
+                                <div class="text-uppercase text-muted small mb-1" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Mes Livres</div>
+                                <div class="h3 mb-0 fw-bold" style="color: #5aa6ff;">
+                                    <i class="fas fa-book me-2" style="font-size: 1.2rem;"></i>{{ $myBooksCount }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-white rounded shadow-sm text-center">
+                                <div class="text-uppercase text-muted small mb-1" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Total Livres</div>
+                                <div class="h3 mb-0 fw-bold" style="color: #10b981;">
+                                    <i class="fas fa-books me-2" style="font-size: 1.2rem;"></i>{{ $totalBooks }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{{ route('books.create') }}" class="btn btn-primary btn-lg" style="border-radius: 50px; padding: 0.75rem 2rem; font-weight: 500;">
+                            <i class="fas fa-plus me-2"></i>Ajouter un livre
+                        </a>
+                        @auth
+                            @if(!$isAdmin && !$isOthers)
+                            <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-outline-primary btn-lg" style="border-radius: 50px; padding: 0.75rem 2rem; font-weight: 500;">
+                                <i class="fas fa-users me-2"></i>Mes Livres
+                            </a>
+                            @elseif($isOthers)
+                            <a href="{{ route('books.index') }}" class="btn btn-outline-primary btn-lg" style="border-radius: 50px; padding: 0.75rem 2rem; font-weight: 500;">
+                                <i class="fas fa-book me-2"></i>Mes livres
+                            </a>
+                            @endif
+                        @endauth
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <a href="{{ route('books.create') }}" class="btn btn-primary"><i class="fas fa-plus mr-1"></i> Ajouter un livre</a>
 </div>
 
 @if(session('success'))

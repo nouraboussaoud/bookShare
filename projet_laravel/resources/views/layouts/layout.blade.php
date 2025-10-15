@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="BookShare">
     <meta name="author" content="">
 
     <title>
         @hasSection('title')
             @yield('title')
         @else
-            SB Admin 2
+            BookShare
         @endif
     </title>
 
@@ -23,113 +23,142 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Custom Styles -->
     <style>
-        .card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        :root {
+            --bg: #f7f8fb;            /* blanc cassé */
+            --card: #ffffff;          /* cartes */
+            --accent: #a5c7f9;        /* bleu clair */
+            --accent-strong: #5aa6ff; /* bleu accent */
+            --success: #8bd3a3;       /* vert statuts */
+            --text: #1f2937;          /* gris foncé */
+            --muted: #6b7280;         /* gris moyen */
         }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12) !important;
+        
+        html, body {
+            font-family: 'Poppins', 'Inter', 'Open Sans', 'Nunito', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
         }
-        .card-img-top {
-            transition: transform 0.3s ease;
+        
+        .navbar-min {
+            backdrop-filter: saturate(180%) blur(8px);
+            background: rgba(255, 255, 255, 0.92) !important;
+            border-bottom: 1px solid #eef2f7;
         }
-        .card:hover .card-img-top {
-            transform: scale(1.02);
+        
+        .card.smooth {
+            background: var(--card);
+            border: 1px solid #eef2f7;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
         }
-        .btn-group .btn {
-            border-radius: 0;
+        
+        .btn-primary {
+            background: var(--accent-strong);
+            border-color: var(--accent-strong);
         }
-        .btn-group .btn:first-child {
-            border-top-left-radius: 0.25rem;
-            border-bottom-left-radius: 0.25rem;
+        .btn-outline-primary:hover {
+            background: var(--accent-strong);
+            border-color: var(--accent-strong);
+            color: #fff;
         }
-        .btn-group .btn:last-child {
-            border-top-right-radius: 0.25rem;
-            border-bottom-right-radius: 0.25rem;
+        .badge-soft {
+            background: #eef2ff;
+            color: #3b82f6;
+            border-radius: 10px;
+            padding: 0.35rem 0.6rem;
+            font-weight: 500;
         }
-        .badge {
-            font-size: 0.75em;
+        a:hover { text-decoration: none; }
+        
+        /* Ajustement pour la navbar fixe */
+        #wrapper {
+            margin-top: 0;
         }
-        .card-title a {
-            color: #2c3e50;
-            text-decoration: none;
-        }
-        .card-title a:hover {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .book-card {
-            overflow: hidden;
-        }
-        .book-card .card-img-top {
-            border-radius: 0.25rem 0.25rem 0 0;
-        }
-        .book-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-        }
-        .btn-group-sm .btn {
-            font-size: 0.8rem;
-            padding: 0.25rem 0.5rem;
-        }
-        .card-img-top {
-            object-fit: cover;
-            width: 100%;
-        }
-        .bg-gradient-primary {
-            background: linear-gradient(45deg, #4e73df, #224abe);
-        }
-        .text-shadow {
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        .border-left-primary {
-            border-left: 4px solid #4e73df !important;
-        }
-        .border-left-success {
-            border-left: 4px solid #1cc88a !important;
-        }
-        .border-left-warning {
-            border-left: 4px solid #f6c23e !important;
+        
+        .sidebar {
+            top: 0;
+            height: 100vh;
         }
     </style>
-    
+
     @stack('styles')
 </head>
 <body id="page-top">
-    <div id="wrapper">
-        @auth
-            <!-- Sidebar -->
-            @include('partials.aside')
-        @endauth
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column"@guest style="margin-left: 0;"@endguest>
-            <!-- Main Content -->
-            <div id="content">
-                <!-- Topbar -->
-                @include('partials.navbar')
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
-                    @yield('content')
-                </div>
-                <!-- /.container-fluid -->
+    <!-- Navbar moderne en haut -->
+    @auth
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm mb-0" style="background: rgba(255, 255, 255, 0.95); border-bottom: 1px solid #eef2f7; position: sticky; top: 0; z-index: 1030;">
+        <div class="container-fluid">
+            <!-- Logo BookShare -->
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}" style="font-weight:600; letter-spacing:.3px;">
+                <i class="fas fa-book-open me-2" style="color: var(--accent-strong);"></i>
+                BookShare
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-0">
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('books.*') ? 'active' : '' }}" href="{{ route('books.index') }}">Livres</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.marketplace') ? 'active' : '' }}" href="{{ route('locations.marketplace') }}">Marketplace</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}">Locations</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('exchanges.*') ? 'active' : '' }}" href="{{ route('exchanges.index') }}">Échanges</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}" href="{{ route('reviews.index') }}">Avis</a></li>
+                </ul>
+
+                <!-- Recherche -->
+                <form class="d-flex me-3" method="GET" action="{{ route('user.dashboard') }}">
+                    <div class="input-group">
+                        <input class="form-control border-0" name="search" type="search" placeholder="Rechercher un livre..." value="{{ request('search') }}" style="background:#f1f5f9; border-radius: 24px 0 0 24px;">
+                        <button class="btn btn-primary" type="submit" style="border-radius: 0 24px 24px 0;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- User Menu -->
+                <ul class="navbar-nav mb-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @if (Route::has('profile.edit'))
+                            <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user me-2"></i>Profil</a></li>
+                            @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
-            <!-- End of Main Content -->
-            <!-- Footer -->
-            @include('partials.footer')
         </div>
-        <!-- End of Content Wrapper -->
+    </nav>
+    @endauth
+    
+    <!-- Main Content (sans sidebar) -->
+    <div class="container-fluid py-4">
+        @yield('content')
     </div>
+    
+    @include('partials.footer')
     <!-- End of Page Wrapper -->
 
     <!-- Scroll to Top Button -->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
-
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -141,14 +170,19 @@
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
-    
+
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/fr.min.js"></script>
+    <script>moment.locale('fr');</script>
+
     <script>
         // Ensure logout buttons work properly
         $(document).ready(function() {
             // Handle logout form submission
             $('form[action*="logout"]').on('submit', function(e) {
                 console.log('Logout form submitted');
-                return true; // Allow form submission
+                return true;
             });
             
             // Handle dropdown toggle
@@ -261,14 +295,7 @@
             }
         }
     </script>
-    
-    <!-- Moment.js for time formatting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/fr.min.js"></script>
-    <script>
-        moment.locale('fr');
-    </script>
-    
+
     @stack('scripts')
     
     <!-- Report Modal -->
