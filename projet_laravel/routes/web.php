@@ -162,6 +162,9 @@ Route::middleware('auth')->prefix('api')->group(function () {
     // Routes pour la classification automatique des signalements
     Route::post('/classify-report', [\App\Http\Controllers\AIReportController::class, 'classifyReport'])->name('api.classify-report');
     Route::get('/test-ai-connection', [\App\Http\Controllers\AIReportController::class, 'testConnection'])->name('api.test-ai-connection');
+    
+    // Routes pour les recommandations intelligentes d'échanges
+    Route::get('/recommend-books/{book}', [\App\Http\Controllers\AIRecommendationController::class, 'recommendBooks'])->name('api.recommend-books');
 });
 
 // Route de test IA (sans auth pour le debug)

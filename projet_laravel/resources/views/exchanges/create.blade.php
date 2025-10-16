@@ -40,6 +40,15 @@
                         </div>
                     @endif
                     
+                    <!-- Message de recommandation IA -->
+                    @if(isset($selectedBook) || isset($yourBook))
+                        <div class="alert alert-info border-left-primary">
+                            <i class="fas fa-robot text-primary"></i>
+                            <strong>Recommandation IA détectée !</strong>
+                            Le formulaire a été pré-rempli selon la suggestion de notre intelligence artificielle.
+                        </div>
+                    @endif
+                    
                     <form action="{{ route('exchanges.store') }}" method="POST" novalidate>
                         @csrf
                         <div class="row">
@@ -48,9 +57,12 @@
                                     <label for="type" class="form-label font-weight-bold">Type d'échange</label>
                                     <select name="type" id="type" class="form-control @error('type') is-invalid @enderror" required>
                                         <option value="">Sélectionner un type</option>
-                                        <option value="RESERVATION" {{ old('type') == 'RESERVATION' ? 'selected' : '' }}>Réservation</option>
-                                        <option value="ECHANGE" {{ old('type') == 'ECHANGE' ? 'selected' : '' }}>Échange</option>
-                                        <option value="PRET" {{ old('type') == 'PRET' ? 'selected' : '' }}>Prêt</option>
+                                        @php
+                                            $defaultType = (isset($selectedBook) && isset($yourBook)) ? 'ECHANGE' : old('type');
+                                        @endphp
+                                        <option value="RESERVATION" {{ $defaultType == 'RESERVATION' ? 'selected' : '' }}>Réservation</option>
+                                        <option value="ECHANGE" {{ $defaultType == 'ECHANGE' ? 'selected' : '' }}>Échange</option>
+                                        <option value="PRET" {{ $defaultType == 'PRET' ? 'selected' : '' }}>Prêt</option>
                                     </select>
                                     @error('type')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -74,7 +86,10 @@
                                     <select name="bookDemandeId" id="bookDemandeId" class="form-control @error('bookDemandeId') is-invalid @enderror" required>
                                         <option value="">Sélectionner un livre</option>
                                         @foreach($books as $book)
-                                            <option value="{{ $book->id }}" {{ old('bookDemandeId') == $book->id ? 'selected' : '' }}>
+                                            @php
+                                                $isSelected = old('bookDemandeId') == $book->id || (isset($selectedBook) && $selectedBook->id == $book->id);
+                                            @endphp
+                                            <option value="{{ $book->id }}" {{ $isSelected ? 'selected' : '' }}>
                                                 {{ $book->title }} - Propriétaire: {{ $book->user->name }}
                                             </option>
                                         @endforeach
@@ -94,7 +109,10 @@
                                     <select name="bookOffertId" id="bookOffertId" class="form-control @error('bookOffertId') is-invalid @enderror">
                                         <option value="">Sélectionner un livre à offrir</option>
                                         @foreach($userBooks as $book)
-                                            <option value="{{ $book->id }}" {{ old('bookOffertId') == $book->id ? 'selected' : '' }}>
+                                            @php
+                                                $isSelected = old('bookOffertId') == $book->id || (isset($yourBook) && $yourBook->id == $book->id);
+                                            @endphp
+                                            <option value="{{ $book->id }}" {{ $isSelected ? 'selected' : '' }}>
                                                 {{ $book->title }}
                                             </option>
                                         @endforeach
@@ -326,6 +344,9 @@ $(document).ready(function() {
             $('#dateFin').attr('min', startDate);
         }
     });
+    
+    // Trigger initial form update based on preselected type (pour les recommandations IA)
+    updateFormBasedOnType($('#type').val());
 });
 </script>
 @endpush

@@ -43,7 +43,7 @@ class AIReportController extends Controller
                 'Content-Type' => 'application/json'
             ])->timeout(8)->post($modelUrl, [
                 'inputs' => $description,
-                'parameters' => [
+                'parameters' => [ 
                     'candidate_labels' => $candidateLabels
                 ]
             ]);
