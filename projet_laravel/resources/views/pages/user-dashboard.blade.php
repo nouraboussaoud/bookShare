@@ -316,8 +316,7 @@
         </div>
     </div>
 
-
-    <!-- Available Books -->
+    <!-- Available Books from Community -->
     @if(isset($availableBooks))
     <div class="row" id="livres-disponibles">
         <div class="col-12">
@@ -336,67 +335,49 @@
                 </div>
                 <div class="card-body p-4">
                     @if($availableBooks->count() > 0)
-                        <div class="row">
+                        <div class="row g-4">
                             @foreach($availableBooks as $book)
-                            <div class="col-lg-4 col-md-6 mb-4">
-                                <div class="card h-100 shadow-sm book-card">
-                                    @if($book->photo)
-                                        <img src="{{ $book->photo_url }}" class="card-img-top" alt="{{ $book->title }}" 
-                                             style="height: 200px; object-fit: cover;">
-                                    @else
-                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
-                                             style="height: 200px;">
-                                            <i class="fas fa-book fa-3x text-muted"></i>
-                                        </div>
-                                    @endif
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h6 class="card-title mb-0">
-                                                <a href="{{ route('books.show', $book) }}" class="text-decoration-none">
-                                                    {{ Str::limit($book->title, 25) }}
-                                                </a>
-                                            </h6>
-                                            @if($book->category)
-                                                <span class="badge" style="background-color: {{ $book->category->color }}; color: white;">
-                                                    {{ $book->category->name }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <p class="card-text text-muted mb-2">par {{ $book->author }}</p>
-                                        <p class="card-text">
-                                            <small class="text-purple">
-                                                <i class="fas fa-user"></i> {{ $book->user->name }}
-                                            </small>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="book-card-modern">
+                                    <!-- Image du livre -->
+                                    <div class="book-image-wrapper">
+                                        @if($book->photo)
+                                            <img src="{{ $book->photo_url }}" class="book-image" alt="{{ $book->title }}">
+                                        @else
+                                            <div class="book-image book-placeholder">
+                                                <i class="fas fa-book fa-3x"></i>
+                                            </div>
+                                        @endif
+                                        @if($book->category)
+                                        <span class="book-category-badge" style="background-color: {{ $book->category->color }};">
+                                            {{ $book->category->name }}
+                                        </span>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Contenu de la carte -->
+                                    <div class="book-card-content">
+                                        <h6 class="book-title">{{ Str::limit($book->title, 40) }}</h6>
+                                        <p class="book-author">
+                                            <i class="fas fa-user me-1"></i>{{ $book->author }}
                                         </p>
-                                        <div class="mb-3">
-                                            <span class="badge badge-purple">{{ $book->age_display ?? 'Tous âges' }}</span>
-                                            @if(isset($book->review) && $book->review)
-                                                <span class="badge badge-purple">
-                                                    <i class="fas fa-star"></i> {{ $book->review->rating }}/5
-                                                </span>
-                                            @endif
-                                        </div>
-                                        <div class="btn-group btn-group-sm w-100" role="group">
-                                            <a href="{{ route('books.show', $book) }}" 
-                                               class="btn btn-outline-purple" title="Voir détails">
-                                                <i class="fas fa-eye"></i>
+                                        <p class="book-owner">
+                                            <i class="fas fa-user-circle me-1"></i>Propriétaire: {{ $book->user->name }}
+                                        </p>
+                                        
+                                        @if($book->description)
+                                        <p class="book-description">
+                                            {{ Str::limit($book->description, 80) }}
+                                        </p>
+                                        @endif
+                                        
+                                        <div class="book-footer">
+                                            <span class="book-status book-status-available">
+                                                Disponible
+                                            </span>
+                                            <a href="{{ route('books.show', $book) }}" class="book-link">
+                                                Voir plus <i class="fas fa-arrow-right ms-1"></i>
                                             </a>
-                                            @if(isset($book->reviews))
-                                                @php
-                                                    $userReview = $book->reviews->where('user_id', Auth::id())->first();
-                                                @endphp
-                                                @if(!$userReview)
-                                                    <a href="{{ route('reviews.create', ['book_id' => $book->id]) }}" 
-                                                       class="btn btn-outline-purple" title="Donner un avis">
-                                                        <i class="fas fa-star"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('reviews.edit', $userReview) }}" 
-                                                       class="btn btn-outline-purple" title="Modifier mon avis">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                @endif
-                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -406,12 +387,12 @@
 
                         <!-- Pagination -->
                         @if(method_exists($availableBooks, 'appends'))
-                            <div class="d-flex justify-content-center">
+                            <div class="d-flex justify-content-center mt-4">
                                 {{ $availableBooks->appends(request()->query())->links() }}
                             </div>
                         @endif
                     @else
-                        <div class="text-center py-4">
+                        <div class="text-center py-5">
                             <i class="fas fa-search fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">Aucun livre trouvé</h5>
                             <p class="text-muted">Essayez de modifier vos critères de recherche.</p>
@@ -1299,6 +1280,13 @@
     .book-author {
         font-size: 0.875rem;
         color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .book-owner {
+        font-size: 0.8125rem;
+        color: #667eea;
+        font-weight: 500;
         margin-bottom: 0.75rem;
     }
     
@@ -1358,41 +1346,47 @@
         box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
     }
     
-    /* Pagination Violet Style */
+    /* Pagination Violet Style - Compact */
     .pagination {
-        gap: 0.5rem;
+        gap: 0.25rem;
+        justify-content: center;
     }
     
     .pagination .page-link {
-        color: #667eea;
-        background-color: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.5rem 0.875rem;
+        color: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 6px;
+        padding: 0.375rem 0.625rem;
         font-weight: 500;
-        transition: all 0.3s ease;
-        margin: 0 0.25rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        margin: 0 0.125rem;
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .pagination .page-link:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         color: white;
-        border-color: transparent;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(102, 126, 234, 0.4);
     }
     
     .pagination .page-item.active .page-link {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-color: transparent;
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         color: white;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 3px 8px rgba(102, 126, 234, 0.5);
+        font-weight: 700;
     }
     
     .pagination .page-item.disabled .page-link {
-        color: #cbd5e1;
-        background-color: #f8f9fc;
-        border-color: #e2e8f0;
+        color: rgba(255, 255, 255, 0.5);
+        background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+        opacity: 0.6;
     }
     
     /* Footer Styles */

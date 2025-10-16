@@ -14,11 +14,11 @@
 
 <!-- Header "Welcome to ShareBooks" -->
 <div class="mb-5">
-    <h1 class="text-center mb-4" style="font-family: 'Georgia', serif; font-size: 2.5rem; font-weight: 400; color: #2c3e50;">
-        welcome to sharebooks
+    <h1 class="text-center mb-4" style="font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 600; color: #1e293b;">
+        Bienvenue sur BookShare
     </h1>
     
-    <div class="card smooth" style="overflow: hidden; border-radius: 16px;">
+    <div class="card smooth" style="overflow: hidden; border-radius: 0px;">
         <div class="row g-0">
             <!-- Image à gauche -->
             <div class="col-md-5 d-none d-md-block" style="background: #f5f5f5; position: relative; min-height: 300px;">
@@ -35,7 +35,7 @@
                         <div class="col-6">
                             <div class="p-3 bg-white rounded shadow-sm text-center">
                                 <div class="text-uppercase text-muted small mb-1" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Mes Livres</div>
-                                <div class="h3 mb-0 fw-bold" style="color: #5aa6ff;">
+                                <div class="h3 mb-0 fw-bold" style="color: #667eea;">
                                     <i class="fas fa-book me-2" style="font-size: 1.2rem;"></i>{{ $myBooksCount }}
                                 </div>
                             </div>
@@ -43,7 +43,7 @@
                         <div class="col-6">
                             <div class="p-3 bg-white rounded shadow-sm text-center">
                                 <div class="text-uppercase text-muted small mb-1" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Total Livres</div>
-                                <div class="h3 mb-0 fw-bold" style="color: #10b981;">
+                                <div class="h3 mb-0 fw-bold" style="color: #667eea;">
                                     <i class="fas fa-books me-2" style="font-size: 1.2rem;"></i>{{ $totalBooks }}
                                 </div>
                             </div>
@@ -52,16 +52,16 @@
                     
                     <!-- Boutons d'action -->
                     <div class="d-flex gap-3 justify-content-center">
-                        <a href="{{ route('books.create') }}" class="btn btn-primary btn-lg" style="border-radius: 50px; padding: 0.75rem 2rem; font-weight: 500;">
+                        <a href="{{ route('books.create') }}" class="btn btn-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
                             <i class="fas fa-plus me-2"></i>Ajouter un livre
                         </a>
                         @auth
                             @if(!$isAdmin && !$isOthers)
-                            <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-outline-primary btn-lg" style="border-radius: 50px; padding: 0.75rem 2rem; font-weight: 500;">
+                            <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-outline-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
                                 <i class="fas fa-users me-2"></i>Mes Livres
                             </a>
                             @elseif($isOthers)
-                            <a href="{{ route('books.index') }}" class="btn btn-outline-primary btn-lg" style="border-radius: 50px; padding: 0.75rem 2rem; font-weight: 500;">
+                            <a href="{{ route('books.index') }}" class="btn btn-outline-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
                                 <i class="fas fa-book me-2"></i>Mes livres
                             </a>
                             @endif
@@ -111,10 +111,10 @@
                         <span class="badge badge-{{ $book->status == 'available' ? 'success' : 'warning' }}">
                             {{ $book->status == 'available' ? 'Disponible' : 'Réservé' }}
                         </span>
-                        <span class="badge badge-info">{{ $book->age_display }}</span>
+                        <span class="badge badge-purple">{{ $book->age_display }}</span>
                     </div>
                     
-                    <p class="card-text small text-info mb-2">
+                    <p class="card-text small text-purple mb-2">
                         <i class="fas fa-user"></i> {{ $book->user?->name ?? 'N/A' }}
                     </p>
                     
@@ -126,7 +126,7 @@
                     
                     <div class="mt-auto">
                         <div class="btn-group w-100" role="group">
-                            <a href="{{ route('books.show', $book) }}" class="btn btn-sm btn-outline-info" title="Voir détails">
+                            <a href="{{ route('books.show', $book) }}" class="btn btn-sm btn-outline-purple" title="Voir détails">
                                 <i class="fas fa-eye"></i>
                             </a>
                             
@@ -158,7 +158,7 @@
                                     @endphp
                                     @if(!$userReview)
                                         <a href="{{ route('reviews.create', ['book_id' => $book->id]) }}" 
-                                           class="btn btn-sm btn-outline-primary" title="Donner un avis">
+                                           class="btn btn-sm btn-outline-purple" title="Donner un avis">
                                             <i class="fas fa-star"></i>
                                         </a>
                                     @else
@@ -187,7 +187,7 @@
                             Vous n'avez pas encore ajouté de livres.
                         @endif
                     </p>
-                    <a href="{{ route('books.create') }}" class="btn btn-primary">
+                    <a href="{{ route('books.create') }}" class="btn btn-purple">
                         <i class="fas fa-plus"></i> Ajouter votre premier livre
                     </a>
                 </div>
@@ -209,8 +209,9 @@
 <style>
     .book-card {
         transition: all 0.3s ease;
-        border: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #f1f5f9;
+        border-radius: 0px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
     .book-card:hover {
@@ -252,7 +253,7 @@
     }
     
     .card-title a:hover {
-        color: #007bff;
+        color: #667eea;
     }
 </style>
 @endpush

@@ -28,13 +28,13 @@
     <!-- Custom Styles -->
     <style>
         :root {
-            --bg: #f7f8fb;            /* blanc cassé */
+            --bg: #f8f9fc;            /* blanc cassé */
             --card: #ffffff;          /* cartes */
-            --accent: #a5c7f9;        /* bleu clair */
-            --accent-strong: #5aa6ff; /* bleu accent */
+            --accent: #667eea;        /* violet principal */
+            --accent-strong: #764ba2; /* violet foncé */
             --success: #8bd3a3;       /* vert statuts */
-            --text: #1f2937;          /* gris foncé */
-            --muted: #6b7280;         /* gris moyen */
+            --text: #1e293b;          /* gris foncé */
+            --muted: #64748b;         /* gris moyen */
         }
         
         html, body {
@@ -51,27 +51,90 @@
         
         .card.smooth {
             background: var(--card);
-            border: 1px solid #eef2f7;
-            border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+            border: 1px solid #f1f5f9;
+            border-radius: 0px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card.smooth:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
         }
         
         .btn-primary {
-            background: var(--accent-strong);
-            border-color: var(--accent-strong);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
         }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-outline-primary {
+            color: #667eea;
+            border-color: #667eea;
+        }
+        
         .btn-outline-primary:hover {
-            background: var(--accent-strong);
-            border-color: var(--accent-strong);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
             color: #fff;
         }
+        
+        .btn-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-purple:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-outline-purple {
+            color: #667eea;
+            border-color: #667eea;
+            background: transparent;
+        }
+        
+        .btn-outline-purple:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .text-purple {
+            color: #667eea !important;
+        }
+        
+        .badge-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        
         .badge-soft {
             background: #eef2ff;
-            color: #3b82f6;
-            border-radius: 10px;
+            color: #667eea;
+            border-radius: 0px;
             padding: 0.35rem 0.6rem;
             font-weight: 500;
         }
+        
         a:hover { text-decoration: none; }
         
         /* Ajustement pour la navbar fixe */
@@ -94,7 +157,7 @@
         <div class="container-fluid">
             <!-- Logo BookShare -->
             <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}" style="font-weight:600; letter-spacing:.3px;">
-                <i class="fas fa-book-open me-2" style="color: var(--accent-strong);"></i>
+                <img src="{{ asset('images/bookshare_logo.png') }}" alt="BookShare Logo" style="height: 40px; margin-right: 10px;">
                 BookShare
             </a>
 
@@ -116,7 +179,7 @@
                 <form class="d-flex me-3" method="GET" action="{{ route('user.dashboard') }}">
                     <div class="input-group">
                         <input class="form-control border-0" name="search" type="search" placeholder="Rechercher un livre..." value="{{ request('search') }}" style="background:#f1f5f9; border-radius: 24px 0 0 24px;">
-                        <button class="btn btn-primary" type="submit" style="border-radius: 0 24px 24px 0;">
+                        <button class="btn" type="submit" style="border-radius: 0 24px 24px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>

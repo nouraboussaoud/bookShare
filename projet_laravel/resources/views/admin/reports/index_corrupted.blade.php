@@ -1,4 +1,4 @@
-@extends('layouts.layout')@extends('layouts.layout')
+@extends('layouts.admin-layout')@extends('layouts.admin-layout')
 
 
 
