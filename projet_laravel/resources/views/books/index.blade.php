@@ -12,18 +12,19 @@
     $reservedBooks = \App\Models\Book::where('status', 'reserved')->count();
 @endphp
 
+<!-- Animated Stars Background -->
+<div class="stars-background" id="starsContainer"></div>
+
 <!-- Header "Welcome to ShareBooks" -->
-<div class="mb-5">
-    <h1 class="text-center mb-4" style="font-family: 'Poppins', sans-serif; font-size: 2.5rem; font-weight: 600; color: #1e293b;">
-        Bienvenue sur BookShare
-    </h1>
+<div class="mb-5" style="position: relative; z-index: 1;">
+    
     
     <div class="card smooth" style="overflow: hidden; border-radius: 0px;">
         <div class="row g-0">
             <!-- Image à gauche -->
             <div class="col-md-5 d-none d-md-block" style="background: #f5f5f5; position: relative; min-height: 300px;">
-                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=400&fit=crop" 
-                     alt="Open book" 
+                <img src="{{ asset('images/livres.png') }}" 
+                     alt="Livres" 
                      style="width: 100%; height: 100%; object-fit: cover;">
             </div>
             
@@ -58,7 +59,7 @@
                         @auth
                             @if(!$isAdmin && !$isOthers)
                             <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-outline-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
-                                <i class="fas fa-users me-2"></i>Mes Livres
+                                <i class="fas fa-users me-2"></i> Livres
                             </a>
                             @elseif($isOthers)
                             <a href="{{ route('books.index') }}" class="btn btn-outline-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
@@ -74,10 +75,10 @@
 </div>
 
 @if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
+    <div class="alert alert-success" style="position: relative; z-index: 1;">{{ session('success') }}</div>
 @endif
 
-<div class="row">
+<div class="row" style="position: relative; z-index: 1;">
     @forelse($books as $book)
         <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
             <div class="card h-100 shadow-sm book-card">
@@ -255,5 +256,114 @@
     .card-title a:hover {
         color: #667eea;
     }
+    
+    /* Rendre le body transparent pour voir le fond */
+    body {
+        background: transparent !important;
+    }
+    
+    /* Fond dégradé violet avec étoiles */
+    .stars-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        z-index: 0;
+        overflow: hidden;
+    }
+    
+    /* Mettre le contenu au-dessus du fond */
+    nav, .container-fluid {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Navbar semi-transparente sur fond violet */
+    nav.navbar {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .star {
+        position: absolute;
+        background: white;
+        border-radius: 50%;
+        animation: float linear infinite;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.9), 0 0 30px rgba(255, 255, 255, 0.5);
+        opacity: 0;
+    }
+    
+    @keyframes float {
+        0% {
+            transform: translateY(0) translateX(0) rotate(0deg) scale(0.5);
+            opacity: 0;
+        }
+        5% {
+            opacity: 1;
+        }
+        50% {
+            transform: translateY(-50vh) translateX(20px) rotate(180deg) scale(1);
+            opacity: 1;
+        }
+        95% {
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-110vh) translateX(-20px) rotate(360deg) scale(0.5);
+            opacity: 0;
+        }
+    }
+    
+    /* Rendre les cartes plus visibles sur le fond violet */
+    .card.smooth {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    .book-card {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+    }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    // Créer des étoiles flottantes
+    function createStars() {
+        const container = document.getElementById('starsContainer');
+        const numberOfStars = 100; // Plus d'étoiles pour un effet plus remarquable
+        
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            
+            // Taille aléatoire entre 3px et 8px (plus grandes)
+            const size = Math.random() * 5 + 3;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            
+            // Position horizontale aléatoire
+            star.style.left = Math.random() * 100 + '%';
+            
+            // Position verticale de départ aléatoire (commencer en bas)
+            star.style.top = '100%';
+            
+            // Durée d'animation aléatoire entre 8s et 20s (plus rapide)
+            const duration = Math.random() * 12 + 8;
+            star.style.animationDuration = duration + 's';
+            
+            // Délai aléatoire pour un effet plus naturel
+            star.style.animationDelay = Math.random() * 8 + 's';
+            
+            container.appendChild(star);
+        }
+    }
+    
+    // Créer les étoiles au chargement de la page
+    document.addEventListener('DOMContentLoaded', createStars);
+</script>
 @endpush

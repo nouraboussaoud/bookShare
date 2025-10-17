@@ -94,7 +94,7 @@
                     <img src="{{ asset('images/reading-old-man.jpg') }}" 
                          alt="BookShare Community" class="hero-image">
                     <div class="hero-overlay">
-                        <h2 class="hero-overlay-title">Bienvenue sur BookShare</h2>
+                        <h2 class="hero-overlay-title"></h2>
                     </div>
                 </div>
             </div>

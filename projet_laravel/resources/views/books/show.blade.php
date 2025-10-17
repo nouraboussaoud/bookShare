@@ -125,18 +125,24 @@
                         <!-- Rating and Status -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                @if($book->review)
+                                @if($book->reviews_count > 0)
                                     <div class="d-flex align-items-center mb-2">
                                         <div class="rating me-2">
+                                            @php
+                                                $avgRating = round($book->average_rating);
+                                            @endphp
                                             @for($i = 1; $i <= 5; $i++)
-                                                @if($i <= $book->review->rating)
+                                                @if($i <= $avgRating)
                                                     <i class="fas fa-star text-warning"></i>
                                                 @else
                                                     <i class="far fa-star text-muted"></i>
                                                 @endif
                                             @endfor
                                         </div>
-                                        <span class="text-muted">({{ $book->review->rating }}/5)</span>
+                                        <span class="text-muted">
+                                            <strong>{{ number_format($book->average_rating, 1) }}/5</strong> 
+                                            ({{ $book->reviews_count }} {{ $book->reviews_count > 1 ? 'avis' : 'avis' }})
+                                        </span>
                                     </div>
                                 @else
                                     <p class="text-muted mb-2">
@@ -201,48 +207,59 @@
                         @endif
 
                         <!-- Review Section -->
-                        @if($book->review)
+                        @if($book->reviews_count > 0)
                             <div class="mb-4">
-                                <h6 class="text-primary">Avis des Lecteurs</h6>
-                                <div class="card border-left-warning">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <div class="rating">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    @if($i <= $book->review->rating)
-                                                        <i class="fas fa-star text-warning"></i>
-                                                    @else
-                                                        <i class="far fa-star text-muted"></i>
-                                                    @endif
-                                                @endfor
-                                                <span class="ms-2 font-weight-bold">{{ $book->review->rating }}/5</span>
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-comments"></i> Avis des Lecteurs 
+                                    <span class="badge bg-primary">{{ $book->reviews_count }}</span>
+                                </h6>
+                                
+                                @foreach($book->reviews as $review)
+                                    <div class="card border-left-warning mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <div class="rating mb-1">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            @if($i <= $review->rating)
+                                                                <i class="fas fa-star text-warning"></i>
+                                                            @else
+                                                                <i class="far fa-star text-muted"></i>
+                                                            @endif
+                                                        @endfor
+                                                        <span class="ms-2 font-weight-bold">{{ $review->rating }}/5</span>
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-user"></i> Par {{ $review->user->name }}
+                                                    </small>
+                                                </div>
+                                                <small class="text-muted">{{ $review->created_at->format('d/m/Y') }}</small>
                                             </div>
-                                            <small class="text-muted">{{ $book->review->created_at->format('d/m/Y') }}</small>
-                                        </div>
-                                        
-                                        @if($book->review->comment)
-                                            <p class="mb-2">{{ $book->review->comment }}</p>
-                                        @endif
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="badge badge-{{ $book->review->status == 'APPROVED' ? 'success' : ($book->review->status == 'REJECTED' ? 'danger' : 'warning') }}">
-                                                {{ ucfirst(strtolower($book->review->status)) }}
-                                            </span>
-                                            @if($book->review->admin_reply)
-                                                <small class="text-info">
-                                                    <i class="fas fa-reply"></i> Réponse admin disponible
-                                                </small>
+                                            
+                                            @if($review->comment)
+                                                <p class="mb-2">{{ $review->comment }}</p>
+                                            @endif
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge badge-{{ $review->status == 'approved' ? 'success' : ($review->status == 'rejected' ? 'danger' : 'warning') }}">
+                                                    {{ ucfirst($review->status) }}
+                                                </span>
+                                                @if($review->admin_reply)
+                                                    <small class="text-info">
+                                                        <i class="fas fa-reply"></i> Réponse admin disponible
+                                                    </small>
+                                                @endif
+                                            </div>
+                                            
+                                            @if($review->admin_reply)
+                                                <div class="mt-3 p-2 bg-info text-white rounded">
+                                                    <small><strong>Réponse de l'administrateur:</strong></small>
+                                                    <p class="mb-0 small">{{ $review->admin_reply }}</p>
+                                                </div>
                                             @endif
                                         </div>
-                                        
-                                        @if($book->review->admin_reply)
-                                            <div class="mt-3 p-2 bg-info text-white rounded">
-                                                <small><strong>Réponse de l'administrateur:</strong></small>
-                                                <p class="mb-0 small">{{ $book->review->admin_reply }}</p>
-                                            </div>
-                                        @endif
                                     </div>
-                                </div>
+                                @endforeach
                             </div>
                         @endif
 
