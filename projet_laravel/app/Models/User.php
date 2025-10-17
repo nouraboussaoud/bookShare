@@ -127,4 +127,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Book::class, 'user_id');
     }
+
+    // Progression de lecture de l'utilisateur
+    public function readingProgress(): HasMany
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
 }

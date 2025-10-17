@@ -169,6 +169,8 @@
                 <ul class="navbar-nav me-auto mb-0">
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('books.*') ? 'active' : '' }}" href="{{ route('books.index') }}">Livres</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('reading-progress.*') ? 'active' : '' }}" href="{{ route('reading-progress.index') }}">Mes Lectures</a></li>
+                    <li class="nav-item"><a class="nav-link {{ request()->routeIs('reading-groups.*') ? 'active' : '' }}" href="{{ route('reading-groups.index') }}">Groupes</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.marketplace') ? 'active' : '' }}" href="{{ route('locations.marketplace') }}">Marketplace</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}">Locations</a></li>
                     <li class="nav-item"><a class="nav-link {{ request()->routeIs('exchanges.*') ? 'active' : '' }}" href="{{ route('exchanges.index') }}">Échanges</a></li>

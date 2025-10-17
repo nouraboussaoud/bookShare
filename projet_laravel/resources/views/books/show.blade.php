@@ -36,7 +36,33 @@
                     <div class="card-body">
                         <h6 class="card-title text-primary">Actions Rapides</h6>
                         <div class="d-grid gap-2">
+                            @php
+                                $userProgress = Auth::user()->readingProgress()->where('book_id', $book->id)->first();
+                            @endphp
+                            
+                            @if(!$userProgress)
+                                <!-- Ajouter à Mes Lectures -->
+                                <form action="{{ route('books.markToRead', $book) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-info w-100">
+                                        <i class="fas fa-bookmark"></i> Ajouter à "À lire"
+                                    </button>
+                                </form>
+                                
+                                <form action="{{ route('books.startReading', $book) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-book-open"></i> Commencer la lecture
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('reading-progress.show', $userProgress) }}" class="btn btn-outline-success w-100">
+                                    <i class="fas fa-check-circle"></i> Voir ma progression
+                                </a>
+                            @endif
+                            
                             @if(Auth::id() != $book->user_id)
+                                <hr>
                                 <!-- Actions pour les autres utilisateurs -->
                                 @if($book->estDisponiblePourLocation())
                                     <a href="{{ route('locations.create', ['book_id' => $book->id]) }}" 
@@ -60,6 +86,7 @@
                                     <i class="fas fa-envelope"></i> Contacter le Propriétaire
                                 </button>
                             @else
+                                <hr>
                                 <!-- Actions pour le propriétaire -->
                                 <a href="{{ route('books.edit', $book) }}" class="btn btn-primary">
                                     <i class="fas fa-edit"></i> Modifier

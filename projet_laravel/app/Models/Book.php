@@ -57,6 +57,11 @@ class Book extends Model
         return $this->hasMany(Location::class);
     }
 
+    public function readingProgress()
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
+
     public function getAgeDisplayAttribute()
     {
         return $this->recommended_age == 0 ? 'Tout âge' : $this->recommended_age . '+';

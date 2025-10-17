@@ -15,6 +15,7 @@ use App\Http\Controllers\LocationController;
 
 use App\Http\Controllers\ReadingGroupController;
 use App\Http\Controllers\GroupMembershipController;
+use App\Http\Controllers\ReadingProgressController;
 
 
 Route::get('/', function () {
@@ -150,6 +151,33 @@ Route::post('reading-groups/{readingGroup}/join', [GroupMembershipController::cl
 Route::delete('reading-groups/{readingGroup}/leave', [GroupMembershipController::class, 'leave'])
     ->name('reading-groups.leave');
 
+// -----------------------
+// Reading Progress Routes
+// -----------------------
+// Liste des progressions de lecture
+Route::get('reading-progress', [ReadingProgressController::class, 'index'])->name('reading-progress.index');
+
+// Statistiques de lecture
+Route::get('reading-progress/statistics', [ReadingProgressController::class, 'statistics'])->name('reading-progress.statistics');
+
+// Afficher une progression spécifique
+Route::get('reading-progress/{readingProgress}', [ReadingProgressController::class, 'show'])->name('reading-progress.show');
+
+// Créer une nouvelle progression
+Route::post('reading-progress', [ReadingProgressController::class, 'store'])->name('reading-progress.store');
+
+// Mettre à jour une progression
+Route::put('reading-progress/{readingProgress}', [ReadingProgressController::class, 'update'])->name('reading-progress.update');
+Route::patch('reading-progress/{readingProgress}', [ReadingProgressController::class, 'update']);
+
+// Supprimer une progression
+Route::delete('reading-progress/{readingProgress}', [ReadingProgressController::class, 'destroy'])->name('reading-progress.destroy');
+
+// Actions rapides
+Route::post('reading-progress/{readingProgress}/add-time', [ReadingProgressController::class, 'addReadingTime'])->name('reading-progress.addTime');
+Route::post('reading-progress/{readingProgress}/complete', [ReadingProgressController::class, 'markAsCompleted'])->name('reading-progress.complete');
+Route::post('books/{book}/mark-to-read', [ReadingProgressController::class, 'markAsToRead'])->name('books.markToRead');
+Route::post('books/{book}/start-reading', [ReadingProgressController::class, 'startReading'])->name('books.startReading');
 
 });
 
