@@ -99,11 +99,28 @@ class ExchangeController extends Controller
     }
 
     // Display the form for creating a new exchange
-    public function create()
+    public function create(Request $request)
     {
         $books = \App\Models\Book::with('user')->where('user_id', '!=', Auth::id())->get();
         $userBooks = \App\Models\Book::where('user_id', Auth::id())->get();
-        return view('exchanges.create', compact('books', 'userBooks'));
+        
+        // Récupérer les paramètres pour pré-remplir le formulaire (recommandations IA)
+        $selectedBookId = $request->get('book_id'); // Livre recommandé par l'IA
+        $yourBookId = $request->get('your_book_id'); // Votre livre actuel
+        
+        // Livres sélectionnés pour pré-remplissage
+        $selectedBook = null;
+        $yourBook = null;
+        
+        if ($selectedBookId) {
+            $selectedBook = \App\Models\Book::with('user')->find($selectedBookId);
+        }
+        
+        if ($yourBookId) {
+            $yourBook = \App\Models\Book::find($yourBookId);
+        }
+        
+        return view('exchanges.create', compact('books', 'userBooks', 'selectedBook', 'yourBook'));
     }
 
     // Store a new exchange

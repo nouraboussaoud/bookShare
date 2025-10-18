@@ -45,13 +45,22 @@ class ReportAdminController extends Controller
             });
         }
 
-        $reports = $query->orderBy('created_at', 'desc')->paginate(15);
+        $reports = $query->orderByRaw("
+            CASE 
+                WHEN priority_level = 'critique' THEN 1
+                WHEN priority_level = 'haute' THEN 2  
+                WHEN priority_level = 'moyenne' THEN 3
+                WHEN priority_level = 'normale' THEN 4
+                ELSE 5
+            END,
+            created_at DESC
+        ")->paginate(15);
 
         $stats = [
             'total' => Report::count(),
             'pending' => Report::pending()->count(),
             'processed' => Report::processed()->count(),
-            'rejected' => Report::rejected()->count(),
+            'critical' => Report::where('priority_level', 'critique')->where('status', 'EN_ATTENTE')->count(),
         ];
 
         return view('admin.reports.index', compact('reports', 'stats'));

@@ -87,11 +87,15 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Rejetés</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['rejected'] ?? 0 }}</div>
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Priorité Critique
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['critical'] ?? 0 }}</div>
+                            <small class="text-muted">Traitement immédiat requis</small>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-times fa-2x text-gray-300"></i>
+                            <i class="fas fa-heart fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -177,6 +181,10 @@
                                     <th>Type</th>
                                     <th>Signalé par</th>
                                     <th>Utilisateur signalé</th>
+                                    <th>
+                                        <i class="fas fa-heart text-danger mr-1"></i>
+                                        Analyse IA
+                                    </th>
                                     <th>Statut</th>
                                     <th>Date</th>
                                     <th>Actions</th>
@@ -214,6 +222,60 @@
                                                 </div>
                                             @else
                                                 <span class="text-muted">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($report->emotion_type && $report->priority_level)
+                                                <div class="text-center">
+                                                    <!-- Émotion avec emoji -->
+                                                    <div class="mb-1">
+                                                        @php
+                                                            $emotionEmojis = [
+                                                                'colère' => '😠',
+                                                                'peur' => '😨', 
+                                                                'tristesse' => '😢',
+                                                                'dégoût' => '🤢',
+                                                                'joie' => '😊',
+                                                                'surprise' => '😲',
+                                                                'neutre' => '😐'
+                                                            ];
+                                                            $emoji = $emotionEmojis[$report->emotion_type] ?? '🤔';
+                                                        @endphp
+                                                        <span style="font-size: 1.2em;">{{ $emoji }}</span>
+                                                        <small class="d-block text-muted">{{ ucfirst($report->emotion_type) }}</small>
+                                                        @if($report->emotion_score)
+                                                            <small class="text-muted">({{ number_format($report->emotion_score, 0) }}%)</small>
+                                                        @endif
+                                                    </div>
+                                                    
+                                                    <!-- Priorité -->
+                                                    <div>
+                                                        @if($report->priority_level === 'critique')
+                                                            <span class="badge badge-danger">
+                                                                <i class="fas fa-exclamation-triangle"></i> Critique
+                                                            </span>
+                                                        @elseif($report->priority_level === 'haute')
+                                                            <span class="badge badge-warning">
+                                                                <i class="fas fa-exclamation"></i> Haute
+                                                            </span>
+                                                        @elseif($report->priority_level === 'moyenne')
+                                                            <span class="badge badge-primary">
+                                                                <i class="fas fa-flag"></i> Moyenne
+                                                            </span>
+                                                        @else
+                                                            <span class="badge badge-secondary">
+                                                                <i class="fas fa-info-circle"></i> Normale
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div class="text-center text-muted">
+                                                    <small>
+                                                        <i class="fas fa-robot"></i><br>
+                                                        Pas d'analyse
+                                                    </small>
+                                                </div>
                                             @endif
                                         </td>
                                         <td>
