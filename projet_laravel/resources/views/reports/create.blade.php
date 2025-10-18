@@ -272,7 +272,7 @@ $(document).ready(function() {
         lastAnalyzedText = text;
         showAIAnalysis();
         
-        // Utiliser fetch au lieu de jQuery pour gérer CSRF
+        // 1. Analyse de classification (existante)
         fetch('{{ route("api.classify-report") }}', {
             method: 'POST',
             headers: {
@@ -303,10 +303,12 @@ $(document).ready(function() {
         })
         .catch(error => {
             hideAIAnalysis();
-            console.error('Erreur IA:', error);
+            console.error('Erreur IA Classification:', error);
             showAIError('Erreur lors de l\'analyse IA: ' + error.message);
         });
     }
+
+
 
     // Afficher l'indicateur d'analyse
     function showAIAnalysis() {
@@ -415,6 +417,8 @@ function getTypeLabel(type) {
     };
     return labels[type] || type;
 }
+
+
 
 // Test de connexion IA
 function testAIConnection() {
