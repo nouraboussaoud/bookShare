@@ -251,6 +251,92 @@
             }
         });
 
+        // Mark single notification as read (using event delegation)
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.mark-read-btn')) {
+                event.preventDefault();
+                const button = event.target.closest('.mark-read-btn');
+                const notificationId = button.getAttribute('data-id');
+                
+                console.log('Marking single notification as read:', notificationId);
+                
+                // Get CSRF token from meta tag
+                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfTokenMeta) {
+                    console.error('CSRF token not found in meta tags');
+                    alert('Erreur: Token CSRF manquant');
+                    return;
+                }
+                const csrfToken = csrfTokenMeta.getAttribute('content');
+                console.log('CSRF Token found:', csrfToken ? 'Yes' : 'No');
+                
+                // Disable button during request
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> En cours...';
+                
+                fetch(`/notifications/${notificationId}/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            console.error('Response body:', text);
+                            throw new Error(`HTTP ${response.status}: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    const listItem = button.closest('.list-group-item');
+                    listItem.classList.remove('notification-unread');
+                    
+                    // Remove the "Nouveau" badge
+                    const badge = listItem.querySelector('.badge-primary, .badge-warning, .badge-info');
+                    if (badge && badge.textContent.trim() === 'Nouveau') {
+                        badge.remove();
+                    }
+                    
+                    // Remove the "Lu" button
+                    button.remove();
+                    
+                    // Update counter if no more unread notifications
+                    const unreadCount = document.querySelectorAll('.notification-unread').length;
+                    console.log('Remaining unread notifications:', unreadCount);
+                    
+                    if (unreadCount === 0) {
+                        const markAllBtn = document.getElementById('markAllRead');
+                        if (markAllBtn) markAllBtn.style.display = 'none';
+                        
+                        const counterBadge = document.querySelector('.badge-danger');
+                        if (counterBadge) counterBadge.remove();
+                    } else {
+                        // Update counter
+                        const counterBadge = document.querySelector('.badge-danger');
+                        if (counterBadge) {
+                            counterBadge.textContent = `${unreadCount} nouveau(x)`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la mise à jour: ' + error.message);
+                    
+                    // Restore button
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check mr-1"></i> Lu';
+                });
+            }
+        });
+
         // Function to mark notification as read (called when clicking "Voir l'échange")
         function markNotificationAsRead(notificationId) {
             console.log('Marking notification as read (from link):', notificationId);
@@ -292,7 +378,18 @@
                 console.log('Marking all notifications as read');
                 
                 // Get CSRF token from meta tag
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfTokenMeta) {
+                    console.error('CSRF token not found in meta tags');
+                    alert('Erreur: Token CSRF manquant');
+                    return;
+                }
+                const csrfToken = csrfTokenMeta.getAttribute('content');
+                
+                // Disable button during request
+                const originalText = markAllReadBtn.innerHTML;
+                markAllReadBtn.disabled = true;
+                markAllReadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> En cours...';
                 
                 fetch('/notifications/mark-all-read', {
                     method: 'POST',
@@ -305,7 +402,10 @@
                 .then(response => {
                     console.log('Response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.text().then(text => {
+                            console.error('Response body:', text);
+                            throw new Error(`HTTP ${response.status}: ${text}`);
+                        });
                     }
                     return response.json();
                 })
@@ -339,6 +439,10 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Erreur lors de la mise à jour: ' + error.message);
+                    
+                    // Restore button
+                    markAllReadBtn.disabled = false;
+                    markAllReadBtn.innerHTML = originalText;
                 });
             });
         }
@@ -346,6 +450,7 @@
         // Delete notification (using event delegation)
         document.addEventListener('click', function(event) {
             if (event.target.closest('.delete-notification-btn')) {
+                event.preventDefault();
                 const button = event.target.closest('.delete-notification-btn');
                 
                 if (!confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
@@ -359,7 +464,17 @@
                 console.log('Deleting notification:', notificationId);
                 
                 // Get CSRF token from meta tag
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfTokenMeta) {
+                    console.error('CSRF token not found in meta tags');
+                    alert('Erreur: Token CSRF manquant');
+                    return;
+                }
+                const csrfToken = csrfTokenMeta.getAttribute('content');
+                
+                // Disable button during request
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Suppression...';
                 
                 fetch(`/notifications/${notificationId}`, {
                     method: 'DELETE',
@@ -372,7 +487,10 @@
                 .then(response => {
                     console.log('Response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.text().then(text => {
+                            console.error('Response body:', text);
+                            throw new Error(`HTTP ${response.status}: ${text}`);
+                        });
                     }
                     return response.json();
                 })
@@ -386,6 +504,8 @@
                         // Update counter if it was unread
                         if (wasUnread) {
                             const unreadCount = document.querySelectorAll('.notification-unread').length;
+                            console.log('Remaining unread after delete:', unreadCount);
+                            
                             if (unreadCount === 0) {
                                 const markAllBtn = document.getElementById('markAllRead');
                                 if (markAllBtn) markAllBtn.style.display = 'none';
@@ -404,6 +524,10 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Erreur lors de la suppression: ' + error.message);
+                    
+                    // Restore button
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-trash mr-1"></i> Supprimer';
                 });
             }
         });

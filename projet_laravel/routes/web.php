@@ -229,4 +229,19 @@ Route::put('/exchanges/{exchange}', [ExchangeController::class, 'update'])->name
 Route::post('/exchanges/{exchange}/accept', [ExchangeController::class, 'accept'])->name('exchanges.accept');
 Route::post('/exchanges/{exchange}/reject', [ExchangeController::class, 'reject'])->name('exchanges.reject');
 
+// Routes API pour l'Intelligence Artificielle
+Route::middleware('auth')->prefix('api')->group(function () {
+    // Routes pour la classification automatique des signalements
+    Route::post('/classify-report', [\App\Http\Controllers\AIReportController::class, 'classifyReport'])->name('api.classify-report');
+    Route::get('/test-ai-connection', [\App\Http\Controllers\AIReportController::class, 'testConnection'])->name('api.test-ai-connection');
+    
+    // Routes pour les recommandations intelligentes d'échanges
+    Route::get('/recommend-books/{book}', [\App\Http\Controllers\AIRecommendationController::class, 'recommendBooks'])->name('api.recommend-books');
+});
+
+// Route de test IA (sans auth pour le debug)
+Route::get('/test-ai', function () {
+    return view('test-ai');
+})->name('test.ai');
+
 require __DIR__.'/auth.php';

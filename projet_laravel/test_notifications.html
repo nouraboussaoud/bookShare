@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Notifications</title>
+</head>
+<body>
+    <h1>Test des routes notifications</h1>
+    <button onclick="testMarkAsRead()">Test Mark as Read</button>
+    <button onclick="testMarkAllAsRead()">Test Mark All as Read</button>
+    <button onclick="testDelete()">Test Delete</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+        
+        async function testMarkAsRead() {
+            try {
+                const response = await fetch(`${BASE_URL}/notifications/1/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `Mark as Read: ${response.status} - ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testMarkAllAsRead() {
+            try {
+                const response = await fetch(`${BASE_URL}/notifications/mark-all-read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `Mark All as Read: ${response.status} - ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testDelete() {
+            try {
+                const response = await fetch(`${BASE_URL}/notifications/1`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = `Delete: ${response.status} - ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

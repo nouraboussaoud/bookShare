@@ -34,33 +34,79 @@
                         </div>
                     @endif
 
+                    <!-- Alert IA pour suggestions -->
+                    <div id="ai-suggestions" class="alert alert-info" style="display: none;">
+                        <h6 class="mb-2">
+                            <i class="fas fa-robot text-primary"></i> 
+                            Suggestion IA - Classification Automatique
+                        </h6>
+                        <div id="ai-suggestion-content"></div>
+                    </div>
+
+                    <!-- Status IA -->
+                    <div id="ai-status" class="text-right mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-brain text-success"></i> 
+                            Assistant IA: <span id="ai-status-text">Prêt</span>
+                        </small>
+                    </div>
+
                     <form method="POST" action="{{ route('reports.store') }}">
                         @csrf
 
-                        <!-- Type de rapport -->
+                        <!-- Type de rapport avec IA -->
                         <div class="form-group">
                             <label for="type">Type de signalement <span class="text-danger">*</span></label>
-                            <select name="type" id="type" class="form-control @error('type') is-invalid @enderror" required>
-                                <option value="">Sélectionnez un type</option>
-                                @foreach(\App\Models\Report::getTypes() as $value => $label)
-                                    <option value="{{ $value }}" {{ old('type', request('type')) == $value ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
+                            <div class="input-group">
+                                <select name="type" id="type" class="form-control @error('type') is-invalid @enderror" required>
+                                    <option value="">Sélectionnez un type</option>
+                                    @foreach(\App\Models\Report::getTypes() as $value => $label)
+                                        <option value="{{ $value }}" {{ old('type', request('type')) == $value ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="input-group-append">
+                                    <span class="input-group-text" title="Classification automatique par IA">
+                                        <i class="fas fa-magic text-primary" id="ai-magic-icon"></i>
+                                    </span>
+                                </div>
+                            </div>
                             </select>
                             @error('type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <!-- Description -->
+                        <!-- Description avec IA en temps réel -->
                         <div class="form-group">
                             <label for="description">Description du problème <span class="text-danger">*</span></label>
-                            <textarea name="description" id="description" rows="5" 
-                                      class="form-control @error('description') is-invalid @enderror" 
-                                      placeholder="Décrivez en détail le problème rencontré ou le comportement à signaler..." 
-                                      required>{{ old('description') }}</textarea>
-                            <small class="form-text text-muted">Minimum 10 caractères, maximum 1000 caractères</small>
+                            <div class="position-relative">
+                                <textarea name="description" id="description" rows="5" 
+                                          class="form-control @error('description') is-invalid @enderror" 
+                                          placeholder="Décrivez en détail le problème rencontré ou le comportement à signaler..." 
+                                          required>{{ old('description') }}</textarea>
+                                
+                                <!-- Indicateur d'analyse IA -->
+                                <div id="ai-analysis-indicator" class="position-absolute" style="top: 10px; right: 10px; display: none;">
+                                    <small class="badge badge-info">
+                                        <i class="fas fa-brain fa-pulse"></i> IA analyse...
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="form-text text-muted">
+                                    Minimum 10 caractères, maximum 1000 caractères
+                                    <br>
+                                    <i class="fas fa-lightbulb text-warning"></i> 
+                                    L'IA analysera automatiquement votre description pour suggérer le type approprié
+                                </small>
+                                <small class="text-muted">
+                                    <span id="char-count">0</span>/1000
+                                </small>
+                            </div>
+                            
                             @error('description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -160,31 +206,308 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
+    let aiAnalysisTimeout;
+    let lastAnalyzedText = '';
+    
     // Show/hide sections based on report type
-    $('#type').change(function() {
-        const type = $(this).val();
+    const typeSelect = document.getElementById('type');
+    typeSelect.addEventListener('change', function() {
+        const type = this.value;
+        const reportedUserSection = document.getElementById('reported-user-section');
+        const exchangeSection = document.getElementById('exchange-section');
+        const exchangeField = document.getElementById('exchange_id');
+        const reportedUserField = document.getElementById('reported_user_search');
         
         if (type === 'COMPORTEMENT') {
-            $('#reported-user-section').show();
-            $('#exchange-section').hide();
-            $('#exchange_id').val('').prop('required', false);
-            $('#reported_user_search').prop('required', true);
+            if (reportedUserSection) {
+                reportedUserSection.style.display = 'block';
+                if (reportedUserField) {
+                    reportedUserField.required = true;
+                }
+            }
+            if (exchangeSection) {
+                exchangeSection.style.display = 'none';
+                if (exchangeField) {
+                    exchangeField.value = '';
+                    exchangeField.required = false;
+                }
+            }
         } else if (type === 'CONFLIT_ECHANGE') {
-            $('#reported-user-section').hide();
-            $('#exchange-section').show();
-            $('#reported_user_search').val('').prop('required', false);
-            $('#exchange_id').prop('required', true);
+            if (reportedUserSection) {
+                reportedUserSection.style.display = 'none';
+                if (reportedUserField) {
+                    reportedUserField.value = '';
+                    reportedUserField.required = false;
+                }
+            }
+            if (exchangeSection) {
+                exchangeSection.style.display = 'block';
+                if (exchangeField) {
+                    exchangeField.required = true;
+                }
+            }
         } else {
-            $('#reported-user-section').hide();
-            $('#exchange-section').hide();
-            $('#reported_user_search').val('').prop('required', false);
-            $('#exchange_id').val('').prop('required', false);
+            if (reportedUserSection) {
+                reportedUserSection.style.display = 'none';
+                if (reportedUserField) {
+                    reportedUserField.value = '';
+                    reportedUserField.required = false;
+                }
+            }
+            if (exchangeSection) {
+                exchangeSection.style.display = 'none';
+                if (exchangeField) {
+                    exchangeField.value = '';
+                    exchangeField.required = false;
+                }
+            }
         }
     });
 
+    // Compteur de caractères et analyse IA
+    const descriptionField = document.getElementById('description');
+    descriptionField.addEventListener('input', function() {
+        const text = this.value;
+        const charCount = text.length;
+        const charCountElement = document.getElementById('char-count');
+        
+        if (charCountElement) {
+            charCountElement.textContent = charCount;
+            
+            // Couleur selon la longueur
+            charCountElement.className = 'text-muted';
+            if (charCount > 900) {
+                charCountElement.className = 'text-danger';
+            } else if (charCount > 700) {
+                charCountElement.className = 'text-warning';
+            }
+        }
+        
+        // Analyse IA avec délai pour éviter trop de requêtes
+        clearTimeout(aiAnalysisTimeout);
+        
+        if (text.length >= 20 && text !== lastAnalyzedText) {
+            aiAnalysisTimeout = setTimeout(() => {
+                analyzeWithAI(text);
+            }, 1500); // Attendre 1.5 secondes après arrêt de frappe
+        }
+    });
+
+    // Fonction d'analyse IA avec fetch
+    function analyzeWithAI(text) {
+        // Éviter les analyses répétées du même texte
+        if (text === lastAnalyzedText) return;
+        
+        lastAnalyzedText = text;
+        showAIAnalysis();
+        
+        // 1. Analyse de classification (existante)
+        fetch('{{ route("api.classify-report") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                description: text
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(response => {
+            hideAIAnalysis();
+            
+            if (response.success && response.is_confident) {
+                showAISuggestion(response);
+            } else if (response.success) {
+                showWeakAISuggestion(response);
+            } else {
+                showAIError('Analyse non concluante');
+            }
+        })
+        .catch(error => {
+            hideAIAnalysis();
+            console.error('Erreur IA Classification:', error);
+            showAIError('Erreur lors de l\'analyse IA: ' + error.message);
+        });
+    }
+
+    // Afficher l'indicateur d'analyse
+    function showAIAnalysis() {
+        const indicator = document.getElementById('ai-analysis-indicator');
+        const statusText = document.getElementById('ai-status-text');
+        const magicIcon = document.getElementById('ai-magic-icon');
+        
+        if (indicator) indicator.style.display = 'block';
+        if (statusText) statusText.textContent = 'Analyse en cours...';
+        if (magicIcon) magicIcon.classList.add('fa-spin');
+    }
+
+    // Masquer l'indicateur d'analyse
+    function hideAIAnalysis() {
+        const indicator = document.getElementById('ai-analysis-indicator');
+        const statusText = document.getElementById('ai-status-text');
+        const magicIcon = document.getElementById('ai-magic-icon');
+        
+        if (indicator) indicator.style.display = 'none';
+        if (statusText) statusText.textContent = 'Analyse terminée';
+        if (magicIcon) magicIcon.classList.remove('fa-spin');
+    }
+
+    // Afficher suggestion IA forte
+    function showAISuggestion(response) {
+        const confidence = Math.round(response.confidence);
+        const aiSuggestions = document.getElementById('ai-suggestions');
+        const aiSuggestionContent = document.getElementById('ai-suggestion-content');
+        
+        if (aiSuggestions && aiSuggestionContent) {
+            aiSuggestions.className = 'alert alert-success';
+            aiSuggestionContent.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Type suggéré:</strong> 
+                        <span class="badge badge-primary">${getTypeLabel(response.suggested_type)}</span>
+                        <br>
+                        <small class="text-muted">
+                            ${response.explanation} 
+                            <br>
+                            <i class="fas fa-chart-line"></i> Confiance: ${confidence}%
+                        </small>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-success" onclick="acceptAISuggestion('${response.suggested_type}')">
+                            <i class="fas fa-check"></i> Accepter
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="dismissAISuggestion()">
+                            <i class="fas fa-times"></i> Ignorer
+                        </button>
+                    </div>
+                </div>
+            `;
+            aiSuggestions.style.display = 'block';
+        }
+    }
+
+    // Afficher suggestion IA faible
+    function showWeakAISuggestion(response) {
+        const confidence = Math.round(response.confidence);
+        const aiSuggestions = document.getElementById('ai-suggestions');
+        const aiSuggestionContent = document.getElementById('ai-suggestion-content');
+        
+        if (aiSuggestions && aiSuggestionContent) {
+            aiSuggestions.className = 'alert alert-warning';
+            aiSuggestionContent.innerHTML = `
+                <div>
+                    <strong>Suggestion incertaine:</strong> 
+                    <span class="badge badge-warning">${getTypeLabel(response.suggested_type)}</span>
+                    <small class="text-muted">(${confidence}% confiance)</small>
+                    <br>
+                    <small class="text-muted">
+                        L'IA n'est pas sûre. Veuillez vérifier le type manuellement.
+                        <button type="button" class="btn btn-link btn-sm p-0 ml-2" onclick="dismissAISuggestion()">Masquer</button>
+                    </small>
+                </div>
+            `;
+            aiSuggestions.style.display = 'block';
+        }
+    }
+
+    // Afficher erreur IA
+    function showAIError(message) {
+        const aiSuggestions = document.getElementById('ai-suggestions');
+        const aiSuggestionContent = document.getElementById('ai-suggestion-content');
+        
+        if (aiSuggestions && aiSuggestionContent) {
+            aiSuggestions.className = 'alert alert-danger';
+            aiSuggestionContent.innerHTML = `
+                <div>
+                    <i class="fas fa-exclamation-triangle"></i> ${message}
+                    <button type="button" class="btn btn-link btn-sm p-0 ml-2" onclick="dismissAISuggestion()">Masquer</button>
+                </div>
+            `;
+            aiSuggestions.style.display = 'block';
+        }
+    }
+
     // Trigger change event on page load
-    $('#type').trigger('change');
+    if (typeSelect) {
+        const event = new Event('change');
+        typeSelect.dispatchEvent(event);
+    }
+    
+    // Test de connexion IA au chargement
+    testAIConnection();
 });
+
+// Fonctions globales pour les boutons
+function acceptAISuggestion(suggestedType) {
+    const typeSelect = document.getElementById('type');
+    if (typeSelect) {
+        typeSelect.value = suggestedType;
+        const event = new Event('change');
+        typeSelect.dispatchEvent(event);
+    }
+    dismissAISuggestion();
+    
+    // Feedback visuel
+    if (typeSelect) {
+        typeSelect.classList.add('border-success');
+        setTimeout(() => {
+            typeSelect.classList.remove('border-success');
+        }, 2000);
+    }
+}
+
+function dismissAISuggestion() {
+    const aiSuggestions = document.getElementById('ai-suggestions');
+    if (aiSuggestions) {
+        aiSuggestions.style.display = 'none';
+    }
+}
+
+function getTypeLabel(type) {
+    const labels = {
+        'CONFLIT_ECHANGE': 'Conflit d\'échange',
+        'COMPORTEMENT': 'Comportement inapproprié', 
+        'AUTRE': 'Autre'
+    };
+    return labels[type] || type;
+}
+
+// Test de connexion IA
+function testAIConnection() {
+    fetch('{{ route("api.test-ai-connection") }}', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        const statusText = document.getElementById('ai-status-text');
+        if (statusText) {
+            if (response.success) {
+                statusText.textContent = 'IA connectée';
+                statusText.className = 'text-success';
+            } else {
+                statusText.textContent = 'IA déconnectée';
+                statusText.className = 'text-warning';
+            }
+        }
+    })
+    .catch(error => {
+        const statusText = document.getElementById('ai-status-text');
+        if (statusText) {
+            statusText.textContent = 'IA indisponible';
+            statusText.className = 'text-danger';
+        }
+    });
+}
 </script>
 @endpush
