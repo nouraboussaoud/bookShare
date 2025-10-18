@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.app')
 
 @section('title', 'Modifier un livre')
 
@@ -63,7 +63,7 @@
                         @endif
                         <input type="file" name="photo" class="form-control @error('photo') is-invalid @enderror" accept="image/*">
                         @error('photo')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <small class="form-text text-muted">Formats acceptés: JPEG, PNG, JPG, GIF. Taille max: 2MB. Laissez vide pour conserver l'image actuelle.</small>
+                        <small class="form-text text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WebP. Taille max: 2MB. Laissez vide pour conserver l'image actuelle.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description</label>
@@ -74,8 +74,8 @@
                     <div class="mb-3">
                         <label class="form-label">Statut</label>
                         <select name="status" class="form-select @error('status') is-invalid @enderror" required>
-                            <option value="AVAILABLE" {{ old('status', $book->status) == 'AVAILABLE' ? 'selected' : '' }}>AVAILABLE</option>
-                            <option value="RESERVED" {{ old('status', $book->status) == 'RESERVED' ? 'selected' : '' }}>RESERVED</option>
+                            <option value="available" {{ old('status', $book->status) == 'available' ? 'selected' : '' }}>Disponible</option>
+                            <option value="reserved" {{ old('status', $book->status) == 'reserved' ? 'selected' : '' }}>Réservé</option>
                         </select>
                         @error('status')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>

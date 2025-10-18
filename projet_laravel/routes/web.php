@@ -1,12 +1,22 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ExchangeController;
+use App\Http\Controllers\Admin\ExchangeAdminController;
+use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDashboardController;
+use App\Http\Controllers\LocationController;
+
+use App\Http\Controllers\ReadingGroupController;
+use App\Http\Controllers\GroupMembershipController;
+use App\Http\Controllers\ReadingProgressController;
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -25,20 +35,32 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Dashboard Admin
-Route::get('/admin/dashboard', function () {
-    return view('pages.dashboard');
-})->middleware(['auth', 'admin'])->name('admin.dashboard');
+Route::get('/admin/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])
+    ->middleware(['auth', 'admin'])
+    ->name('admin.dashboard');
 
-// Routes Admin pour la gestion des utilisateurs
+// Routes Admin pour la gestion des utilisateurs et catégories
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserManagementController::class);
     Route::patch('users/{user}/toggle-status', [\App\Http\Controllers\Admin\UserManagementController::class, 'toggleStatus'])
         ->name('users.toggle-status');
     
+    // Categories management routes
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryManagementController::class);
+    Route::patch('categories/{category}/toggle-status', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'toggleStatus'])
+        ->name('categories.toggle-status');
+    Route::patch('categories/{category}/toggle-featured', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'toggleFeatured'])
+        ->name('categories.toggle-featured');
+    
     // Admin routes for reviews management
     Route::resource('reviews', \App\Http\Controllers\Admin\ReviewManagementController::class);
     Route::patch('reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'approve'])->name('reviews.approve');
     Route::patch('reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'reject'])->name('reviews.reject');
+    
+    // Admin routes for reports management
+    Route::resource('reports', \App\Http\Controllers\Admin\ReportAdminController::class)->only(['index', 'show', 'destroy']);
+    Route::patch('reports/{report}/status', [\App\Http\Controllers\Admin\ReportAdminController::class, 'updateStatus'])->name('reports.updateStatus');
+    Route::post('reports/bulk-status', [\App\Http\Controllers\Admin\ReportAdminController::class, 'bulkUpdateStatus'])->name('reports.bulkUpdateStatus');
 });
 
 // Dashboard User -> now uses controller for dynamic data
@@ -49,6 +71,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Notification routes
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unreadCount');
+    Route::get('/notifications/recent', [\App\Http\Controllers\NotificationController::class, 'getRecent'])->name('notifications.recent');
+    Route::get('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     
     // Simple logout test route
     Route::get('/test-logout', function () {
@@ -77,17 +108,148 @@ Route::middleware('auth')->group(function () {
         return redirect('/dashboard')->with('message', 'Vous êtes maintenant administrateur!');
     });
 
-
+Route::resource('locations', LocationController::class);
+    
+    // Routes spécifiques pour les actions de location
+    Route::post('locations/{location}/confirmer', [LocationController::class, 'confirmer'])->name('locations.confirmer');
+    Route::post('locations/{location}/refuser', [LocationController::class, 'refuser'])->name('locations.refuser');
+    Route::post('locations/{location}/demarrer', [LocationController::class, 'demarrer'])->name('locations.demarrer');
+    Route::post('locations/{location}/terminer', [LocationController::class, 'terminer'])->name('locations.terminer');
+    
+    // Route pour le marketplace des locations
+    Route::get('locations-marketplace', [LocationController::class, 'marketplace'])->name('locations.marketplace');
+    
+    // Route pour l'aide des locations
+    Route::get('locations-help', function () {
+        return view('locations.help');
+    })->name('locations.help');
     // Books resource routes
     Route::resource('books', BookController::class);
     // Toggle book status (AVAILABLE <-> RESERVED)
     Route::patch('books/{book}/toggle-status', [BookController::class, 'toggleStatus'])->name('books.toggleStatus');
-    
-    // Categories resource routes
-    Route::resource('categories', CategoryController::class);
+    // AI Summary generation
+    Route::post('books/{book}/generate-summary', [BookController::class, 'generateSummary'])->name('books.generateSummary');
     
     // Reviews resource routes - Users can manage their own reviews
     Route::resource('reviews', ReviewController::class);
+    
+    // Report routes for users
+    Route::resource('reports', \App\Http\Controllers\ReportController::class)->only(['index', 'create', 'store', 'show']);
+    
+    // Notification routes
+    Route::get('notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/{notification}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('notifications/{notification}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    
+// -----------------------
+// Reading Groups
+// -----------------------
+// Add this to enable the create view/route
+Route::get('reading-groups/create', [ReadingGroupController::class, 'create'])->name('reading-groups.create');
+
+// Full CRUD (index, store, show, update, destroy)
+// excluding only create/edit since you don’t use blade forms
+Route::resource('reading-groups', ReadingGroupController::class)
+    ->except(['create','edit']);
+ Route::get('reading-groups/{readingGroup}/edit', [ReadingGroupController::class, 'edit'])->name('reading-groups.edit');
+// Membership actions (join / leave)
+Route::post('reading-groups/{readingGroup}/join', [GroupMembershipController::class, 'join'])
+    ->name('reading-groups.join');
+Route::delete('reading-groups/{readingGroup}/leave', [GroupMembershipController::class, 'leave'])
+    ->name('reading-groups.leave');
+
+// -----------------------
+// Reading Progress Routes
+// -----------------------
+// Liste des progressions de lecture
+Route::get('reading-progress', [ReadingProgressController::class, 'index'])->name('reading-progress.index');
+
+// Statistiques de lecture
+Route::get('reading-progress/statistics', [ReadingProgressController::class, 'statistics'])->name('reading-progress.statistics');
+
+// Afficher une progression spécifique
+Route::get('reading-progress/{readingProgress}', [ReadingProgressController::class, 'show'])->name('reading-progress.show');
+
+// Créer une nouvelle progression
+Route::post('reading-progress', [ReadingProgressController::class, 'store'])->name('reading-progress.store');
+
+// Mettre à jour une progression
+Route::put('reading-progress/{readingProgress}', [ReadingProgressController::class, 'update'])->name('reading-progress.update');
+Route::patch('reading-progress/{readingProgress}', [ReadingProgressController::class, 'update']);
+
+// Supprimer une progression
+Route::delete('reading-progress/{readingProgress}', [ReadingProgressController::class, 'destroy'])->name('reading-progress.destroy');
+
+// Actions rapides
+Route::post('reading-progress/{readingProgress}/add-time', [ReadingProgressController::class, 'addReadingTime'])->name('reading-progress.addTime');
+Route::post('reading-progress/{readingProgress}/complete', [ReadingProgressController::class, 'markAsCompleted'])->name('reading-progress.complete');
+Route::post('books/{book}/mark-to-read', [ReadingProgressController::class, 'markAsToRead'])->name('books.markToRead');
+Route::post('books/{book}/start-reading', [ReadingProgressController::class, 'startReading'])->name('books.startReading');
+
 });
+
+// Routes Front Office
+Route::prefix('user')->middleware(['auth'])->group(function () {
+    Route::post('/reserve-book', [ExchangeController::class, 'reserveBook'])->name('user.reserveBook');
+    Route::patch('/confirm-exchange/{id}', [ExchangeController::class, 'confirmExchange'])->name('user.confirmExchange');
+    Route::get('/exchange-history', [ExchangeController::class, 'exchangeHistory'])->name('user.exchangeHistory');
+});
+
+// Routes Back Office
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
+    // Exchange management routes
+    Route::resource('exchanges', ExchangeAdminController::class);
+    Route::patch('/exchanges/{exchange}/supervise', [ExchangeAdminController::class, 'supervise'])->name('exchanges.supervise');
+    Route::patch('/exchanges/{exchange}/arbitrate', [ExchangeAdminController::class, 'arbitrate'])->name('exchanges.arbitrate');
+    Route::patch('/exchanges/{exchange}/cancel', [ExchangeAdminController::class, 'cancel'])->name('exchanges.cancel');
+    
+    // Legacy API routes
+    Route::get('/supervise-exchanges', [ExchangeAdminController::class, 'superviseExchanges'])->name('superviseExchanges');
+    Route::patch('/arbitrate-exchange/{id}', [ExchangeAdminController::class, 'arbitrateExchange'])->name('arbitrateExchange');
+    Route::delete('/cancel-exchange/{id}', [ExchangeAdminController::class, 'cancelExchange'])->name('cancelExchange');
+});
+
+// Route for creating an exchange
+Route::get('/exchanges/create', [ExchangeController::class, 'create'])->name('exchanges.create');
+
+// Route for user profiles
+Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+
+// Route for listing exchanges
+Route::get('/exchanges', [ExchangeController::class, 'index'])->name('exchanges.index');
+
+// Route for storing a new exchange
+Route::post('/exchanges', [ExchangeController::class, 'store'])->name('exchanges.store');
+// Route for showing a specific exchange
+Route::get('/exchanges/{exchange}', [ExchangeController::class, 'show'])->name('exchanges.show');
+// Route for editing an exchange
+Route::get('/exchanges/{exchange}/edit', [ExchangeController::class, 'edit'])->name('exchanges.edit');
+// Route for updating an exchange
+Route::put('/exchanges/{exchange}', [ExchangeController::class, 'update'])->name('exchanges.update');
+// Routes for accepting and rejecting exchanges
+Route::post('/exchanges/{exchange}/accept', [ExchangeController::class, 'accept'])->name('exchanges.accept');
+Route::post('/exchanges/{exchange}/reject', [ExchangeController::class, 'reject'])->name('exchanges.reject');
+
+// Routes API pour l'Intelligence Artificielle
+Route::middleware('auth')->prefix('api')->group(function () {
+    // Routes pour la classification automatique des signalements
+    Route::post('/classify-report', [\App\Http\Controllers\AIReportController::class, 'classifyReport'])->name('api.classify-report');
+    Route::get('/test-ai-connection', [\App\Http\Controllers\AIReportController::class, 'testConnection'])->name('api.test-ai-connection');
+    
+    // Routes pour les recommandations intelligentes d'échanges
+    Route::get('/recommend-books/{book}', [\App\Http\Controllers\AIRecommendationController::class, 'recommendBooks'])->name('api.recommend-books');
+    
+    // Routes pour le chatbot IA
+    Route::post('/chatbot/message', [\App\Http\Controllers\ChatbotController::class, 'sendMessage'])->name('api.chatbot.message');
+    Route::get('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'getHistory'])->name('api.chatbot.history');
+    Route::delete('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'clearHistory'])->name('api.chatbot.clear');
+    Route::get('/chatbot/suggestions', [\App\Http\Controllers\ChatbotController::class, 'getSuggestions'])->name('api.chatbot.suggestions');
+});
+
+// Route de test IA (sans auth pour le debug)
+Route::get('/test-ai', function () {
+    return view('test-ai');
+})->name('test.ai');
 
 require __DIR__.'/auth.php';

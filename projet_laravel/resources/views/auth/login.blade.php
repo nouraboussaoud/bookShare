@@ -1,47 +1,70 @@
 <x-guest-layout>
+    <h2 class="auth-title">Connexion</h2>
+    <p class="auth-subtitle">Bienvenue ! Connectez-vous à votre compte</p>
+
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+        <div class="success-message">
+            {{ session('status') }}
+        </div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
         <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="mb-3">
+            <label for="email" class="form-label">
+                <i class="fas fa-envelope me-2"></i>Email
+            </label>
+            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" 
+                   name="email" value="{{ old('email') }}" required autofocus autocomplete="username" 
+                   placeholder="votre@email.com">
+            @error('email')
+                <div class="error-message">{{ $message }}</div>
+            @enderror
         </div>
 
         <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="mb-3">
+            <label for="password" class="form-label">
+                <i class="fas fa-lock me-2"></i>Mot de passe
+            </label>
+            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" 
+                   name="password" required autocomplete="current-password" 
+                   placeholder="••••••••">
+            @error('password')
+                <div class="error-message">{{ $message }}</div>
+            @enderror
         </div>
 
         <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="remember_me" name="remember">
+            <label class="form-check-label" for="remember_me">
+                Se souvenir de moi
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary-auth mb-3">
+            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+        </button>
+
+        <!-- Links -->
+        <div class="text-center">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+                <a href="{{ route('password.request') }}" class="auth-link d-block mb-2">
+                    <i class="fas fa-key me-1"></i>Mot de passe oublié ?
                 </a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+            
+            @if (Route::has('register'))
+                <div class="auth-divider">ou</div>
+                <a href="{{ route('register') }}" class="auth-link">
+                    <i class="fas fa-user-plus me-1"></i>Créer un nouveau compte
+                </a>
+            @endif
         </div>
     </form>
 </x-guest-layout>

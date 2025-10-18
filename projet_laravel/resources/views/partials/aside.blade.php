@@ -46,21 +46,57 @@
         </div>
     </li>
 
-    <!-- Nav Item - Categories -->
-    <li class="nav-item {{ request()->routeIs('categories.*') ? 'active' : '' }}">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCategories"
-            aria-expanded="{{ request()->routeIs('categories.*') ? 'true' : 'false' }}" aria-controls="collapseCategories">
-            <i class="fas fa-fw fa-tags"></i>
-            <span>Catégories</span>
+
+    <!-- Nav Item - Utilities Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
+            aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-wrench"></i>
+            <span>Utilities</span>
+<li class="nav-item {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReviews"
+            aria-expanded="{{ request()->routeIs('reviews.*') ? 'true' : 'false' }}" aria-controls="collapseReviews">
+            <i class="fas fa-fw fa-star"></i>
+            <span>Avis</span>
+
+    <!-- Nav Item - Locations -->
+    <li class="nav-item {{ request()->routeIs('locations.*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLocations"
+            aria-expanded="{{ request()->routeIs('locations.*') ? 'true' : 'false' }}" aria-controls="collapseLocations">
+            <i class="fas fa-fw fa-handshake"></i>
+            <span>Locations</span>
         </a>
-        <div id="collapseCategories" class="collapse {{ request()->routeIs('categories.*') ? 'show' : '' }}" aria-labelledby="headingCategories" data-parent="#accordionSidebar">
+        <div id="collapseLocations" class="collapse {{ request()->routeIs('locations.*') ? 'show' : '' }}" aria-labelledby="headingLocations" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Gestion des Catégories:</h6>
-                <a class="collapse-item {{ request()->routeIs('categories.index') ? 'active' : '' }}" href="{{ route('categories.index') }}">
-                    <i class="fas fa-list"></i> Toutes les Catégories
+                <h6 class="collapse-header">Gestion des Locations:</h6>
+                <a class="collapse-item {{ request()->routeIs('locations.marketplace') ? 'active' : '' }}" href="{{ route('locations.marketplace') }}">
+                    <i class="fas fa-store"></i> Marketplace
                 </a>
-                <a class="collapse-item {{ request()->routeIs('categories.create') ? 'active' : '' }}" href="{{ route('categories.create') }}">
-                    <i class="fas fa-plus"></i> Ajouter une Catégorie
+                <a class="collapse-item {{ request()->routeIs('locations.index') ? 'active' : '' }}" href="{{ route('locations.index') }}">
+                    <i class="fas fa-list"></i> Mes Locations
+                </a>
+                <a class="collapse-item {{ request()->routeIs('locations.help') ? 'active' : '' }}" href="{{ route('locations.help') }}">
+                    <i class="fas fa-question-circle"></i> Guide d'aide
+                </a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Exchanges -->
+    <li class="nav-item {{ request()->routeIs('exchanges.*') ? 'active' : '' }}">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseExchanges"
+            aria-expanded="{{ request()->routeIs('exchanges.*') ? 'true' : 'false' }}" aria-controls="collapseExchanges">
+            <i class="fas fa-fw fa-exchange-alt"></i>
+            <span>Échanges</span>
+        </a>
+        <div id="collapseExchanges" class="collapse {{ request()->routeIs('exchanges.*') ? 'show' : '' }}" aria-labelledby="headingExchanges" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Gestion des Échanges:</h6>
+                <a class="collapse-item {{ request()->routeIs('exchanges.index') ? 'active' : '' }}" href="{{ route('exchanges.index') }}">
+                    <i class="fas fa-list"></i> Mes Échanges
+                </a>
+                <a class="collapse-item {{ request()->routeIs('exchanges.create') ? 'active' : '' }}" href="{{ route('exchanges.create') }}">
+                    <i class="fas fa-plus"></i> Réserver un Livre
                 </a>
             </div>
         </div>
@@ -103,11 +139,31 @@
             </a>
         </li>
 
+        <!-- Nav Item - Categories Management -->
+        <li class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.categories.index') }}">
+                <i class="fas fa-fw fa-tags"></i>
+                <span>Gestion Catégories</span>
+            </a>
+        </li>
+
         <!-- Nav Item - Admin Reviews Management -->
         <li class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.reviews.index') }}">
                 <i class="fas fa-fw fa-star-half-alt"></i>
                 <span>Gestion Avis (Admin)</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Reports Management -->
+        <li class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.reports.index') }}">
+                <i class="fas fa-fw fa-flag"></i>
+                <span>Gestion Signalements</span>
+                @php $pendingReports = \App\Models\Report::pending()->count(); @endphp
+                @if($pendingReports > 0)
+                    <span class="badge badge-danger ml-2">{{ $pendingReports }}</span>
+                @endif
             </a>
         </li>
     @endif

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -86,5 +87,62 @@ class User extends Authenticatable
     public function isInactive(): bool
     {
         return $this->status === 'inactive';
+    }
+
+    // Report relationships
+    public function reportsCreated()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    public function reportsReceived()
+    {
+        return $this->hasMany(Report::class, 'reported_user_id');
+    }
+    /**
+     * Relations avec les locations
+     */
+    
+    // Livres que l'utilisateur possède et loue à d'autres
+    public function locationsCommeProprietaire(): HasMany
+    {
+        return $this->hasMany(Location::class, 'proprietaire_id');
+    }
+
+    // Livres que l'utilisateur loue à d'autres
+    public function locationsCommeLocataire(): HasMany
+    {
+        return $this->hasMany(Location::class, 'locataire_id');
+    }
+
+    // Toutes les locations liées à l'utilisateur
+    public function toutesLesLocations()
+    {
+        return Location::where('proprietaire_id', $this->id)
+                      ->orWhere('locataire_id', $this->id);
+    }
+
+    // Livres possédés par l'utilisateur
+    public function books(): HasMany
+    {
+        return $this->hasMany(Book::class, 'user_id');
+    }
+
+    // Progression de lecture de l'utilisateur
+    public function readingProgress(): HasMany
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
+
+    // Notifications personnalisées
+    public function customNotifications(): HasMany
+    {
+        return $this->hasMany(\App\Models\Notification::class);
+    }
+
+    // Notifications non lues
+    public function unreadCustomNotifications(): HasMany
+    {
+        return $this->hasMany(\App\Models\Notification::class)->where('is_read', false);
     }
 }

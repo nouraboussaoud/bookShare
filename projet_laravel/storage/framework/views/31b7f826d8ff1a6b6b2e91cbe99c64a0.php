@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Ajouter un livre'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -126,7 +124,7 @@ $message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                        <small class="form-text text-muted">Formats acceptés: JPEG, PNG, JPG, GIF. Taille max: 2MB</small>
+                        <small class="form-text text-muted">Formats acceptés: JPEG, PNG, JPG, GIF, WebP. Taille max: 2MB</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description</label>
@@ -148,6 +146,23 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         <small class="form-text text-muted">Maximum 1000 caractères</small>
                     </div>
+
+                    <!-- Tags Section -->
+                    <div class="mb-3" id="tags-section">
+                        <label class="form-label">
+                            <i class="fas fa-tags"></i> Tags 
+                            <small class="text-muted">(Sélectionnez les tags qui correspondent à ce livre)</small>
+                        </label>
+                        <div id="tags-container" class="border rounded p-3 bg-light">
+                            <p class="text-muted text-center" id="no-category-message">
+                                <i class="fas fa-info-circle"></i> Sélectionnez d'abord une catégorie pour voir les tags disponibles
+                            </p>
+                            <div id="tags-list" class="d-none">
+                                <!-- Tags will be loaded here dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Statut</label>
                         <select name="status" class="form-select <?php $__errorArgs = ['status'];
@@ -158,8 +173,8 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" required>
-                            <option value="AVAILABLE" <?php echo e(old('status') == 'AVAILABLE' ? 'selected' : ''); ?>>AVAILABLE</option>
-                            <option value="RESERVED" <?php echo e(old('status') == 'RESERVED' ? 'selected' : ''); ?>>RESERVED</option>
+                            <option value="available" <?php echo e(old('status') == 'available' ? 'selected' : ''); ?>>Disponible</option>
+                            <option value="reserved" <?php echo e(old('status') == 'reserved' ? 'selected' : ''); ?>>Réservé</option>
                         </select>
                         <?php $__errorArgs = ['status'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -176,6 +191,80 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </div>
 </div>
-<?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Lenovo\Desktop\bookShare\projet_laravel\resources\views/books/create.blade.php ENDPATH**/ ?>
+<?php $__env->startPush('scripts'); ?>
+<script>
+// Tags data from categories
+const categoriesData = <?php echo json_encode($categories->map(function($cat) {
+    return [
+        'id' => $cat->id,
+        'name' => $cat->name,
+        'tags' => $cat->categoryTags->map(function($tag) {
+            return [
+                'id' => $tag->id,
+                'name' => $tag->name,
+                'color' => $tag->color,
+                'icon' => $tag->icon,
+                'type' => $tag->type,
+                'description' => $tag->description
+            ];
+        })
+    ];
+})); ?>;
+
+// Handle category change
+document.querySelector('select[name="category_id"]').addEventListener('change', function() {
+    const categoryId = parseInt(this.value);
+    const tagsListDiv = document.getElementById('tags-list');
+    const noMessageDiv = document.getElementById('no-category-message');
+    
+    if (!categoryId) {
+        tagsListDiv.classList.add('d-none');
+        noMessageDiv.classList.remove('d-none');
+        return;
+    }
+    
+    const category = categoriesData.find(c => c.id === categoryId);
+    
+    if (!category || category.tags.length === 0) {
+        tagsListDiv.innerHTML = '<p class="text-muted text-center"><i class="fas fa-info-circle"></i> Aucun tag disponible pour cette catégorie</p>';
+        tagsListDiv.classList.remove('d-none');
+        noMessageDiv.classList.add('d-none');
+        return;
+    }
+    
+    // Build tags HTML
+    let html = '<div class="row">';
+    category.tags.forEach(tag => {
+        const typeLabel = {
+            'genre': '📖 Genre',
+            'theme': '🎭 Thème',
+            'mood': '😊 Ambiance',
+            'pace': '⚡ Rythme',
+            'other': '🏷️ Autre'
+        }[tag.type] || '🏷️';
+        
+        html += `
+            <div class="col-md-6 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="tags[]" value="${tag.id}" id="tag-${tag.id}">
+                    <label class="form-check-label" for="tag-${tag.id}">
+                        <span class="badge" style="background-color: ${tag.color}; color: white;">
+                            ${tag.icon ? '<i class="' + tag.icon + '"></i>' : ''} ${tag.name}
+                        </span>
+                        <small class="text-muted d-block">${typeLabel} ${tag.description ? '- ' + tag.description : ''}</small>
+                    </label>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    tagsListDiv.innerHTML = html;
+    tagsListDiv.classList.remove('d-none');
+    noMessageDiv.classList.add('d-none');
+});
+</script>
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Lenovo\Desktop\bookShare\projet_laravel\resources\views/books/create.blade.php ENDPATH**/ ?>

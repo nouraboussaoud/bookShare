@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'huggingface' => [
+        'token' => env('HUGGINGFACE_TOKEN'),
+    ],
+
+    'groq' => [
+        'api_key' => env('GROQ_API_KEY'),
+    ],
+
 ];

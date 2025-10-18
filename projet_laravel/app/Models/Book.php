@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Book extends Model
 {
@@ -18,7 +19,19 @@ class Book extends Model
         'recommended_age',
         'photo',
         'description',
+        'ai_summary',
     ];
+
+    // Relations
+    public function exchangesDemande()
+    {
+        return $this->hasMany(Exchange::class, 'bookDemandeId');
+    }
+
+    public function exchangesOffert()
+    {
+        return $this->hasMany(Exchange::class, 'bookOffertId');
+    }
 
     public function user()
     {
@@ -40,6 +53,47 @@ class Book extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function locations()
+    {
+        return $this->hasMany(Location::class);
+    }
+
+    public function readingProgress()
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
+
+    public function categoryTags()
+    {
+        return $this->belongsToMany(CategoryTag::class, 'book_category_tag')
+            ->withPivot('created_by_user_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Calcule la note moyenne des avis
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Retourne le nombre total d'avis
+     */
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
+    /**
+     * Retourne tous les avis approuvés
+     */
+    public function approvedReviews()
+    {
+        return $this->reviews()->where('status', 'approved');
+    }
+
     public function getAgeDisplayAttribute()
     {
         return $this->recommended_age == 0 ? 'Tout âge' : $this->recommended_age . '+';
@@ -57,7 +111,7 @@ class Book extends Model
 
     public function scopeAvailable($query)
     {
-        return $query->where('status', 'AVAILABLE');
+        return $query->where('status', 'available');
     }
 
     public function getPhotoUrlAttribute()
@@ -71,5 +125,35 @@ class Book extends Model
     public function hasPhoto()
     {
         return !empty($this->photo) && file_exists(storage_path('app/public/' . $this->photo));
+    }
+
+    /**
+     * Vérifie si le livre est disponible pour la location
+     */
+    public function estDisponiblePourLocation(): bool
+    {
+        // Le livre doit être disponible et ne pas avoir de location active
+        return $this->status === 'available' && !$this->estEnLocation();
+    }
+
+    /**
+     * Vérifie si le livre est actuellement en location
+     */
+    public function estEnLocation(): bool
+    {
+        return $this->locations()
+            ->whereIn('statut', ['confirmee', 'en_cours'])
+            ->exists();
+    }
+
+    /**
+     * Retourne la location active s'il y en a une
+     */
+    public function getLocationActive()
+    {
+        return $this->locations()
+            ->whereIn('statut', ['confirmee', 'en_cours'])
+            ->with(['locataire', 'proprietaire'])
+            ->first();
     }
 }
