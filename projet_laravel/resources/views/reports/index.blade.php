@@ -17,6 +17,87 @@
         </a>
     </div>
 
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Signalements
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $reports->total() }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-flag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                En Attente
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $reports->where('status', 'EN_ATTENTE')->count() }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Traités
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $reports->where('status', 'TRAITE')->count() }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Rejetés
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $reports->where('status', 'REJETE')->count() }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-times fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -41,12 +122,17 @@
                 </div>
             @endif
 
-            <!-- Filters -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <form method="GET" class="form-inline">
-                        <div class="form-group mr-3">
-                            <label for="status" class="mr-2">Statut:</label>
+            <!-- Filters Card -->
+            <div class="card mb-4 border-left-primary">
+                <div class="card-header bg-light">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-filter mr-2"></i>Filtres de recherche
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="status" class="form-label font-weight-bold">Statut</label>
                             <select name="status" id="status" class="form-control">
                                 <option value="">Tous les statuts</option>
                                 @foreach(\App\Models\Report::getStatuses() as $value => $label)
@@ -57,8 +143,8 @@
                             </select>
                         </div>
 
-                        <div class="form-group mr-3">
-                            <label for="type" class="mr-2">Type:</label>
+                        <div class="col-md-4 mb-3">
+                            <label for="type" class="form-label font-weight-bold">Type</label>
                             <select name="type" id="type" class="form-control">
                                 <option value="">Tous les types</option>
                                 @foreach(\App\Models\Report::getTypes() as $value => $label)
@@ -69,16 +155,34 @@
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary mr-2">
-                            <i class="fas fa-filter"></i> Filtrer
-                        </button>
-
-                        @if(request()->hasAny(['status', 'type']))
-                            <a href="{{ route('reports.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-undo"></i> Réinitialiser
-                            </a>
-                        @endif
+                        <div class="col-md-4 mb-3 d-flex align-items-end">
+                            <div class="btn-group w-100" role="group">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search mr-1"></i> Filtrer
+                                </button>
+                                @if(request()->hasAny(['status', 'type']))
+                                    <a href="{{ route('reports.index') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-undo mr-1"></i> Reset
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
                     </form>
+                    
+                    @if(request()->hasAny(['status', 'type']))
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Filtres actifs: 
+                                @if(request('status'))
+                                    <span class="badge badge-primary">{{ \App\Models\Report::getStatuses()[request('status')] }}</span>
+                                @endif
+                                @if(request('type'))
+                                    <span class="badge badge-info">{{ \App\Models\Report::getTypes()[request('type')] }}</span>
+                                @endif
+                            </small>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -169,6 +273,57 @@
 .badge-purple {
     color: #fff;
     background-color: #6f42c1;
+}
+
+.card.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.card.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.card.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.card.border-left-danger {
+    border-left: 0.25rem solid #e74a3b !important;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+    color: #5a5c69;
+}
+
+.card-header.bg-light {
+    background-color: #f8f9fc !important;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.table thead th {
+    border-bottom: 2px solid #e3e6f0;
+    background-color: #f8f9fc;
+    color: #5a5c69;
+    font-weight: 600;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fc;
 }
 </style>
 @endpush

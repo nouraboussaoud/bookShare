@@ -206,52 +206,82 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     let aiAnalysisTimeout;
     let lastAnalyzedText = '';
     
-    // Ajouter le token CSRF pour les requêtes AJAX
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
     // Show/hide sections based on report type
-    $('#type').change(function() {
-        const type = $(this).val();
+    const typeSelect = document.getElementById('type');
+    typeSelect.addEventListener('change', function() {
+        const type = this.value;
+        const reportedUserSection = document.getElementById('reported-user-section');
+        const exchangeSection = document.getElementById('exchange-section');
+        const exchangeField = document.getElementById('exchange_id');
+        const reportedUserField = document.getElementById('reported_user_search');
         
         if (type === 'COMPORTEMENT') {
-            $('#reported-user-section').show();
-            $('#exchange-section').hide();
-            $('#exchange_id').val('').prop('required', false);
-            $('#reported_user_search').prop('required', true);
+            if (reportedUserSection) {
+                reportedUserSection.style.display = 'block';
+                if (reportedUserField) {
+                    reportedUserField.required = true;
+                }
+            }
+            if (exchangeSection) {
+                exchangeSection.style.display = 'none';
+                if (exchangeField) {
+                    exchangeField.value = '';
+                    exchangeField.required = false;
+                }
+            }
         } else if (type === 'CONFLIT_ECHANGE') {
-            $('#reported-user-section').hide();
-            $('#exchange-section').show();
-            $('#reported_user_search').val('').prop('required', false);
-            $('#exchange_id').prop('required', true);
+            if (reportedUserSection) {
+                reportedUserSection.style.display = 'none';
+                if (reportedUserField) {
+                    reportedUserField.value = '';
+                    reportedUserField.required = false;
+                }
+            }
+            if (exchangeSection) {
+                exchangeSection.style.display = 'block';
+                if (exchangeField) {
+                    exchangeField.required = true;
+                }
+            }
         } else {
-            $('#reported-user-section').hide();
-            $('#exchange-section').hide();
-            $('#reported_user_search').val('').prop('required', false);
-            $('#exchange_id').val('').prop('required', false);
+            if (reportedUserSection) {
+                reportedUserSection.style.display = 'none';
+                if (reportedUserField) {
+                    reportedUserField.value = '';
+                    reportedUserField.required = false;
+                }
+            }
+            if (exchangeSection) {
+                exchangeSection.style.display = 'none';
+                if (exchangeField) {
+                    exchangeField.value = '';
+                    exchangeField.required = false;
+                }
+            }
         }
     });
 
-    // Compteur de caractères
-    $('#description').on('input', function() {
-        const text = $(this).val();
+    // Compteur de caractères et analyse IA
+    const descriptionField = document.getElementById('description');
+    descriptionField.addEventListener('input', function() {
+        const text = this.value;
         const charCount = text.length;
-        $('#char-count').text(charCount);
+        const charCountElement = document.getElementById('char-count');
         
-        // Couleur selon la longueur
-        if (charCount > 900) {
-            $('#char-count').removeClass('text-muted text-warning').addClass('text-danger');
-        } else if (charCount > 700) {
-            $('#char-count').removeClass('text-muted text-danger').addClass('text-warning');
-        } else {
-            $('#char-count').removeClass('text-warning text-danger').addClass('text-muted');
+        if (charCountElement) {
+            charCountElement.textContent = charCount;
+            
+            // Couleur selon la longueur
+            charCountElement.className = 'text-muted';
+            if (charCount > 900) {
+                charCountElement.className = 'text-danger';
+            } else if (charCount > 700) {
+                charCountElement.className = 'text-warning';
+            }
         }
         
         // Analyse IA avec délai pour éviter trop de requêtes
@@ -308,86 +338,108 @@ $(document).ready(function() {
         });
     }
 
-
-
     // Afficher l'indicateur d'analyse
     function showAIAnalysis() {
-        $('#ai-analysis-indicator').show();
-        $('#ai-status-text').text('Analyse en cours...');
-        $('#ai-magic-icon').addClass('fa-spin');
+        const indicator = document.getElementById('ai-analysis-indicator');
+        const statusText = document.getElementById('ai-status-text');
+        const magicIcon = document.getElementById('ai-magic-icon');
+        
+        if (indicator) indicator.style.display = 'block';
+        if (statusText) statusText.textContent = 'Analyse en cours...';
+        if (magicIcon) magicIcon.classList.add('fa-spin');
     }
 
     // Masquer l'indicateur d'analyse
     function hideAIAnalysis() {
-        $('#ai-analysis-indicator').hide();
-        $('#ai-status-text').text('Analyse terminée');
-        $('#ai-magic-icon').removeClass('fa-spin');
+        const indicator = document.getElementById('ai-analysis-indicator');
+        const statusText = document.getElementById('ai-status-text');
+        const magicIcon = document.getElementById('ai-magic-icon');
+        
+        if (indicator) indicator.style.display = 'none';
+        if (statusText) statusText.textContent = 'Analyse terminée';
+        if (magicIcon) magicIcon.classList.remove('fa-spin');
     }
 
     // Afficher suggestion IA forte
     function showAISuggestion(response) {
         const confidence = Math.round(response.confidence);
+        const aiSuggestions = document.getElementById('ai-suggestions');
+        const aiSuggestionContent = document.getElementById('ai-suggestion-content');
         
-        $('#ai-suggestions').removeClass('alert-warning alert-danger').addClass('alert-success');
-        $('#ai-suggestion-content').html(`
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>Type suggéré:</strong> 
-                    <span class="badge badge-primary">${getTypeLabel(response.suggested_type)}</span>
-                    <br>
-                    <small class="text-muted">
-                        ${response.explanation} 
+        if (aiSuggestions && aiSuggestionContent) {
+            aiSuggestions.className = 'alert alert-success';
+            aiSuggestionContent.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Type suggéré:</strong> 
+                        <span class="badge badge-primary">${getTypeLabel(response.suggested_type)}</span>
                         <br>
-                        <i class="fas fa-chart-line"></i> Confiance: ${confidence}%
-                    </small>
+                        <small class="text-muted">
+                            ${response.explanation} 
+                            <br>
+                            <i class="fas fa-chart-line"></i> Confiance: ${confidence}%
+                        </small>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-success" onclick="acceptAISuggestion('${response.suggested_type}')">
+                            <i class="fas fa-check"></i> Accepter
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="dismissAISuggestion()">
+                            <i class="fas fa-times"></i> Ignorer
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <button type="button" class="btn btn-sm btn-success" onclick="acceptAISuggestion('${response.suggested_type}')">
-                        <i class="fas fa-check"></i> Accepter
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary ml-1" onclick="dismissAISuggestion()">
-                        <i class="fas fa-times"></i> Ignorer
-                    </button>
-                </div>
-            </div>
-        `);
-        $('#ai-suggestions').show();
+            `;
+            aiSuggestions.style.display = 'block';
+        }
     }
 
     // Afficher suggestion IA faible
     function showWeakAISuggestion(response) {
         const confidence = Math.round(response.confidence);
+        const aiSuggestions = document.getElementById('ai-suggestions');
+        const aiSuggestionContent = document.getElementById('ai-suggestion-content');
         
-        $('#ai-suggestions').removeClass('alert-success alert-danger').addClass('alert-warning');
-        $('#ai-suggestion-content').html(`
-            <div>
-                <strong>Suggestion incertaine:</strong> 
-                <span class="badge badge-warning">${getTypeLabel(response.suggested_type)}</span>
-                <small class="text-muted">(${confidence}% confiance)</small>
-                <br>
-                <small class="text-muted">
-                    L'IA n'est pas sûre. Veuillez vérifier le type manuellement.
-                    <button type="button" class="btn btn-link btn-sm p-0 ml-2" onclick="dismissAISuggestion()">Masquer</button>
-                </small>
-            </div>
-        `);
-        $('#ai-suggestions').show();
+        if (aiSuggestions && aiSuggestionContent) {
+            aiSuggestions.className = 'alert alert-warning';
+            aiSuggestionContent.innerHTML = `
+                <div>
+                    <strong>Suggestion incertaine:</strong> 
+                    <span class="badge badge-warning">${getTypeLabel(response.suggested_type)}</span>
+                    <small class="text-muted">(${confidence}% confiance)</small>
+                    <br>
+                    <small class="text-muted">
+                        L'IA n'est pas sûre. Veuillez vérifier le type manuellement.
+                        <button type="button" class="btn btn-link btn-sm p-0 ml-2" onclick="dismissAISuggestion()">Masquer</button>
+                    </small>
+                </div>
+            `;
+            aiSuggestions.style.display = 'block';
+        }
     }
 
     // Afficher erreur IA
     function showAIError(message) {
-        $('#ai-suggestions').removeClass('alert-success alert-warning').addClass('alert-danger');
-        $('#ai-suggestion-content').html(`
-            <div>
-                <i class="fas fa-exclamation-triangle"></i> ${message}
-                <button type="button" class="btn btn-link btn-sm p-0 ml-2" onclick="dismissAISuggestion()">Masquer</button>
-            </div>
-        `);
-        $('#ai-suggestions').show();
+        const aiSuggestions = document.getElementById('ai-suggestions');
+        const aiSuggestionContent = document.getElementById('ai-suggestion-content');
+        
+        if (aiSuggestions && aiSuggestionContent) {
+            aiSuggestions.className = 'alert alert-danger';
+            aiSuggestionContent.innerHTML = `
+                <div>
+                    <i class="fas fa-exclamation-triangle"></i> ${message}
+                    <button type="button" class="btn btn-link btn-sm p-0 ml-2" onclick="dismissAISuggestion()">Masquer</button>
+                </div>
+            `;
+            aiSuggestions.style.display = 'block';
+        }
     }
 
     // Trigger change event on page load
-    $('#type').trigger('change');
+    if (typeSelect) {
+        const event = new Event('change');
+        typeSelect.dispatchEvent(event);
+    }
     
     // Test de connexion IA au chargement
     testAIConnection();
@@ -395,18 +447,28 @@ $(document).ready(function() {
 
 // Fonctions globales pour les boutons
 function acceptAISuggestion(suggestedType) {
-    $('#type').val(suggestedType).trigger('change');
+    const typeSelect = document.getElementById('type');
+    if (typeSelect) {
+        typeSelect.value = suggestedType;
+        const event = new Event('change');
+        typeSelect.dispatchEvent(event);
+    }
     dismissAISuggestion();
     
     // Feedback visuel
-    $('#type').addClass('border-success');
-    setTimeout(() => {
-        $('#type').removeClass('border-success');
-    }, 2000);
+    if (typeSelect) {
+        typeSelect.classList.add('border-success');
+        setTimeout(() => {
+            typeSelect.classList.remove('border-success');
+        }, 2000);
+    }
 }
 
 function dismissAISuggestion() {
-    $('#ai-suggestions').hide();
+    const aiSuggestions = document.getElementById('ai-suggestions');
+    if (aiSuggestions) {
+        aiSuggestions.style.display = 'none';
+    }
 }
 
 function getTypeLabel(type) {
@@ -418,22 +480,32 @@ function getTypeLabel(type) {
     return labels[type] || type;
 }
 
-
-
 // Test de connexion IA
 function testAIConnection() {
-    $.ajax({
-        url: '{{ route("api.test-ai-connection") }}',
+    fetch('{{ route("api.test-ai-connection") }}', {
         method: 'GET',
-        success: function(response) {
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(response => {
+        const statusText = document.getElementById('ai-status-text');
+        if (statusText) {
             if (response.success) {
-                $('#ai-status-text').text('IA connectée').addClass('text-success');
+                statusText.textContent = 'IA connectée';
+                statusText.className = 'text-success';
             } else {
-                $('#ai-status-text').text('IA déconnectée').addClass('text-warning');
+                statusText.textContent = 'IA déconnectée';
+                statusText.className = 'text-warning';
             }
-        },
-        error: function() {
-            $('#ai-status-text').text('IA indisponible').addClass('text-danger');
+        }
+    })
+    .catch(error => {
+        const statusText = document.getElementById('ai-status-text');
+        if (statusText) {
+            statusText.textContent = 'IA indisponible';
+            statusText.className = 'text-danger';
         }
     });
 }
