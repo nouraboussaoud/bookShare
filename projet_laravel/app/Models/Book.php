@@ -57,6 +57,35 @@ class Book extends Model
         return $this->hasMany(Location::class);
     }
 
+    public function readingProgress()
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
+
+    /**
+     * Calcule la note moyenne des avis
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    /**
+     * Retourne le nombre total d'avis
+     */
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
+    /**
+     * Retourne tous les avis approuvés
+     */
+    public function approvedReviews()
+    {
+        return $this->reviews()->where('status', 'approved');
+    }
+
     public function getAgeDisplayAttribute()
     {
         return $this->recommended_age == 0 ? 'Tout âge' : $this->recommended_age . '+';

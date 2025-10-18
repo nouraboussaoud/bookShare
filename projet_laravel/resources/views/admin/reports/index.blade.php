@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.admin-layout')
 
 @section('title', 'BookShare - Gestion des signalements')
 

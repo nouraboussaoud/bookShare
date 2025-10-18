@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.admin-layout')
 
 @section('title', 'BookShare - Détails du signalement #' . $report->id)
 

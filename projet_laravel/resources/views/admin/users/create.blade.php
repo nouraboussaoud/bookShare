@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.admin-layout')
 @section('title', 'Créer un Utilisateur')
 @section('content')
     <!-- Page Heading -->

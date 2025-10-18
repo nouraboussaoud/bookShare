@@ -13,6 +13,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\LocationController;
 
+use App\Http\Controllers\ReadingGroupController;
+use App\Http\Controllers\GroupMembershipController;
+use App\Http\Controllers\ReadingProgressController;
+
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -129,6 +133,52 @@ Route::resource('locations', LocationController::class);
     
     // Report routes for users
     Route::resource('reports', \App\Http\Controllers\ReportController::class)->only(['index', 'create', 'store', 'show']);
+    
+// -----------------------
+// Reading Groups
+// -----------------------
+// Add this to enable the create view/route
+Route::get('reading-groups/create', [ReadingGroupController::class, 'create'])->name('reading-groups.create');
+
+// Full CRUD (index, store, show, update, destroy)
+// excluding only create/edit since you don’t use blade forms
+Route::resource('reading-groups', ReadingGroupController::class)
+    ->except(['create','edit']);
+ Route::get('reading-groups/{readingGroup}/edit', [ReadingGroupController::class, 'edit'])->name('reading-groups.edit');
+// Membership actions (join / leave)
+Route::post('reading-groups/{readingGroup}/join', [GroupMembershipController::class, 'join'])
+    ->name('reading-groups.join');
+Route::delete('reading-groups/{readingGroup}/leave', [GroupMembershipController::class, 'leave'])
+    ->name('reading-groups.leave');
+
+// -----------------------
+// Reading Progress Routes
+// -----------------------
+// Liste des progressions de lecture
+Route::get('reading-progress', [ReadingProgressController::class, 'index'])->name('reading-progress.index');
+
+// Statistiques de lecture
+Route::get('reading-progress/statistics', [ReadingProgressController::class, 'statistics'])->name('reading-progress.statistics');
+
+// Afficher une progression spécifique
+Route::get('reading-progress/{readingProgress}', [ReadingProgressController::class, 'show'])->name('reading-progress.show');
+
+// Créer une nouvelle progression
+Route::post('reading-progress', [ReadingProgressController::class, 'store'])->name('reading-progress.store');
+
+// Mettre à jour une progression
+Route::put('reading-progress/{readingProgress}', [ReadingProgressController::class, 'update'])->name('reading-progress.update');
+Route::patch('reading-progress/{readingProgress}', [ReadingProgressController::class, 'update']);
+
+// Supprimer une progression
+Route::delete('reading-progress/{readingProgress}', [ReadingProgressController::class, 'destroy'])->name('reading-progress.destroy');
+
+// Actions rapides
+Route::post('reading-progress/{readingProgress}/add-time', [ReadingProgressController::class, 'addReadingTime'])->name('reading-progress.addTime');
+Route::post('reading-progress/{readingProgress}/complete', [ReadingProgressController::class, 'markAsCompleted'])->name('reading-progress.complete');
+Route::post('books/{book}/mark-to-read', [ReadingProgressController::class, 'markAsToRead'])->name('books.markToRead');
+Route::post('books/{book}/start-reading', [ReadingProgressController::class, 'startReading'])->name('books.startReading');
+
 });
 
 // Routes Front Office
