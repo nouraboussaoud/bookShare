@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.app')
 @section('title', 'Détails de l\'Avis')
 @section('content')
     <!-- Page Heading -->

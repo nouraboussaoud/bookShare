@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.app')
 
 @section('title', 'BookShare - Notifications')
 
@@ -75,10 +75,29 @@
                                             @endif
                                             <div class="btn-group-vertical">
                                                 @if($notification->type === 'exchange_request' || $notification->type === 'exchange_status_change')
-                                                    <a href="{{ route('notifications.markAsRead', $notification->id) }}" 
-                                                       class="btn btn-sm btn-outline-primary mb-1">
-                                                        <i class="fas fa-eye mr-1"></i> Voir l'échange
-                                                    </a>
+                                                    @php
+                                                        $exchangeId = null;
+                                                        if(is_array($notification->data) && isset($notification->data['exchange_id'])) {
+                                                            $exchangeId = $notification->data['exchange_id'];
+                                                        } elseif(is_string($notification->data)) {
+                                                            $data = json_decode($notification->data, true);
+                                                            $exchangeId = $data['exchange_id'] ?? null;
+                                                        }
+                                                    @endphp
+                                                    
+                                                    @if($exchangeId)
+                                                        <a href="{{ route('exchanges.show', $exchangeId) }}" 
+                                                           class="btn btn-sm btn-outline-primary mb-1"
+                                                           onclick="markNotificationAsRead({{ $notification->id }})">
+                                                            <i class="fas fa-eye mr-1"></i> Voir l'échange
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('exchanges.index') }}" 
+                                                           class="btn btn-sm btn-outline-primary mb-1"
+                                                           onclick="markNotificationAsRead({{ $notification->id }})">
+                                                            <i class="fas fa-list mr-1"></i> Voir les échanges
+                                                        </a>
+                                                    @endif
                                                 @endif
                                                 @if(!$notification->is_read)
                                                     <button class="btn btn-sm btn-outline-success mb-1 mark-read-btn" 
@@ -169,51 +188,224 @@
             });
         });
 
-        // Mark single notification as read
-        $('.mark-read-btn').on('click', function() {
-            const notificationId = $(this).data('id');
-            const button = $(this);
-            
-            $.ajax({
-                url: `/notifications/${notificationId}/mark-read`,
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    button.closest('.list-group-item').removeClass('notification-unread');
+        // Mark single notification as read (using event delegation)
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.mark-read-btn')) {
+                const button = event.target.closest('.mark-read-btn');
+                const notificationId = button.getAttribute('data-id');
+                
+                console.log('Marking notification as read:', notificationId);
+                
+                // Get CSRF token from meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                fetch(`/notifications/${notificationId}/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    const listItem = button.closest('.list-group-item');
+                    listItem.classList.remove('notification-unread');
+                    
+                    // Remove the "Nouveau" badge
+                    const badge = listItem.querySelector('.badge-primary, .badge-warning, .badge-info');
+                    if (badge && badge.textContent.trim() === 'Nouveau') {
+                        badge.remove();
+                    }
+                    
+                    // Remove the "Lu" button
                     button.remove();
-                },
-                error: function() {
-                    alert('Erreur lors de la mise à jour.');
-                }
-            });
+                    
+                    // Update counter if no more unread notifications
+                    const unreadCount = document.querySelectorAll('.notification-unread').length;
+                    if (unreadCount === 0) {
+                        const markAllBtn = document.getElementById('markAllRead');
+                        if (markAllBtn) markAllBtn.style.display = 'none';
+                        
+                        const counterBadge = document.querySelector('.badge-danger');
+                        if (counterBadge) counterBadge.remove();
+                    } else {
+                        // Update counter
+                        const counterBadge = document.querySelector('.badge-danger');
+                        if (counterBadge) {
+                            counterBadge.textContent = `${unreadCount} nouveau(x)`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la mise à jour: ' + error.message);
+                });
+            }
         });
 
-        // Delete notification
-        $('.delete-notification-btn').on('click', function() {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
-                return;
-            }
+        // Function to mark notification as read (called when clicking "Voir l'échange")
+        function markNotificationAsRead(notificationId) {
+            console.log('Marking notification as read (from link):', notificationId);
             
-            const notificationId = $(this).data('id');
-            const listItem = $(this).closest('.list-group-item');
+            // Get CSRF token from meta tag
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             
-            $.ajax({
-                url: `/notifications/${notificationId}`,
-                method: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    listItem.fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                },
-                error: function() {
-                    alert('Erreur lors de la suppression.');
+            fetch('/notifications/' + notificationId + '/mark-read', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Notification marquée comme lue:', data);
+            })
+            .catch(error => {
+                console.error('Erreur lors de la mise à jour de la notification:', error);
             });
+        }
+
+        // Mark all notifications as read
+        const markAllReadBtn = document.getElementById('markAllRead');
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', function() {
+                if (!confirm('Êtes-vous sûr de vouloir marquer toutes les notifications comme lues ?')) {
+                    return;
+                }
+                
+                console.log('Marking all notifications as read');
+                
+                // Get CSRF token from meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                fetch('/notifications/mark-all-read', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    
+                    // Remove unread styling from all notifications
+                    document.querySelectorAll('.notification-unread').forEach(function(item) {
+                        item.classList.remove('notification-unread');
+                    });
+                    
+                    // Remove all "Lu" buttons and "Nouveau" badges
+                    document.querySelectorAll('.mark-read-btn').forEach(function(btn) {
+                        btn.remove();
+                    });
+                    document.querySelectorAll('.badge-primary, .badge-warning, .badge-info').forEach(function(badge) {
+                        if (badge.textContent.trim() === 'Nouveau') {
+                            badge.remove();
+                        }
+                    });
+                    
+                    // Hide the "Mark all as read" button
+                    markAllReadBtn.style.display = 'none';
+                    
+                    // Update the counter in header
+                    const counterBadge = document.querySelector('.badge-danger');
+                    if (counterBadge) {
+                        counterBadge.remove();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la mise à jour: ' + error.message);
+                });
+            });
+        }
+
+        // Delete notification (using event delegation)
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.delete-notification-btn')) {
+                const button = event.target.closest('.delete-notification-btn');
+                
+                if (!confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
+                    return;
+                }
+                
+                const notificationId = button.getAttribute('data-id');
+                const listItem = button.closest('.list-group-item');
+                const wasUnread = listItem.classList.contains('notification-unread');
+                
+                console.log('Deleting notification:', notificationId);
+                
+                // Get CSRF token from meta tag
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                fetch(`/notifications/${notificationId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    listItem.style.transition = 'opacity 0.3s';
+                    listItem.style.opacity = '0';
+                    setTimeout(() => {
+                        listItem.remove();
+                        
+                        // Update counter if it was unread
+                        if (wasUnread) {
+                            const unreadCount = document.querySelectorAll('.notification-unread').length;
+                            if (unreadCount === 0) {
+                                const markAllBtn = document.getElementById('markAllRead');
+                                if (markAllBtn) markAllBtn.style.display = 'none';
+                                
+                                const counterBadge = document.querySelector('.badge-danger');
+                                if (counterBadge) counterBadge.remove();
+                            } else {
+                                const counterBadge = document.querySelector('.badge-danger');
+                                if (counterBadge) {
+                                    counterBadge.textContent = `${unreadCount} nouveau(x)`;
+                                }
+                            }
+                        }
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la suppression: ' + error.message);
+                });
+            }
         });
     });
 </script>

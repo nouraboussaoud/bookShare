@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+@extends('layouts.app')
 
 @section('title', 'BookShare - Créer un Échange')
 
@@ -145,50 +145,51 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     function updateFormBasedOnType(selectedType) {
-        const bookOfferedRow = $('#book-offered-row');
-        const bookOfferedField = $('#bookOffertId');
-        const bookLabel = $('#book-label');
+        const bookOfferedRow = document.getElementById('book-offered-row');
+        const bookOfferedField = document.getElementById('bookOffertId');
+        const bookLabel = document.getElementById('book-label');
         
         // Reset visibility and requirements
-        bookOfferedRow.hide();
-        bookOfferedField.removeAttr('required');
+        bookOfferedRow.style.display = 'none';
+        bookOfferedField.removeAttribute('required');
         
         // Update labels and show/hide fields based on type
         switch(selectedType) {
             case 'RESERVATION':
-                bookLabel.text('Livre à réserver');
+                bookLabel.textContent = 'Livre à réserver';
                 break;
             case 'PRET':
-                bookLabel.text('Livre à emprunter');
+                bookLabel.textContent = 'Livre à emprunter';
                 break;
             case 'ECHANGE':
-                bookLabel.text('Livre demandé');
-                bookOfferedRow.show();
-                bookOfferedField.attr('required', 'required');
+                bookLabel.textContent = 'Livre demandé';
+                bookOfferedRow.style.display = 'block';
+                bookOfferedField.setAttribute('required', 'required');
                 break;
             default:
-                bookLabel.text('Livre');
+                bookLabel.textContent = 'Livre';
                 break;
         }
     }
     
     // Handle exchange type change
-    $('#type').on('change', function() {
-        updateFormBasedOnType($(this).val());
+    const typeSelect = document.getElementById('type');
+    typeSelect.addEventListener('change', function() {
+        updateFormBasedOnType(this.value);
     });
     
     // Initialize form based on current/old value
-    const currentType = $('#type').val();
+    const currentType = typeSelect.value;
     if (currentType) {
         updateFormBasedOnType(currentType);
     }
     
     // Date validation
     function validateDates() {
-        const dateDebut = $('#dateDebut').val();
-        const dateFin = $('#dateFin').val();
+        const dateDebut = document.getElementById('dateDebut').value;
+        const dateFin = document.getElementById('dateFin').value;
         const today = new Date().toISOString().split('T')[0];
         
         // Start date validation
@@ -211,34 +212,43 @@ $(document).ready(function() {
     
     // Show validation error
     function showValidationError(fieldId, message) {
-        const field = $('#' + fieldId);
-        field.addClass('is-invalid');
+        const field = document.getElementById(fieldId);
+        field.classList.add('is-invalid');
         
         // Remove existing error message
-        field.siblings('.invalid-feedback').remove();
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
         
         // Add new error message with red styling
-        field.after('<div class="invalid-feedback" style="color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: block;">' + message + '</div>');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.style.cssText = 'color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: block;';
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
     }
     
     // Clear validation error
     function clearValidationError(fieldId) {
-        const field = $('#' + fieldId);
-        field.removeClass('is-invalid');
-        field.siblings('.invalid-feedback').remove();
+        const field = document.getElementById(fieldId);
+        field.classList.remove('is-invalid');
+        const errorDiv = field.parentNode.querySelector('.invalid-feedback');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
     }
     
     // Real-time date validation
-    $('#dateDebut, #dateFin').on('change', function() {
-        validateDates();
-    });
+    document.getElementById('dateDebut').addEventListener('change', validateDates);
+    document.getElementById('dateFin').addEventListener('change', validateDates);
     
     // Validate required fields function
     function validateRequiredFields() {
         let isValid = true;
         
         // Validate Type
-        const type = $('#type').val();
+        const type = document.getElementById('type').value;
         if (!type) {
             showValidationError('type', 'Veuillez sélectionner un type d\'échange');
             isValid = false;
@@ -247,7 +257,7 @@ $(document).ready(function() {
         }
         
         // Validate Book
-        const book = $('#bookDemandeId').val();
+        const book = document.getElementById('bookDemandeId').value;
         if (!book) {
             showValidationError('bookDemandeId', 'Veuillez sélectionner un livre');
             isValid = false;
@@ -256,8 +266,8 @@ $(document).ready(function() {
         }
         
         // Validate dates
-        const dateDebut = $('#dateDebut').val();
-        const dateFin = $('#dateFin').val();
+        const dateDebut = document.getElementById('dateDebut').value;
+        const dateFin = document.getElementById('dateFin').value;
         
         if (!dateDebut) {
             showValidationError('dateDebut', 'Veuillez sélectionner une date de début');
@@ -277,13 +287,24 @@ $(document).ready(function() {
     }
     
     // Real-time validation on all fields
-    $('#type, #bookDemandeId, #bookOffertId, #dateDebut, #dateFin').on('change blur', function() {
-        validateRequiredFields();
-        validateDates();
+    const fieldsToValidate = ['type', 'bookDemandeId', 'bookOffertId', 'dateDebut', 'dateFin'];
+    fieldsToValidate.forEach(function(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', function() {
+                validateRequiredFields();
+                validateDates();
+            });
+            field.addEventListener('blur', function() {
+                validateRequiredFields();
+                validateDates();
+            });
+        }
     });
     
     // Form submission validation
-    $('form').on('submit', function(e) {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
         let isValid = validateRequiredFields();
         
         // Validate dates
@@ -292,10 +313,10 @@ $(document).ready(function() {
         }
         
         // Validate exchange type specific requirements
-        const exchangeType = $('#type').val();
+        const exchangeType = document.getElementById('type').value;
         if (exchangeType === 'ECHANGE') {
-            const bookOffered = $('#bookOffertId').val();
-            const bookDemande = $('#bookDemandeId').val();
+            const bookOffered = document.getElementById('bookOffertId').value;
+            const bookDemande = document.getElementById('bookDemandeId').value;
             
             if (!bookOffered) {
                 showValidationError('bookOffertId', 'Vous devez sélectionner un livre à offrir pour un échange');
@@ -311,19 +332,23 @@ $(document).ready(function() {
         if (!isValid) {
             e.preventDefault();
             // Scroll to first error
-            $('.is-invalid').first().focus();
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.focus();
+            }
         }
     });
     
     // Auto-set minimum date to today
     const today = new Date().toISOString().split('T')[0];
-    $('#dateDebut').attr('min', today);
+    const dateDebutField = document.getElementById('dateDebut');
+    dateDebutField.setAttribute('min', today);
     
     // Update minimum end date when start date changes
-    $('#dateDebut').on('change', function() {
-        const startDate = $(this).val();
+    dateDebutField.addEventListener('change', function() {
+        const startDate = this.value;
         if (startDate) {
-            $('#dateFin').attr('min', startDate);
+            document.getElementById('dateFin').setAttribute('min', startDate);
         }
     });
 });

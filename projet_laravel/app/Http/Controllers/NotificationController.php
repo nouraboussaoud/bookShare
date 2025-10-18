@@ -49,13 +49,18 @@ class NotificationController extends Controller
     /**
      * Mark a notification as read
      */
-    public function markAsRead($id)
+    public function markAsRead(Request $request, $id)
     {
         $notification = Notification::where('user_id', Auth::id())
             ->where('id', $id)
             ->firstOrFail();
 
         $notification->markAsRead();
+
+        // If it's an AJAX request, return JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['message' => 'Notification marquée comme lue.']);
+        }
 
         // If the notification is about an exchange, redirect to exchange details
         $redirectUrl = route('notifications.index');

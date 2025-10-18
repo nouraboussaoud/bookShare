@@ -1,5 +1,4 @@
-@extends('layouts.layout')
-
+@extends('layouts.app')
 @section('title', 'BookShare - Détails de l\'Échange')
 
 @section('content')

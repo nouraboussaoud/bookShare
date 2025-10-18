@@ -106,6 +106,9 @@
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.marketplace') ? 'active' : '' }}" href="{{ route('locations.marketplace') }}">Marketplace</a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}">Locations</a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('exchanges.*') ? 'active' : '' }}" href="{{ route('exchanges.index') }}">Échanges</a></li>
+                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
+                            Signaler
+                        </a></li>
                         <li class="nav-item"><a class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}" href="{{ route('reviews.index') }}">Avis</a></li>
                     @endauth
                 </ul>
@@ -123,6 +126,74 @@
 
                 <ul class="navbar-nav mb-2 mb-lg-0 ms-lg-2">
                     @auth
+                        <!-- Notifications Dropdown -->
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-bell fs-5"></i>
+                                @php $unreadCount = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count(); @endphp
+                                @if($unreadCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                                        {{ $unreadCount }}
+                                    </span>
+                                @endif
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" style="width: 320px; max-height: 380px; overflow-y: auto;">
+                                <li class="dropdown-header d-flex justify-content-between align-items-center">
+                                    <span><strong>Notifications</strong></span>
+                                    @if($unreadCount > 0)
+                                        <small class="badge bg-primary">{{ $unreadCount }} nouvelles</small>
+                                    @endif
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                @php $recentNotifications = \App\Models\Notification::where('user_id', auth()->id())->orderBy('created_at', 'desc')->take(5)->get(); @endphp
+                                @forelse($recentNotifications as $notification)
+                                    <li class="px-3 py-2 {{ $notification->is_read ? 'bg-light' : 'bg-warning bg-opacity-10' }}" style="border-left: 3px solid {{ $notification->is_read ? '#e0e0e0' : '#ffc107' }};">
+                                        <div class="d-flex align-items-start">
+                                            <div class="flex-shrink-0 me-2">
+                                                @switch($notification->type)
+                                                    @case('exchange_request')
+                                                    @case('exchange_accepted')
+                                                    @case('exchange_rejected')
+                                                        <i class="fas fa-exchange-alt text-primary"></i>
+                                                        @break
+                                                    @case('report_created')
+                                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                                        @break
+                                                    @case('review_added')
+                                                        <i class="fas fa-star text-success"></i>
+                                                        @break
+                                                    @default
+                                                        <i class="fas fa-info-circle text-info"></i>
+                                                @endswitch
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <p class="mb-1 small"><strong>{{ $notification->title ?? 'Notification' }}</strong></p>
+                                                <p class="mb-1 text-muted small">{{ Str::limit($notification->message ?? 'Nouveau message', 50) }}</p>
+                                                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    @if(!$loop->last)<li><hr class="dropdown-divider my-1"></li>@endif
+                                @empty
+                                    <li class="px-3 py-4 text-center text-muted">
+                                        <i class="fas fa-bell-slash mb-2 d-block"></i>
+                                        Aucune notification
+                                    </li>
+                                @endforelse
+                                
+                                @if($recentNotifications->count() > 0)
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="text-center">
+                                        <a class="dropdown-item small" href="{{ route('notifications.index') }}">
+                                            <i class="fas fa-list me-1"></i>Voir toutes les notifications
+                                        </a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </li>
+                        
+                        <!-- User Dropdown -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}

@@ -133,4 +133,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(ReadingProgress::class);
     }
+
+    // Notifications personnalisées
+    public function customNotifications(): HasMany
+    {
+        return $this->hasMany(\App\Models\Notification::class);
+    }
+
+    // Notifications non lues
+    public function unreadCustomNotifications(): HasMany
+    {
+        return $this->hasMany(\App\Models\Notification::class)->where('is_read', false);
+    }
 }
