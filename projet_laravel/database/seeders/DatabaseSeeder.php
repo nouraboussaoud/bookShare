@@ -47,5 +47,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             NotificationSeeder::class,
         ]);
+        
+        // Create reading groups with events (depends on users)
+        $this->call([
+            ReadingGroupSeeder::class,
+        ]);
     }
 }

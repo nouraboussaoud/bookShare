@@ -14,6 +14,9 @@ class ReadingGroup extends Model
         'description',
         'owner_id',
         'is_private',
+        'status',
+        'max_members',
+        'image',
     ];
 
     protected $casts = [
@@ -38,5 +41,52 @@ class ReadingGroup extends Model
         return $this->belongsToMany(User::class, 'group_memberships')
                     ->withPivot(['role', 'status', 'joined_at'])
                     ->withTimestamps();
+    }
+
+    // Events for this reading group
+    public function events()
+    {
+        return $this->hasMany(GroupEvent::class);
+    }
+
+    // Upcoming events
+    public function upcomingEvents()
+    {
+        return $this->events()
+                    ->where('event_date', '>=', now()->toDateString())
+                    ->orderBy('event_date')
+                    ->orderBy('event_time');
+    }
+
+    // Past events
+    public function pastEvents()
+    {
+        return $this->events()
+                    ->where('event_date', '<', now()->toDateString())
+                    ->orderByDesc('event_date')
+                    ->orderByDesc('event_time');
+    }
+
+    // Discussions for this reading group
+    public function discussions()
+    {
+        return $this->hasMany(GroupDiscussion::class);
+    }
+
+    // Active discussions (not locked)
+    public function activeDiscussions()
+    {
+        return $this->discussions()
+                    ->where('is_locked', false)
+                    ->orderByDesc('is_pinned')
+                    ->orderByDesc('updated_at');
+    }
+
+    // Pinned discussions
+    public function pinnedDiscussions()
+    {
+        return $this->discussions()
+                    ->where('is_pinned', true)
+                    ->orderByDesc('updated_at');
     }
 }

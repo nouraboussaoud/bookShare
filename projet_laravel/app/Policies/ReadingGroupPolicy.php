@@ -38,6 +38,15 @@ class ReadingGroupPolicy
     }
 
     /**
+     * Determine whether the user can manage membership for the reading group.
+     * Only owner can manage memberships (approve, reject, remove members).
+     */
+    public function manageMembership(User $user, ReadingGroup $readingGroup): bool
+    {
+        return $user->id === $readingGroup->owner_id;
+    }
+
+    /**
      * Determine whether the user can view the reading group.
      * Public groups can be viewed by anyone authenticated, private groups only if member/owner.
      */

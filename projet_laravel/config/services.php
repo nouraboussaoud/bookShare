@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'ai_moderation' => [
+        'enabled' => env('AI_MODERATION_ENABLED', false),
+        'provider' => env('AI_MODERATION_PROVIDER', 'groq'), // groq, openai, perspective, custom
+        'api_key' => env('AI_MODERATION_API_KEY'),
+        'endpoint' => env('AI_MODERATION_ENDPOINT'),
+        'model' => env('AI_MODERATION_MODEL', 'llama3-70b-8192'),
+        'timeout' => env('AI_MODERATION_TIMEOUT', 5), // seconds
+        'fallback_enabled' => env('AI_MODERATION_FALLBACK_ENABLED', true),
+        'max_daily_calls' => env('AI_MODERATION_MAX_DAILY_CALLS', 50), // Reduced from 100 to 50 for more conservative usage
+        'call_interval' => env('AI_MODERATION_CALL_INTERVAL', 120), // Increased from 60 to 120 seconds between calls
+    ],
+
 ];

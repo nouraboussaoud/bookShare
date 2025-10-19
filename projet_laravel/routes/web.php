@@ -147,15 +147,70 @@ Route::resource('locations', LocationController::class);
 Route::get('reading-groups/create', [ReadingGroupController::class, 'create'])->name('reading-groups.create');
 
 // Full CRUD (index, store, show, update, destroy)
-// excluding only create/edit since you don’t use blade forms
+// excluding only create/edit since you don't use blade forms
 Route::resource('reading-groups', ReadingGroupController::class)
     ->except(['create','edit']);
- Route::get('reading-groups/{readingGroup}/edit', [ReadingGroupController::class, 'edit'])->name('reading-groups.edit');
+Route::get('reading-groups/{readingGroup}/edit', [ReadingGroupController::class, 'edit'])->name('reading-groups.edit');
+
 // Membership actions (join / leave)
 Route::post('reading-groups/{readingGroup}/join', [GroupMembershipController::class, 'join'])
     ->name('reading-groups.join');
 Route::delete('reading-groups/{readingGroup}/leave', [GroupMembershipController::class, 'leave'])
     ->name('reading-groups.leave');
+
+// Member management (owner only)
+Route::middleware(['auth'])->group(function () {
+    Route::post('reading-groups/{readingGroup}/members/{membership}/approve', [GroupMembershipController::class, 'approve'])
+        ->name('reading-groups.memberships.approve');
+    Route::post('reading-groups/{readingGroup}/members/{membership}/reject', [GroupMembershipController::class, 'reject'])
+        ->name('reading-groups.memberships.reject');
+    Route::delete('reading-groups/{readingGroup}/members/{userId}', [GroupMembershipController::class, 'remove'])
+        ->name('reading-groups.members.remove');
+    Route::patch('reading-groups/{readingGroup}/members/{userId}/role', [GroupMembershipController::class, 'changeRole'])
+        ->name('reading-groups.members.changeRole');
+    Route::get('reading-groups/{readingGroup}/members-list', [GroupMembershipController::class, 'getMembersList'])
+        ->name('reading-groups.members.list');
+});
+
+// Group Events routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('reading-groups/{readingGroup}/events', [\App\Http\Controllers\GroupEventController::class, 'index'])
+        ->name('reading-groups.events.index');
+    Route::get('reading-groups/{readingGroup}/events/create', [\App\Http\Controllers\GroupEventController::class, 'create'])
+        ->name('reading-groups.events.create');
+    Route::post('reading-groups/{readingGroup}/events', [\App\Http\Controllers\GroupEventController::class, 'store'])
+        ->name('reading-groups.events.store');
+    Route::get('reading-groups/{readingGroup}/events/{event}', [\App\Http\Controllers\GroupEventController::class, 'show'])
+        ->name('reading-groups.events.show');
+    Route::get('reading-groups/{readingGroup}/events/{event}/edit', [\App\Http\Controllers\GroupEventController::class, 'edit'])
+        ->name('reading-groups.events.edit');
+    Route::put('reading-groups/{readingGroup}/events/{event}', [\App\Http\Controllers\GroupEventController::class, 'update'])
+        ->name('reading-groups.events.update');
+    Route::delete('reading-groups/{readingGroup}/events/{event}', [\App\Http\Controllers\GroupEventController::class, 'destroy'])
+        ->name('reading-groups.events.destroy');
+    
+    // Event attendance
+    Route::post('reading-groups/{readingGroup}/events/{event}/join', [\App\Http\Controllers\GroupEventController::class, 'joinEvent'])
+        ->name('reading-groups.events.join');
+    Route::delete('reading-groups/{readingGroup}/events/{event}/leave', [\App\Http\Controllers\GroupEventController::class, 'leaveEvent'])
+        ->name('reading-groups.events.leave');
+    
+    // Event Chat Routes
+    Route::get('events/{event}/chat/messages', [\App\Http\Controllers\EventChatController::class, 'getMessages'])
+        ->name('events.chat.messages');
+    Route::post('events/{event}/chat/messages', [\App\Http\Controllers\EventChatController::class, 'postMessage'])
+        ->name('events.chat.post');
+    Route::post('events/{event}/chat/typing', [\App\Http\Controllers\EventChatController::class, 'updateTypingStatus'])
+        ->name('events.chat.typing');
+    Route::get('events/{event}/chat/typing', [\App\Http\Controllers\EventChatController::class, 'getTypingStatus'])
+        ->name('events.chat.typing-status');
+    Route::delete('events/{event}/chat/messages/{eventChatMessage}', [\App\Http\Controllers\EventChatController::class, 'deleteMessage'])
+        ->name('events.chat.delete');
+    Route::get('events/{event}/chat/statistics', [\App\Http\Controllers\EventChatController::class, 'getStatistics'])
+        ->name('events.chat.statistics');
+    Route::get('events/{event}/chat', [\App\Http\Controllers\EventChatController::class, 'showChat'])
+        ->name('events.chat.show');
+});
 
 // -----------------------
 // Reading Progress Routes
@@ -206,6 +261,20 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/supervise-exchanges', [ExchangeAdminController::class, 'superviseExchanges'])->name('superviseExchanges');
     Route::patch('/arbitrate-exchange/{id}', [ExchangeAdminController::class, 'arbitrateExchange'])->name('arbitrateExchange');
     Route::delete('/cancel-exchange/{id}', [ExchangeAdminController::class, 'cancelExchange'])->name('cancelExchange');
+
+    // Admin Groupes management (minimal CRUD view/edit/delete)
+    Route::get('groupes', [\App\Http\Controllers\Admin\GroupManagementController::class, 'index'])->name('groupes.index');
+    Route::get('groupes/{readingGroup}', [\App\Http\Controllers\Admin\GroupManagementController::class, 'show'])->name('groupes.show');
+    Route::get('groupes/{readingGroup}/edit', [\App\Http\Controllers\Admin\GroupManagementController::class, 'edit'])->name('groupes.edit');
+    Route::put('groupes/{readingGroup}', [\App\Http\Controllers\Admin\GroupManagementController::class, 'update'])->name('groupes.update');
+    Route::delete('groupes/{readingGroup}', [\App\Http\Controllers\Admin\GroupManagementController::class, 'destroy'])->name('groupes.destroy');
+
+    // Admin Événements management (minimal CRUD view/edit/delete)
+    Route::get('evenements', [\App\Http\Controllers\Admin\EventManagementController::class, 'index'])->name('evenements.index');
+    Route::get('evenements/{groupEvent}', [\App\Http\Controllers\Admin\EventManagementController::class, 'show'])->name('evenements.show');
+    Route::get('evenements/{groupEvent}/edit', [\App\Http\Controllers\Admin\EventManagementController::class, 'edit'])->name('evenements.edit');
+    Route::put('evenements/{groupEvent}', [\App\Http\Controllers\Admin\EventManagementController::class, 'update'])->name('evenements.update');
+    Route::delete('evenements/{groupEvent}', [\App\Http\Controllers\Admin\EventManagementController::class, 'destroy'])->name('evenements.destroy');
 });
 
 // Route for creating an exchange

@@ -26,6 +26,11 @@
         position:absolute; inset:0;
         background: url("data:image/svg+xml,<svg width='60' height='60' xmlns='http://www.w3.org/2000/svg'><circle cx='30' cy='30' r='3' fill='%23fff' fill-opacity='0.12'/></svg>");
         opacity:.2;
+        z-index: 1;
+    }
+    .page-hero > * {
+        position: relative;
+        z-index: 2;
     }
 
     .stat-card { background:#fff; border-left:4px solid var(--primary); border-radius:.75rem; padding:1rem; box-shadow:0 2px 6px rgba(0,0,0,.04); }
@@ -44,11 +49,16 @@
     .owner-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--primary),var(--secondary)); }
 
     .group-actions { margin-top:auto; border-top:1px solid var(--border); padding:.75rem 1rem; background:#f8fafc; display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
-    .btn-modern { border-radius:.5rem; padding:.45rem .9rem; display:inline-flex; align-items:center; gap:.5rem; font-weight:600; font-size:.9rem; text-decoration:none; }
+    .btn-modern { border-radius:.5rem; padding:.45rem .9rem; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-weight:600; font-size:.9rem; text-decoration:none; border:none; cursor:pointer; transition:all .2s ease; }
+    .btn-modern:hover { transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,.1); }
     .btn-join { background:var(--success); color:#fff; }
+    .btn-join:hover { background:#0da858; }
     .btn-request { background:var(--warning); color:#fff; }
+    .btn-request:hover { background:#d97706; }
     .btn-manage { background:var(--primary); color:#fff; }
+    .btn-manage:hover { background:#4f46e5; }
     .btn-view { background:#fff; border:1px solid var(--border); color:#444; }
+    .btn-view:hover { background:#f3f4f6; border-color:var(--primary); color:var(--primary); }
 
     /* responsive tweaks */
     @media (max-width:576px){ .group-meta { font-size:.85rem; } .stat-number{ font-size:1.25rem; } }
@@ -58,14 +68,28 @@
 @section('content')
 <div class="container-fluid px-3 px-md-4">
 
+    {{-- Flash Messages --}}
+    @if(session('status'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ session('status') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="page-hero">
         <div class="d-flex justify-content-between flex-wrap align-items-start gap-3">
             <div>
-                <h1 class="h3 fw-bold mb-1"><i class="fas fa-book-reader me-2"></i> Reading Groups</h1>
-                <p class="mb-0 text-white-75">Discover amazing reading communities and connect with fellow book lovers</p>
+                <h1 class="h3 fw-bold mb-1"><i class="fas fa-book-reader me-2"></i> Groupes de Lecture</h1>
+                <p class="mb-0 text-white-75">Découvrez des communautés de lecture incroyables et connectez-vous avec d'autres passionnés de livres</p>
             </div>
             <a href="{{ route('reading-groups.create') }}" class="btn btn-light btn-lg shadow-sm">
-                <i class="fas fa-plus me-2"></i>Create Group
+                <i class="fas fa-plus me-2"></i>Créer un Groupe
             </a>
         </div>
     </div>
@@ -75,25 +99,28 @@
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <div class="stat-number">{{ $groups->total() }}</div>
-                <div class="text-muted small">Total Groups</div>
+                <div class="text-muted small">Groupes Totaux</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card">
-                <div class="stat-number">{{ $groups->where('is_private', false)->count() }}</div>
-                <div class="text-muted small">Public Groups</div>
+                @php $publicCount = \App\Models\ReadingGroup::where('is_private', false)->where('status', 'active')->count(); @endphp
+                <div class="stat-number">{{ $publicCount }}</div>
+                <div class="text-muted small">Groupes Publics</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card">
-                <div class="stat-number">{{ $groups->where('owner_id', auth()->id())->count() }}</div>
-                <div class="text-muted small">Your Groups</div>
+                @php $myGroupsCount = \App\Models\ReadingGroup::where('owner_id', auth()->id())->where('status', 'active')->count(); @endphp
+                <div class="stat-number">{{ $myGroupsCount }}</div>
+                <div class="text-muted small">Vos Groupes</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card">
-                <div class="stat-number">{{ $groups->sum('members_count') }}</div>
-                <div class="text-muted small">Total Members</div>
+                @php $totalMembers = \App\Models\GroupMembership::where('status', 'approved')->distinct('user_id')->count('user_id'); @endphp
+                <div class="stat-number">{{ $totalMembers }}</div>
+                <div class="text-muted small">Membres Totaux</div>
             </div>
         </div>
     </div>
@@ -101,17 +128,17 @@
     {{-- groups list --}}
     <div class="card shadow-sm border-0">
         <div class="card-header bg-light d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <h5 class="mb-0"><i class="fas fa-users me-2 text-primary"></i> All Reading Groups</h5>
+            <h5 class="mb-0"><i class="fas fa-users me-2 text-primary"></i> Tous les Groupes de Lecture</h5>
             <div class="d-flex gap-2 w-100 w-md-auto">
                 <div class="position-relative flex-grow-1">
                     <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input class="form-control ps-5 rounded-pill" placeholder="Search groups by name or description..." />
+                    <input class="form-control ps-5 rounded-pill" placeholder="Rechercher des groupes par nom ou description..." />
                 </div>
                 <select class="form-select rounded-pill w-auto">
-                    <option>All Groups</option>
-                    <option>Public Groups</option>
-                    <option>Private Groups</option>
-                    <option>My Groups</option>
+                    <option>Tous les Groupes</option>
+                    <option>Groupes Publics</option>
+                    <option>Groupes Privés</option>
+                    <option>Mes Groupes</option>
                 </select>
             </div>
         </div>
@@ -130,23 +157,23 @@
                             <div class="group-card h-100">
                                 <span class="group-badge {{ $group->is_private ? 'badge-private' : 'badge-public' }}">
                                     <i class="fas fa-{{ $group->is_private ? 'lock' : 'globe' }} me-1"></i>
-                                    {{ $group->is_private ? 'Private' : 'Public' }}
+                                    {{ $group->is_private ? 'Privé' : 'Public' }}
                                 </span>
 
                                 <div class="group-content">
                                     <h5 class="mb-1 fw-bold">
                                         {{ $group->name }}
                                         @if($group->owner_id === auth()->id())
-                                            <i class="fas fa-crown text-warning small ms-1" title="You own this group"></i>
+                                            <i class="fas fa-crown text-warning small ms-1" title="Vous êtes propriétaire de ce groupe"></i>
                                         @endif
                                     </h5>
 
                                     <p class="text-muted small mb-2" style="min-height:2.6rem;">
-                                        {{ \Illuminate\Support\Str::limit($group->description ?? 'No description available', 140) }}
+                                        {{ \Illuminate\Support\Str::limit($group->description ?? 'Aucune description disponible', 140) }}
                                     </p>
 
                                     <div class="group-meta d-flex gap-3 flex-wrap">
-                                        <span><i class="fas fa-users me-1"></i> {{ $membersCount }} {{ \Illuminate\Support\Str::plural('member', $membersCount) }}</span>
+                                        <span><i class="fas fa-users me-1"></i> {{ $membersCount }} {{ \Illuminate\Support\Str::plural('membre', $membersCount) }}</span>
                                         <span><i class="fas fa-calendar me-1"></i> {{ optional($group->created_at)->format('M j, Y') }}</span>
                                     </div>
                                 </div>
@@ -161,18 +188,22 @@
                                 <div class="group-actions">
                                     @php
                                         $isOwner = $group->owner_id === auth()->id();
-                                        $isMember = $group->members ? $group->members->contains(auth()->id()) : false;
+                                        // Check membership via the pivot table directly for reliability
+                                        $isMember = \App\Models\GroupMembership::where('user_id', auth()->id())
+                                            ->where('reading_group_id', $group->id)
+                                            ->where('status', 'approved')
+                                            ->exists();
                                     @endphp
 
                                     @if($isOwner)
                                         <a href="{{ route('reading-groups.edit', $group) }}" class="btn-modern btn-manage">
-                                            <i class="fas fa-cog"></i> Manage
+                                            <i class="fas fa-cog"></i> Gérer
                                         </a>
                                     @elseif($isMember)
                                         <form action="{{ route('reading-groups.leave', $group) }}" method="POST" class="d-inline">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="btn-modern btn-request" onclick="return confirm('Leave this group?')">
-                                                <i class="fas fa-sign-out-alt"></i> Leave
+                                            <button type="submit" class="btn-modern btn-request" onclick="return confirm('Quitter ce groupe ?')">
+                                                <i class="fas fa-sign-out-alt"></i> Quitter
                                             </button>
                                         </form>
                                     @else
@@ -180,13 +211,13 @@
                                             @csrf
                                             <button type="submit" class="btn-modern {{ $group->is_private ? 'btn-request' : 'btn-join' }}">
                                                 <i class="fas fa-{{ $group->is_private ? 'clock' : 'user-plus' }}"></i>
-                                                {{ $group->is_private ? 'Request' : 'Join' }}
+                                                {{ $group->is_private ? 'Demander' : 'Rejoindre' }}
                                             </button>
                                         </form>
                                     @endif
 
                                     <a href="{{ route('reading-groups.show', $group) }}" class="btn-modern btn-view ms-auto">
-                                        <i class="fas fa-eye"></i> View
+                                        <i class="fas fa-eye"></i> Voir
                                     </a>
                                 </div>
                             </div>
@@ -200,10 +231,10 @@
             @else
                 <div class="empty-state">
                     <i class="fas fa-book-open empty-icon"></i>
-                    <h5>No reading groups yet</h5>
-                    <p class="small mb-3">Be the first to create a reading community!</p>
+                    <h5>Aucun groupe de lecture pour le moment</h5>
+                    <p class="small mb-3">Soyez le premier à créer une communauté de lecture !</p>
                     <a href="{{ route('reading-groups.create') }}" class="btn-modern btn-manage">
-                        <i class="fas fa-plus me-1"></i>Create First Group
+                        <i class="fas fa-plus me-1"></i>Créer le Premier Groupe
                     </a>
                 </div>
             @endif

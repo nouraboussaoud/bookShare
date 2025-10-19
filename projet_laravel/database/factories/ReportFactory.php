@@ -22,12 +22,16 @@ class ReportFactory extends Factory
         $types = [Report::TYPE_CONFLIT_ECHANGE, Report::TYPE_COMPORTEMENT];
         $statuses = [Report::STATUS_EN_ATTENTE, Report::STATUS_TRAITE, Report::STATUS_REJETE];
 
+        $users = User::all();
+        $reporter = $users->random();
+        $reported = $users->where('id', '!=', $reporter->id)->random();
+
         return [
             'type' => $this->faker->randomElement($types),
             'description' => $this->faker->paragraph(3),
             'status' => $this->faker->randomElement($statuses),
-            'reporter_id' => User::factory(),
-            'reported_user_id' => User::factory(),
+            'reporter_id' => $reporter->id,
+            'reported_user_id' => $reported->id,
             'exchange_id' => null, // Will be set in specific states if needed
         ];
     }
@@ -37,9 +41,10 @@ class ReportFactory extends Factory
      */
     public function exchangeConflict(): static
     {
+        $exchanges = Exchange::all();
         return $this->state(fn (array $attributes) => [
             'type' => Report::TYPE_CONFLIT_ECHANGE,
-            'exchange_id' => Exchange::factory(),
+            'exchange_id' => $exchanges->isNotEmpty() ? $exchanges->random()->id : null,
             'reported_user_id' => null,
         ]);
     }

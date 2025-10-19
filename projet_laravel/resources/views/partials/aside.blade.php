@@ -48,16 +48,7 @@
 
 
     <!-- Nav Item - Utilities Collapse Menu -->
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-            aria-expanded="true" aria-controls="collapseUtilities">
-            <i class="fas fa-fw fa-wrench"></i>
-            <span>Utilities</span>
-<li class="nav-item {{ request()->routeIs('reviews.*') ? 'active' : '' }}">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReviews"
-            aria-expanded="{{ request()->routeIs('reviews.*') ? 'true' : 'false' }}" aria-controls="collapseReviews">
-            <i class="fas fa-fw fa-star"></i>
-            <span>Avis</span>
+
 
     <!-- Nav Item - Locations -->
     <li class="nav-item {{ request()->routeIs('locations.*') ? 'active' : '' }}">
@@ -152,6 +143,22 @@
             <a class="nav-link" href="{{ route('admin.reviews.index') }}">
                 <i class="fas fa-fw fa-star-half-alt"></i>
                 <span>Gestion Avis (Admin)</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Groupes Management -->
+        <li class="nav-item {{ request()->routeIs('admin.groupes.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.groupes.index') }}">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Gestion Groupes</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Événements Management -->
+        <li class="nav-item {{ request()->routeIs('admin.evenements.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.evenements.index') }}">
+                <i class="fas fa-fw fa-calendar-alt"></i>
+                <span>Gestion Événements</span>
             </a>
         </li>
 

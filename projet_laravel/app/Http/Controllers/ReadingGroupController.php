@@ -10,43 +10,51 @@ class ReadingGroupController extends Controller
 {
     use AuthorizesRequests;
 
-    // Liste paginée
+    /**
+     * Display a listing of reading groups with pagination
+     */
     public function index()
     {
         $groups = ReadingGroup::with(['owner', 'members'])
             ->withCount('members')
+            ->where('status', 'active')
             ->orderByDesc('created_at')
             ->paginate(9);
 
         return view('groups.index', compact('groups'));
     }
 
-    // Formulaire création
+    /**
+     * Show the form for creating a new reading group
+     */
     public function create()
     {
         $this->authorize('create', ReadingGroup::class);
         return view('groups.create');
     }
 
-    // Enregistrement
+    /**
+     * Store a newly created reading group
+     */
     public function store(Request $request)
     {
         $this->authorize('create', ReadingGroup::class);
 
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name'        => 'required|string|max:255|unique:reading_groups,name',
+            'description' => 'nullable|string|max:1000',
             'is_private'  => 'boolean',
         ]);
 
         $group = ReadingGroup::create([
-            'owner_id' => auth()->id(),   // Changed from 'user_id' to 'owner_id'
-            'name' => $data['name'],
+            'owner_id'    => auth()->id(),
+            'name'        => $data['name'],
             'description' => $data['description'] ?? null,
-            'is_private' => $data['is_private'] ?? false,
+            'is_private'  => $data['is_private'] ?? false,
+            'status'      => 'active',
         ]);
 
-        // Ajouter le propriétaire comme membre
+        // Add the owner as a member with owner role
         $group->memberships()->create([
             'user_id'   => auth()->id(),
             'role'      => 'owner',
@@ -56,33 +64,44 @@ class ReadingGroupController extends Controller
 
         return redirect()
             ->route('reading-groups.show', $group)
-            ->with('status', 'Group created.');
+            ->with('status', 'Reading group created successfully! Start inviting members.');
     }
 
-    // Détail
+    /**
+     * Display a specific reading group
+     */
     public function show(ReadingGroup $readingGroup)
     {
         $this->authorize('view', $readingGroup);
-        $readingGroup->load(['owner', 'members']);
-        $members = $readingGroup->members;
+        $readingGroup->load('owner');
+        
+        // Load only approved members with their details
+        $members = $readingGroup->members()
+            ->wherePivot('status', 'approved')
+            ->get();
+        
         return view('groups.show', compact('readingGroup', 'members'));
     }
 
-    // Formulaire édition
+    /**
+     * Show the form for editing a reading group
+     */
     public function edit(ReadingGroup $readingGroup)
     {
         $this->authorize('update', $readingGroup);
         return view('groups.edit', compact('readingGroup'));
     }
 
-    // Mise à jour
+    /**
+     * Update a reading group
+     */
     public function update(Request $request, ReadingGroup $readingGroup)
     {
         $this->authorize('update', $readingGroup);
 
         $data = $request->validate([
-            'name'        => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
+            'name'        => 'sometimes|required|string|max:255|unique:reading_groups,name,' . $readingGroup->id,
+            'description' => 'nullable|string|max:1000',
             'is_private'  => 'sometimes|boolean',
         ]);
 
@@ -90,18 +109,41 @@ class ReadingGroupController extends Controller
 
         return redirect()
             ->route('reading-groups.show', $readingGroup)
-            ->with('status', 'Group updated.');
+            ->with('status', 'Group information updated successfully.');
     }
 
-    // Suppression
+    /**
+     * Delete a reading group
+     */
     public function destroy(ReadingGroup $readingGroup)
     {
         $this->authorize('delete', $readingGroup);
 
+        $groupName = $readingGroup->name;
         $readingGroup->delete();
 
         return redirect()
             ->route('reading-groups.index')
-            ->with('status', 'Group deleted.');
+            ->with('status', "Reading group '$groupName' has been deleted.");
+    }
+
+    /**
+     * Search reading groups
+     */
+    public function search(Request $request)
+    {
+        $query = $request->input('q');
+        
+        $groups = ReadingGroup::where('status', 'active')
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%");
+            })
+            ->with(['owner', 'members'])
+            ->withCount('members')
+            ->orderByDesc('created_at')
+            ->paginate(12);
+
+        return view('groups.index', compact('groups'));
     }
 }

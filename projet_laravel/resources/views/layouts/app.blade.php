@@ -79,6 +79,20 @@
         }
         
         a:hover { text-decoration: none; }
+        
+        /* Smaller navbar text */
+        .navbar-brand {
+            font-size: 1.1rem !important;
+        }
+        
+        .navbar-nav .nav-link {
+            font-size: 0.9rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+        }
     </style>
 
     @stack('styles')
@@ -99,24 +113,56 @@
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     @auth
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('books.*') ? 'active' : '' }}" href="{{ route('books.index') }}">Livres</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('reading-progress.*') ? 'active' : '' }}" href="{{ route('reading-progress.index') }}">Mes Lectures</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('reading-groups.*') ? 'active' : '' }}" href="{{ route('reading-groups.index') }}">Groupes</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.marketplace') ? 'active' : '' }}" href="{{ route('locations.marketplace') }}">Marketplace</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}" href="{{ route('locations.index') }}">Locations</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('exchanges.*') ? 'active' : '' }}" href="{{ route('exchanges.index') }}">Échanges</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}" href="{{ route('reports.index') }}">
-                            Signaler
-                        </a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('reviews.*') ? 'active' : '' }}" href="{{ route('reviews.index') }}">Avis</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('user.dashboard') ? 'active' : '' }}" 
+                               href="{{ route('dashboard') }}">
+                                <i class="fas fa-home me-1"></i> Tableau de bord
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('books.*') ? 'active' : '' }}" 
+                               href="{{ route('books.index') }}">
+                                <i class="fas fa-book me-1"></i> Livres
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('reading-progress.*') ? 'active' : '' }}" 
+                               href="{{ route('reading-progress.index') }}">
+                                <i class="fas fa-bookmark me-1"></i> Ma Lecture
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('reading-groups.*') ? 'active' : '' }}" 
+                               href="{{ route('reading-groups.index') }}">
+                                <i class="fas fa-users me-1"></i> Groupes
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="communitiesDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-handshake me-1"></i> Communauté
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="communitiesDropdown">
+                                <li><a class="dropdown-item" href="{{ route('exchanges.index') }}"><i class="fas fa-exchange-alt me-2"></i> Échanges</a></li>
+                                <li><a class="dropdown-item" href="{{ route('locations.marketplace') }}"><i class="fas fa-store me-2"></i> Marché</a></li>
+                                <li><a class="dropdown-item" href="{{ route('reviews.index') }}"><i class="fas fa-star me-2"></i> Avis</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('reports.index') }}"><i class="fas fa-flag me-2"></i> Signalements</a></li>
+                            </ul>
+                        </li>
+                        @if(Auth::user()->isAdmin())
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                                <i class="fas fa-cog me-1"></i> Admin
+                            </a>
+                        </li>
+                        @endif
                     @endauth
                 </ul>
 
                 @auth
                 <form class="d-flex me-lg-3 my-2 my-lg-0" method="GET" action="{{ route('user.dashboard') }}">
                     <div class="input-group">
-                        <input class="form-control border-0" name="search" type="search" placeholder="Rechercher un livre..." value="{{ request('search') }}" style="background:#f1f5f9; border-radius: 24px 0 0 24px;">
+                        <input class="form-control border-0" name="search" type="search" placeholder="Rechercher des livres..." value="{{ request('search') }}" style="background:#f1f5f9; border-radius: 24px 0 0 24px;">
                         <button class="btn" type="submit" style="border-radius: 0 24px 24px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
                             <i class="fas fa-search"></i>
                         </button>
@@ -128,20 +174,20 @@
                     @auth
                         <!-- Notifications Dropdown -->
                         <li class="nav-item dropdown me-2">
-                            <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-bell fs-5"></i>
                                 @php $unreadCount = \App\Models\Notification::where('user_id', auth()->id())->where('is_read', false)->count(); @endphp
                                 @if($unreadCount > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
-                                        {{ $unreadCount }}
+                                        {{ $unreadCount > 9 ? '9+' : $unreadCount }}
                                     </span>
                                 @endif
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" style="width: 320px; max-height: 380px; overflow-y: auto;">
+                            <ul class="dropdown-menu dropdown-menu-end" style="width: 320px; max-height: 380px; overflow-y: auto;" aria-labelledby="notificationsDropdown">
                                 <li class="dropdown-header d-flex justify-content-between align-items-center">
                                     <span><strong>Notifications</strong></span>
                                     @if($unreadCount > 0)
-                                        <small class="badge bg-primary">{{ $unreadCount }} nouvelles</small>
+                                        <small class="badge bg-primary">{{ $unreadCount }} nouveau{{ $unreadCount > 1 ? 'x' : '' }}</small>
                                     @endif
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
@@ -163,13 +209,16 @@
                                                     @case('review_added')
                                                         <i class="fas fa-star text-success"></i>
                                                         @break
+                                                    @case('group_event')
+                                                        <i class="fas fa-calendar text-info"></i>
+                                                        @break
                                                     @default
                                                         <i class="fas fa-info-circle text-info"></i>
                                                 @endswitch
                                             </div>
                                             <div class="flex-grow-1">
                                                 <p class="mb-1 small"><strong>{{ $notification->title ?? 'Notification' }}</strong></p>
-                                                <p class="mb-1 text-muted small">{{ Str::limit($notification->message ?? 'Nouveau message', 50) }}</p>
+                                                <p class="mb-1 text-muted small">{{ Str::limit($notification->message ?? 'New message', 50) }}</p>
                                                 <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                                             </div>
                                         </div>
@@ -195,16 +244,14 @@
                         
                         <!-- User Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>{{ Auth::user()->name }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-2"></i>{{ Auth::user()->name }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                @if (Route::has('profile.edit'))
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                                 <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user me-2"></i>Profil</a></li>
-                                @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="POST" action="{{ route('logout') }}">
+                                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
                                         @csrf
                                         <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</button>
                                     </form>
@@ -214,7 +261,7 @@
                     @else
                         <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Connexion</a></li>
                         @if (Route::has('register'))
-                        <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Inscription</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">S'inscrire</a></li>
                         @endif
                     @endauth
                 </ul>
@@ -229,6 +276,7 @@
 
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    @vite(['resources/js/app.js'])
     @stack('scripts')
 </body>
 </html>
