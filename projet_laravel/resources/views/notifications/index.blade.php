@@ -170,92 +170,65 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        // Mark all as read
-        $('#markAllRead').on('click', function() {
-            $.ajax({
-                url: '{{ route("notifications.markAllAsRead") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    location.reload();
-                },
-                error: function() {
-                    alert('Erreur lors de la mise à jour des notifications.');
-                }
-            });
-        });
-
-        // Mark single notification as read (using event delegation)
-        document.addEventListener('click', function(event) {
-            if (event.target.closest('.mark-read-btn')) {
-                const button = event.target.closest('.mark-read-btn');
-                const notificationId = button.getAttribute('data-id');
-                
-                console.log('Marking notification as read:', notificationId);
-                
-                // Get CSRF token from meta tag
-                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                
-                fetch(`/notifications/${notificationId}/mark-read`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    }
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Success:', data);
-                    const listItem = button.closest('.list-group-item');
-                    listItem.classList.remove('notification-unread');
-                    
-                    // Remove the "Nouveau" badge
-                    const badge = listItem.querySelector('.badge-primary, .badge-warning, .badge-info');
-                    if (badge && badge.textContent.trim() === 'Nouveau') {
-                        badge.remove();
-                    }
-                    
-                    // Remove the "Lu" button
-                    button.remove();
-                    
-                    // Update counter if no more unread notifications
-                    const unreadCount = document.querySelectorAll('.notification-unread').length;
-                    if (unreadCount === 0) {
-                        const markAllBtn = document.getElementById('markAllRead');
-                        if (markAllBtn) markAllBtn.style.display = 'none';
-                        
-                        const counterBadge = document.querySelector('.badge-danger');
-                        if (counterBadge) counterBadge.remove();
-                    } else {
-                        // Update counter
-                        const counterBadge = document.querySelector('.badge-danger');
-                        if (counterBadge) {
-                            counterBadge.textContent = `${unreadCount} nouveau(x)`;
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Erreur lors de la mise à jour: ' + error.message);
-                });
+    // Global function to mark notification as read (called when clicking "Voir l'échange")
+    function markNotificationAsRead(notificationId) {
+        console.log('Marking notification as read (from link):', notificationId);
+        
+        // Get CSRF token from meta tag
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfTokenMeta) {
+            console.error('CSRF token not found in meta tags');
+            return;
+        }
+        const csrfToken = csrfTokenMeta.getAttribute('content');
+        
+        fetch('/notifications/' + notificationId + '/mark-read', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
             }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notification marquée comme lue:', data);
+        })
+        .catch(error => {
+            console.error('Erreur lors de la mise à jour de la notification:', error);
         });
+    }
 
+    // Helper function to update notification counter
+    function updateNotificationCounter() {
+        const unreadCount = document.querySelectorAll('.notification-unread').length;
+        console.log('Remaining unread notifications:', unreadCount);
+        
+        const markAllBtn = document.getElementById('markAllRead');
+        const counterBadge = document.querySelector('.badge-danger');
+        
+        if (unreadCount === 0) {
+            if (markAllBtn) markAllBtn.style.display = 'none';
+            if (counterBadge) counterBadge.remove();
+        } else {
+            if (counterBadge) {
+                counterBadge.textContent = `${unreadCount} nouveau(x)`;
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
         // Mark single notification as read (using event delegation)
-        document.addEventListener('click', function(event) {
-            if (event.target.closest('.mark-read-btn')) {
-                event.preventDefault();
-                const button = event.target.closest('.mark-read-btn');
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.mark-read-btn')) {
+                e.preventDefault();
+                const button = e.target.closest('.mark-read-btn');
                 const notificationId = button.getAttribute('data-id');
                 
                 console.log('Marking single notification as read:', notificationId);
@@ -268,7 +241,6 @@
                     return;
                 }
                 const csrfToken = csrfTokenMeta.getAttribute('content');
-                console.log('CSRF Token found:', csrfToken ? 'Yes' : 'No');
                 
                 // Disable button during request
                 button.disabled = true;
@@ -284,11 +256,8 @@
                 })
                 .then(response => {
                     console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
-                    
                     if (!response.ok) {
                         return response.text().then(text => {
-                            console.error('Response body:', text);
                             throw new Error(`HTTP ${response.status}: ${text}`);
                         });
                     }
@@ -300,31 +269,18 @@
                     listItem.classList.remove('notification-unread');
                     
                     // Remove the "Nouveau" badge
-                    const badge = listItem.querySelector('.badge-primary, .badge-warning, .badge-info');
-                    if (badge && badge.textContent.trim() === 'Nouveau') {
-                        badge.remove();
-                    }
+                    const badges = listItem.querySelectorAll('.badge-primary, .badge-warning, .badge-info');
+                    badges.forEach(badge => {
+                        if (badge.textContent.trim() === 'Nouveau') {
+                            badge.remove();
+                        }
+                    });
                     
                     // Remove the "Lu" button
                     button.remove();
                     
-                    // Update counter if no more unread notifications
-                    const unreadCount = document.querySelectorAll('.notification-unread').length;
-                    console.log('Remaining unread notifications:', unreadCount);
-                    
-                    if (unreadCount === 0) {
-                        const markAllBtn = document.getElementById('markAllRead');
-                        if (markAllBtn) markAllBtn.style.display = 'none';
-                        
-                        const counterBadge = document.querySelector('.badge-danger');
-                        if (counterBadge) counterBadge.remove();
-                    } else {
-                        // Update counter
-                        const counterBadge = document.querySelector('.badge-danger');
-                        if (counterBadge) {
-                            counterBadge.textContent = `${unreadCount} nouveau(x)`;
-                        }
-                    }
+                    // Update counter
+                    updateNotificationCounter();
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -337,45 +293,22 @@
             }
         });
 
-        // Function to mark notification as read (called when clicking "Voir l'échange")
-        function markNotificationAsRead(notificationId) {
-            console.log('Marking notification as read (from link):', notificationId);
-            
-            // Get CSRF token from meta tag
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
-            fetch('/notifications/' + notificationId + '/mark-read', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Notification marquée comme lue:', data);
-            })
-            .catch(error => {
-                console.error('Erreur lors de la mise à jour de la notification:', error);
-            });
-        }
-
         // Mark all notifications as read
-        const markAllReadBtn = document.getElementById('markAllRead');
-        if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', function() {
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#markAllRead')) {
+                e.preventDefault();
+                
                 if (!confirm('Êtes-vous sûr de vouloir marquer toutes les notifications comme lues ?')) {
                     return;
                 }
                 
                 console.log('Marking all notifications as read');
+                const button = e.target.closest('#markAllRead');
+                const originalText = button.innerHTML;
+                
+                // Disable button during request
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> En cours...';
                 
                 // Get CSRF token from meta tag
                 const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
@@ -385,11 +318,6 @@
                     return;
                 }
                 const csrfToken = csrfTokenMeta.getAttribute('content');
-                
-                // Disable button during request
-                const originalText = markAllReadBtn.innerHTML;
-                markAllReadBtn.disabled = true;
-                markAllReadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> En cours...';
                 
                 fetch('/notifications/mark-all-read', {
                     method: 'POST',
@@ -403,7 +331,6 @@
                     console.log('Response status:', response.status);
                     if (!response.ok) {
                         return response.text().then(text => {
-                            console.error('Response body:', text);
                             throw new Error(`HTTP ${response.status}: ${text}`);
                         });
                     }
@@ -413,50 +340,46 @@
                     console.log('Success:', data);
                     
                     // Remove unread styling from all notifications
-                    document.querySelectorAll('.notification-unread').forEach(function(item) {
+                    document.querySelectorAll('.notification-unread').forEach(item => {
                         item.classList.remove('notification-unread');
                     });
                     
                     // Remove all "Lu" buttons and "Nouveau" badges
-                    document.querySelectorAll('.mark-read-btn').forEach(function(btn) {
-                        btn.remove();
-                    });
-                    document.querySelectorAll('.badge-primary, .badge-warning, .badge-info').forEach(function(badge) {
+                    document.querySelectorAll('.mark-read-btn').forEach(btn => btn.remove());
+                    document.querySelectorAll('.badge-primary, .badge-warning, .badge-info').forEach(badge => {
                         if (badge.textContent.trim() === 'Nouveau') {
                             badge.remove();
                         }
                     });
                     
                     // Hide the "Mark all as read" button
-                    markAllReadBtn.style.display = 'none';
+                    button.style.display = 'none';
                     
                     // Update the counter in header
                     const counterBadge = document.querySelector('.badge-danger');
-                    if (counterBadge) {
-                        counterBadge.remove();
-                    }
+                    if (counterBadge) counterBadge.remove();
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Erreur lors de la mise à jour: ' + error.message);
                     
                     // Restore button
-                    markAllReadBtn.disabled = false;
-                    markAllReadBtn.innerHTML = originalText;
+                    button.disabled = false;
+                    button.innerHTML = originalText;
                 });
-            });
-        }
+            }
+        });
 
         // Delete notification (using event delegation)
-        document.addEventListener('click', function(event) {
-            if (event.target.closest('.delete-notification-btn')) {
-                event.preventDefault();
-                const button = event.target.closest('.delete-notification-btn');
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-notification-btn')) {
+                e.preventDefault();
                 
                 if (!confirm('Êtes-vous sûr de vouloir supprimer cette notification ?')) {
                     return;
                 }
                 
+                const button = e.target.closest('.delete-notification-btn');
                 const notificationId = button.getAttribute('data-id');
                 const listItem = button.closest('.list-group-item');
                 const wasUnread = listItem.classList.contains('notification-unread');
@@ -488,7 +411,6 @@
                     console.log('Response status:', response.status);
                     if (!response.ok) {
                         return response.text().then(text => {
-                            console.error('Response body:', text);
                             throw new Error(`HTTP ${response.status}: ${text}`);
                         });
                     }
@@ -503,21 +425,7 @@
                         
                         // Update counter if it was unread
                         if (wasUnread) {
-                            const unreadCount = document.querySelectorAll('.notification-unread').length;
-                            console.log('Remaining unread after delete:', unreadCount);
-                            
-                            if (unreadCount === 0) {
-                                const markAllBtn = document.getElementById('markAllRead');
-                                if (markAllBtn) markAllBtn.style.display = 'none';
-                                
-                                const counterBadge = document.querySelector('.badge-danger');
-                                if (counterBadge) counterBadge.remove();
-                            } else {
-                                const counterBadge = document.querySelector('.badge-danger');
-                                if (counterBadge) {
-                                    counterBadge.textContent = `${unreadCount} nouveau(x)`;
-                                }
-                            }
+                            updateNotificationCounter();
                         }
                     }, 300);
                 })

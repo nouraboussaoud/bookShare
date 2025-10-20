@@ -87,6 +87,30 @@ Route::middleware('auth')->group(function () {
         return redirect('/')->with('message', 'Logged out successfully via test route');
     })->name('test.logout');
     
+    // Route de test pour créer une notification
+    Route::get('/test-create-notification', function () {
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Vous devez être connecté');
+        }
+        
+        $notification = new \App\Models\Notification([
+            'user_id' => $user->id,
+            'type' => 'exchange_request',
+            'title' => 'Nouvelle demande d\'échange (Test)',
+            'message' => 'Un utilisateur souhaite échanger votre livre "Test Book". Consultez les détails et acceptez ou refusez cette demande.',
+            'data' => [
+                'exchange_id' => 1,
+                'book_title' => 'Test Book',
+                'initiator_name' => 'Test User'
+            ],
+            'is_read' => false
+        ]);
+        $notification->save();
+        
+        return redirect()->route('notifications.index')->with('success', 'Notification de test créée !');
+    })->name('test.notification');
+    
     // Route de debug pour vérifier/changer le rôle (TEMPORAIRE)
     Route::get('/debug-role', function () {
         $user = Auth::user();
@@ -133,12 +157,6 @@ Route::resource('locations', LocationController::class);
     
     // Report routes for users
     Route::resource('reports', \App\Http\Controllers\ReportController::class)->only(['index', 'create', 'store', 'show']);
-    
-    // Notification routes
-    Route::get('notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('notifications/{notification}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-    Route::post('notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
-    Route::delete('notifications/{notification}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     
 // -----------------------
 // Reading Groups

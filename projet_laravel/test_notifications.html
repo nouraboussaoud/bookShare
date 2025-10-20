@@ -2,26 +2,73 @@
 <html>
 <head>
     <title>Test Notifications</title>
+    <meta name="csrf-token" content="">
 </head>
 <body>
     <h1>Test des routes notifications</h1>
+    <div>
+        <label>CSRF Token: <input type="text" id="csrfToken" placeholder="Entrez le token CSRF"></label>
+    </div>
+    <br>
     <button onclick="testMarkAsRead()">Test Mark as Read</button>
     <button onclick="testMarkAllAsRead()">Test Mark All as Read</button>
     <button onclick="testDelete()">Test Delete</button>
+    <button onclick="testGetCsrfFromServer()">Get CSRF Token</button>
     
     <div id="result"></div>
 
     <script>
         const BASE_URL = 'http://localhost:8000';
         
+        // Get CSRF token from server
+        async function testGetCsrfFromServer() {
+            try {
+                const response = await fetch(`${BASE_URL}/notifications`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    // Try to extract CSRF token from the response
+                    const match = html.match(/name="csrf-token"\s+content="([^"]+)"/);
+                    if (match) {
+                        document.getElementById('csrfToken').value = match[1];
+                        document.querySelector('meta[name="csrf-token"]').content = match[1];
+                        document.getElementById('result').innerHTML = `CSRF Token récupéré: ${match[1].substring(0, 20)}...`;
+                    } else {
+                        document.getElementById('result').innerHTML = 'CSRF Token non trouvé dans la réponse';
+                    }
+                } else {
+                    document.getElementById('result').innerHTML = `Erreur récupération token: ${response.status}`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+            }
+        }
+        
+        function getCsrfToken() {
+            return document.getElementById('csrfToken').value || 
+                   document.querySelector('meta[name="csrf-token"]')?.content || 
+                   '';
+        }
+        
         async function testMarkAsRead() {
             try {
+                const csrfToken = getCsrfToken();
+                if (!csrfToken) {
+                    document.getElementById('result').innerHTML = 'CSRF Token manquant! Utilisez "Get CSRF Token" d\'abord.';
+                    return;
+                }
+                
                 const response = await fetch(`${BASE_URL}/notifications/1/mark-read`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                    }
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'include'
                 });
                 
                 const result = await response.text();
@@ -33,12 +80,20 @@
         
         async function testMarkAllAsRead() {
             try {
+                const csrfToken = getCsrfToken();
+                if (!csrfToken) {
+                    document.getElementById('result').innerHTML = 'CSRF Token manquant! Utilisez "Get CSRF Token" d\'abord.';
+                    return;
+                }
+                
                 const response = await fetch(`${BASE_URL}/notifications/mark-all-read`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                    }
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'include'
                 });
                 
                 const result = await response.text();
@@ -50,12 +105,20 @@
         
         async function testDelete() {
             try {
+                const csrfToken = getCsrfToken();
+                if (!csrfToken) {
+                    document.getElementById('result').innerHTML = 'CSRF Token manquant! Utilisez "Get CSRF Token" d\'abord.';
+                    return;
+                }
+                
                 const response = await fetch(`${BASE_URL}/notifications/1`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                    }
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    credentials: 'include'
                 });
                 
                 const result = await response.text();
