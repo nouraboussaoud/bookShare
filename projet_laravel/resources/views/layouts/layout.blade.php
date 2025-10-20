@@ -438,6 +438,7 @@
     <!-- Report Modal -->
     @auth
         @include('components.report-modal')
+        @include('components.chatbot-widget')
     @endauth
 </body>
 </html>

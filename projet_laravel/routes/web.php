@@ -328,6 +328,11 @@ Route::middleware('auth')->prefix('api')->group(function () {
     
     // Routes pour les recommandations intelligentes d'échanges
     Route::get('/recommend-books/{book}', [\App\Http\Controllers\AIRecommendationController::class, 'recommendBooks'])->name('api.recommend-books');
+    
+    // Routes pour le chatbot
+    Route::post('/chatbot/message', [\App\Http\Controllers\ChatbotController::class, 'sendMessage'])->name('api.chatbot.message');
+    Route::get('/chatbot/suggestions', [\App\Http\Controllers\ChatbotController::class, 'getSuggestions'])->name('api.chatbot.suggestions');
+    Route::delete('/chatbot/history', [\App\Http\Controllers\ChatbotController::class, 'clearHistory'])->name('api.chatbot.history');
 });
 
 // Route de test IA (sans auth pour le debug)
