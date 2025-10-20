@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
 class Location extends Model
@@ -44,6 +45,11 @@ class Location extends Model
     public function locataire(): BelongsTo
     {
         return $this->belongsTo(User::class, 'locataire_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(ReservationPayment::class);
     }
 
     // Méthodes utiles

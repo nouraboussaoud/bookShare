@@ -12,6 +12,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\ReservationPaymentController;
 
 use App\Http\Controllers\ReadingGroupController;
 use App\Http\Controllers\GroupMembershipController;
@@ -56,6 +57,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('reviews', \App\Http\Controllers\Admin\ReviewManagementController::class);
     Route::patch('reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'approve'])->name('reviews.approve');
     Route::patch('reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'reject'])->name('reviews.reject');
+    
+    // Dashboard Analytics & Priority System (AVANT resource pour éviter conflit avec {report})
+    Route::get('reports/dashboard', [\App\Http\Controllers\Admin\ReportsDashboardController::class, 'index'])->name('reports.dashboard');
+    Route::get('reports/dashboard/export', [\App\Http\Controllers\Admin\ReportsDashboardController::class, 'export'])->name('reports.dashboard.export');
+    Route::get('reports/dashboard/timeline-data', [\App\Http\Controllers\Admin\ReportsDashboardController::class, 'timelineData'])->name('reports.dashboard.timeline');
     
     // Admin routes for reports management
     Route::resource('reports', \App\Http\Controllers\Admin\ReportAdminController::class)->only(['index', 'show', 'destroy']);
@@ -147,6 +153,12 @@ Route::resource('locations', LocationController::class);
     Route::get('locations-help', function () {
         return view('locations.help');
     })->name('locations.help');
+
+    // Routes pour les paiements de réservation
+    Route::resource('reservation-payments', ReservationPaymentController::class);
+    Route::patch('reservation-payments/{reservationPayment}/marquer-complete', [ReservationPaymentController::class, 'marquerComplete'])->name('reservation-payments.marquer-complete');
+    Route::patch('reservation-payments/{reservationPayment}/rembourser', [ReservationPaymentController::class, 'rembourser'])->name('reservation-payments.rembourser');
+    Route::get('locations/{location}/payments', [ReservationPaymentController::class, 'byLocation'])->name('locations.payments');
     // Books resource routes
     Route::resource('books', BookController::class);
     // Toggle book status (AVAILABLE <-> RESERVED)
@@ -283,6 +295,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/supervise-exchanges', [ExchangeAdminController::class, 'superviseExchanges'])->name('superviseExchanges');
     Route::patch('/arbitrate-exchange/{id}', [ExchangeAdminController::class, 'arbitrateExchange'])->name('arbitrateExchange');
     Route::delete('/cancel-exchange/{id}', [ExchangeAdminController::class, 'cancelExchange'])->name('cancelExchange');
+
+    // Location (Réservations) management routes
+    Route::get('locations', [\App\Http\Controllers\Admin\LocationAdminController::class, 'index'])->name('locations.index');
+    Route::get('locations/{location}', [\App\Http\Controllers\Admin\LocationAdminController::class, 'show'])->name('locations.show');
+    Route::patch('locations/{location}/approve', [\App\Http\Controllers\Admin\LocationAdminController::class, 'approve'])->name('locations.approve');
+    Route::patch('locations/{location}/reject', [\App\Http\Controllers\Admin\LocationAdminController::class, 'reject'])->name('locations.reject');
+    Route::delete('locations/{location}', [\App\Http\Controllers\Admin\LocationAdminController::class, 'destroy'])->name('locations.destroy');
 
     // Admin Groupes management (minimal CRUD view/edit/delete)
     Route::get('groupes', [\App\Http\Controllers\Admin\GroupManagementController::class, 'index'])->name('groupes.index');

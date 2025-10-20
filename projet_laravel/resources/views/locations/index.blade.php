@@ -6,14 +6,14 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-handshake fa-sm text-primary"></i>
-            Mes Locations
+            Mes Réservations
         </h1>
         <div>
             <a href="{{ route('locations.help') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
                 <i class="fas fa-question-circle fa-sm text-white-50"></i> Guide d'aide
             </a>
             <a href="{{ route('books.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-plus fa-sm text-white-50"></i> Louer un livre
+                <i class="fas fa-plus fa-sm text-white-50"></i> Réserver un livre
             </a>
         </div>
     </div>
@@ -37,20 +37,20 @@
     @endif
 
     <div class="row">
-        <!-- Locations où je suis locataire -->
+        <!-- Réservations où je suis locataire -->
         <div class="col-xl-6 col-lg-6">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">
                         <i class="fas fa-book-reader"></i>
-                        Livres que je loue ({{ $locationsCommeLocataire->count() }})
+                        Livres que je réserve ({{ $locationsCommeLocataire->count() }})
                     </h6>
                 </div>
                 <div class="card-body">
                     @if($locationsCommeLocataire->isEmpty())
                         <div class="text-center py-4">
                             <i class="fas fa-book-open fa-3x text-gray-300 mb-3"></i>
-                            <p class="text-gray-500">Vous n'avez pas encore loué de livres.</p>
+                            <p class="text-gray-500">Vous n'avez pas encore réservé de livres.</p>
                             <a href="{{ route('books.index') }}" class="btn btn-primary btn-sm">
                                 Parcourir les livres
                             </a>

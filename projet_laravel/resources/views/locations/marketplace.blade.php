@@ -6,14 +6,14 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-store fa-sm text-success"></i>
-            Marketplace des Locations
+            Marketplace des Réservations
         </h1>
         <div>
             <a href="{{ route('locations.help') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
                 <i class="fas fa-question-circle fa-sm text-white-50"></i> Guide d'aide
             </a>
             <a href="{{ route('locations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-handshake fa-sm text-white-50"></i> Mes Locations
+                <i class="fas fa-calendar-check fa-sm text-white-50"></i> Mes Réservations
             </a>
         </div>
     </div>
@@ -43,11 +43,11 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Locations Actives</div>
+                                Réservations Actives</div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $locationsRecentes->where('statut', 'en_cours')->count() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-handshake fa-2x text-gray-300"></i>
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -161,7 +161,7 @@
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-success">
                 <i class="fas fa-book-open"></i>
-                Livres Disponibles à la Location ({{ $livresDisponibles->total() }})
+                Livres Disponibles à la Réservation ({{ $livresDisponibles->total() }})
             </h6>
         </div>
         <div class="card-body">
@@ -232,7 +232,7 @@
                                                 @if(Auth::id() != $livre->user_id)
                                                     <a href="{{ route('locations.create', ['book_id' => $livre->id]) }}" 
                                                        class="btn btn-success btn-sm">
-                                                        <i class="fas fa-handshake"></i> Louer
+                                                        <i class="fas fa-calendar-check"></i> Réserver
                                                     </a>
                                                 @else
                                                     <span class="badge badge-secondary">Votre livre</span>
@@ -272,7 +272,7 @@
                 <div class="text-center py-5">
                     <i class="fas fa-book-open fa-4x text-gray-300 mb-4"></i>
                     <h4 class="text-gray-500">Aucun livre disponible</h4>
-                    <p class="text-gray-400">Il n'y a actuellement aucun livre disponible à la location.</p>
+                    <p class="text-gray-400">Il n'y a actuellement aucun livre disponible à la réservation.</p>
                     <a href="{{ route('books.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Ajouter un livre
                     </a>
@@ -287,7 +287,7 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-info">
                     <i class="fas fa-history"></i>
-                    Locations Récentes (Exemples de prix)
+                    Réservations Récentes (Exemples de prix)
                 </h6>
             </div>
             <div class="card-body">

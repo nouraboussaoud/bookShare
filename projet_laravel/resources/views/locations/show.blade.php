@@ -6,10 +6,10 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-eye fa-sm text-primary"></i>
-            Détails de la location
+            Détails de la réservation
         </h1>
         <a href="{{ route('locations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Retour aux locations
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Retour aux réservations
         </a>
     </div>
 
@@ -175,6 +175,13 @@
                     </h6>
                 </div>
                 <div class="card-body">
+                    <!-- Bouton voir les paiements -->
+                    <div class="mb-3">
+                        <a href="{{ route('locations.payments', $location) }}" class="btn btn-info btn-block">
+                            <i class="fas fa-euro-sign"></i> Voir les Paiements
+                        </a>
+                    </div>
+
                     @if(Auth::id() === $location->locataire_id)
                         <!-- Actions pour le locataire -->
                         @if($location->statut === 'en_attente')

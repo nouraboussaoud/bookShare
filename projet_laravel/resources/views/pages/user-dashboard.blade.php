@@ -428,6 +428,7 @@
                         <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
                         <li><a href="{{ route('books.index') }}">Livres</a></li>
                         <li><a href="{{ route('locations.marketplace') }}">Marketplace</a></li>
+                        <li><a href="{{ route('locations.index') }}">Réservations</a></li>
                         <li><a href="{{ route('exchanges.index') }}">Échanges</a></li>
                     </ul>
                 </div>
