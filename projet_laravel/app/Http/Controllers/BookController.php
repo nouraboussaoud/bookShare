@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Category;
+use App\Services\BookSummaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,13 +39,13 @@ class BookController extends Controller
 
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('categoryTags')->orderBy('name')->get();
         return view('books.create', compact('categories'));
     }
 
     public function show(Book $book)
     {
-        $book->load(['user', 'category', 'review']);
+        $book->load(['user', 'category', 'review', 'categoryTags']);
         return view('books.show', compact('book'));
     }
 
@@ -66,7 +67,17 @@ class BookController extends Controller
         }
 
         $validated['user_id'] = Auth::id();
-        Book::create($validated);
+        $book = Book::create($validated);
+
+        // Attach tags if provided
+        if ($request->has('tags')) {
+            $book->categoryTags()->attach($request->tags, ['created_by_user_id' => Auth::id()]);
+            
+            // Update usage count for each tag
+            foreach ($request->tags as $tagId) {
+                \App\Models\CategoryTag::find($tagId)?->incrementUsage();
+            }
+        }
 
         return redirect()->route('user.dashboard')->with('success', 'Livre créé avec succès.');
     }
@@ -74,7 +85,8 @@ class BookController extends Controller
     public function edit(Book $book)
     {
         $this->authorizeAccess($book);
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::with('categoryTags')->orderBy('name')->get();
+        $book->load('categoryTags');
         return view('books.edit', compact('book', 'categories'));
     }
 
@@ -102,6 +114,35 @@ class BookController extends Controller
         }
 
         $book->update($validated);
+
+        // Sync tags if provided
+        if ($request->has('tags')) {
+            // Get old tags to decrement their usage
+            $oldTags = $book->categoryTags->pluck('id')->toArray();
+            
+            // Sync tags
+            $book->categoryTags()->sync($request->tags);
+            
+            // Update usage counts
+            foreach ($oldTags as $oldTagId) {
+                if (!in_array($oldTagId, $request->tags)) {
+                    \App\Models\CategoryTag::find($oldTagId)?->decrementUsage();
+                }
+            }
+            
+            foreach ($request->tags as $newTagId) {
+                if (!in_array($newTagId, $oldTags)) {
+                    \App\Models\CategoryTag::find($newTagId)?->incrementUsage();
+                }
+            }
+        } else {
+            // Remove all tags if none provided
+            foreach ($book->categoryTags as $tag) {
+                $tag->decrementUsage();
+            }
+            $book->categoryTags()->detach();
+        }
+
         return redirect()->route('books.index')->with('success', 'Livre mis à jour avec succès.');
     }
 
@@ -119,6 +160,19 @@ class BookController extends Controller
         $book->save();
 
         return redirect()->route('books.index')->with('success', 'Statut du livre mis à jour.');
+    }
+
+    public function generateSummary(Book $book, BookSummaryService $summaryService)
+    {
+        $this->authorizeAccess($book);
+
+        $result = $summaryService->generateSummary($book);
+
+        if ($result['success']) {
+            return redirect()->back()->with('success', $result['message']);
+        }
+
+        return redirect()->back()->with('error', $result['message']);
     }
 
     private function authorizeAccess(Book $book): void

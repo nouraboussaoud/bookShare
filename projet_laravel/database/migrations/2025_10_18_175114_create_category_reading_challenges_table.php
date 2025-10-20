@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reading_groups', function (Blueprint $table) {
-            $table->enum('status', ['active', 'inactive', 'completed'])->default('active')->after('description');
+        Schema::create('category_reading_challenges', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('reading_groups', function (Blueprint $table) {
-            $table->dropColumn('status');
-        });
+        Schema::dropIfExists('category_reading_challenges');
     }
 };

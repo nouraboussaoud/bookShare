@@ -15,18 +15,20 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['to_read', 'reading', 'completed', 'abandoned'])->default('to_read');
             $table->integer('current_page')->default(0);
             $table->integer('total_pages')->nullable();
-            $table->integer('reading_time_minutes')->default(0);
-            $table->date('started_at')->nullable();
-            $table->date('completed_at')->nullable();
-            $table->text('notes')->nullable();
-            $table->integer('rating')->nullable()->comment('1-5 stars');
+            $table->enum('status', ['to_read', 'reading', 'completed', 'abandoned'])->default('to_read');
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('finished_at')->nullable();
+            $table->integer('reading_time_minutes')->default(0)->comment('Total reading time in minutes');
+            $table->text('notes')->nullable()->comment('Personal reading notes');
             $table->timestamps();
+
+            // Index pour améliorer les performances
+            $table->index(['user_id', 'book_id']);
+            $table->index('status');
             
-            // Index pour optimiser les requêtes
-            $table->index(['user_id', 'status']);
+            // Un utilisateur ne peut avoir qu'une seule progression par livre
             $table->unique(['user_id', 'book_id']);
         });
     }

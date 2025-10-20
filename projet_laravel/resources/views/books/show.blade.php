@@ -196,6 +196,37 @@
                             </div>
                         </div>
 
+                        <!-- Tags -->
+                        @if($book->categoryTags && $book->categoryTags->count() > 0)
+                            <div class="mb-4">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-tags"></i> Tags
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach($book->categoryTags as $tag)
+                                        <span class="badge" style="background-color: {{ $tag->color }}; color: white; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                            @if($tag->icon)
+                                                <i class="{{ $tag->icon }}"></i>
+                                            @endif
+                                            {{ $tag->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- AI Summary -->
+                        @if($book->ai_summary)
+                            <div class="mb-4">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-robot"></i> Résumé IA
+                                </h6>
+                                <div class="bg-gradient-light p-3 rounded border-left-primary">
+                                    <p class="mb-0">{{ $book->ai_summary }}</p>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Description -->
                         @if($book->description)
                             <div class="mb-4">
@@ -203,6 +234,21 @@
                                 <div class="bg-light p-3 rounded">
                                     <p class="mb-0">{{ $book->description }}</p>
                                 </div>
+                            </div>
+                        @endif
+
+                        <!-- Generate AI Summary Button (for book owner) -->
+                        @if(Auth::id() == $book->user_id && !$book->ai_summary)
+                            <div class="mb-4">
+                                <form action="{{ route('books.generateSummary', $book) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-primary">
+                                        <i class="fas fa-magic"></i> Générer un résumé IA
+                                    </button>
+                                </form>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle"></i> L'IA créera un résumé captivant basé sur les informations du livre
+                                </small>
                             </div>
                         @endif
 

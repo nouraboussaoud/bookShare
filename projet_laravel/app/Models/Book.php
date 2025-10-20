@@ -19,6 +19,7 @@ class Book extends Model
         'recommended_age',
         'photo',
         'description',
+        'ai_summary',
     ];
 
     // Relations
@@ -60,6 +61,13 @@ class Book extends Model
     public function readingProgress()
     {
         return $this->hasMany(ReadingProgress::class);
+    }
+
+    public function categoryTags()
+    {
+        return $this->belongsToMany(CategoryTag::class, 'book_category_tag')
+            ->withPivot('created_by_user_id')
+            ->withTimestamps();
     }
 
     /**

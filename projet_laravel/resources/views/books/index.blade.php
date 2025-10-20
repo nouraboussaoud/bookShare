@@ -136,6 +136,15 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     
+                                    @if(!$book->ai_summary)
+                                        <form action="{{ route('books.generateSummary', $book) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-info" title="Générer résumé IA">
+                                                <i class="fas fa-magic"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    
                                     <form action="{{ route('books.toggleStatus', $book) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('PATCH')

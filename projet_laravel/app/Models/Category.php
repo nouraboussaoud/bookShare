@@ -49,6 +49,16 @@ class Category extends Model
         return $query->where('is_featured', true);
     }
 
+    public function categoryTags(): HasMany
+    {
+        return $this->hasMany(CategoryTag::class);
+    }
+
+    public function popularTags()
+    {
+        return $this->categoryTags()->popular(5);
+    }
+
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('name');

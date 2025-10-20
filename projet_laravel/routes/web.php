@@ -151,6 +151,10 @@ Route::resource('locations', LocationController::class);
     Route::resource('books', BookController::class);
     // Toggle book status (AVAILABLE <-> RESERVED)
     Route::patch('books/{book}/toggle-status', [BookController::class, 'toggleStatus'])->name('books.toggleStatus');
+    // AI Summary generation
+    Route::post('books/{book}/generate-summary', [BookController::class, 'generateSummary'])->name('books.generateSummary');
+    // Categories resource routes
+    Route::resource('categories', CategoryController::class);
     
     // Reviews resource routes - Users can manage their own reviews
     Route::resource('reviews', ReviewController::class);

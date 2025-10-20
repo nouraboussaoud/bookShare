@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('reading_groups', function (Blueprint $table) {
-            $table->enum('status', ['active', 'inactive', 'completed'])->default('active')->after('description');
+        Schema::table('books', function (Blueprint $table) {
+            $table->text('ai_summary')->nullable()->after('description');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('reading_groups', function (Blueprint $table) {
-            $table->dropColumn('status');
+        Schema::table('books', function (Blueprint $table) {
+            $table->dropColumn('ai_summary');
         });
     }
 };
