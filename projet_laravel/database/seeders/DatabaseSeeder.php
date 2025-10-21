@@ -57,5 +57,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ReadingGroupSeeder::class,
         ]);
+
+        // Create test data for development/testing
+        $this->call([
+            TestDataSeeder::class,
+        ]);
     }
 }
