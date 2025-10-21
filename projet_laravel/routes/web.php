@@ -17,6 +17,7 @@ use App\Http\Controllers\ReservationPaymentController;
 use App\Http\Controllers\ReadingGroupController;
 use App\Http\Controllers\GroupMembershipController;
 use App\Http\Controllers\ReadingProgressController;
+use App\Http\Controllers\PollController;
 
 
 Route::get('/', function () {
@@ -76,6 +77,7 @@ Route::get('/user/dashboard', [UserDashboardController::class, 'index'])
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // Notification routes
@@ -116,6 +118,45 @@ Route::middleware('auth')->group(function () {
         
         return redirect()->route('notifications.index')->with('success', 'Notification de test créée !');
     })->name('test.notification');
+    
+    // Test Notifications & Polls Page
+    Route::get('/test/notifications-polls', function () {
+        return view('test-notifications-polls');
+    })->name('test.notifications-polls');
+    
+    // Test Event Reminder
+    Route::post('/test/event-reminder', function (\Illuminate\Http\Request $request) {
+        $event = \App\Models\GroupEvent::find($request->event_id);
+        if (!$event) {
+            return back()->withErrors('Event not found');
+        }
+        
+        $notificationService = app(\App\Services\NotificationService::class);
+        
+        if ($request->reminder_type === '24h') {
+            $notificationService->notifyEventReminder24h($event);
+            $message = "✅ 24-hour reminder sent to {$event->attendees()->count()} attendees";
+        } else {
+            $notificationService->notifyEventReminder1h($event);
+            $message = "✅ 1-hour reminder sent to {$event->attendees()->count()} attendees";
+        }
+        
+        return back()->with('reminder_sent', $message);
+    })->name('test.event.reminder');
+    
+    // Test Poll Started
+    Route::post('/test/poll-started', function (\Illuminate\Http\Request $request) {
+        $poll = \App\Models\Poll::find($request->poll_id);
+        if (!$poll) {
+            return back()->withErrors('Poll not found');
+        }
+        
+        $notificationService = app(\App\Services\NotificationService::class);
+        $notificationService->notifyPollStarted($poll);
+        
+        $message = "✅ Poll notification sent to {$poll->event->attendees()->where('group_event_attendees.status', 'confirmed')->count()} attendees";
+        return back()->with('poll_notif_sent', $message);
+    })->name('test.poll.started');
     
     // Route de debug pour vérifier/changer le rôle (TEMPORAIRE)
     Route::get('/debug-role', function () {
@@ -262,6 +303,24 @@ Route::middleware(['auth'])->group(function () {
         ->name('events.chat.statistics');
     Route::get('events/{event}/chat', [\App\Http\Controllers\EventChatController::class, 'showChat'])
         ->name('events.chat.show');
+    
+    // Poll Routes
+    Route::get('reading-groups/{readingGroup}/events/{event}/polls/create', [PollController::class, 'create'])
+        ->name('polls.create');
+    Route::post('reading-groups/{readingGroup}/events/{event}/polls', [PollController::class, 'store'])
+        ->name('polls.store');
+    Route::get('reading-groups/{readingGroup}/events/{event}/polls/{poll}', [PollController::class, 'show'])
+        ->name('polls.show');
+    Route::post('reading-groups/{readingGroup}/events/{event}/polls/{poll}/vote', [PollController::class, 'vote'])
+        ->name('polls.vote');
+    Route::get('reading-groups/{readingGroup}/events/{event}/polls/{poll}/results', [PollController::class, 'getResults'])
+        ->name('polls.results');
+    Route::get('reading-groups/{readingGroup}/events/{event}/polls/{poll}/export', [PollController::class, 'exportResults'])
+        ->name('polls.export');
+    Route::post('reading-groups/{readingGroup}/events/{event}/polls/{poll}/close', [PollController::class, 'close'])
+        ->name('polls.close');
+    Route::delete('reading-groups/{readingGroup}/events/{event}/polls/{poll}', [PollController::class, 'destroy'])
+        ->name('polls.destroy');
 });
 
 // -----------------------
@@ -323,6 +382,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     // Admin Groupes management (minimal CRUD view/edit/delete)
     Route::get('groupes', [\App\Http\Controllers\Admin\GroupManagementController::class, 'index'])->name('groupes.index');
+    Route::get('groupes/export/csv', [\App\Http\Controllers\Admin\GroupManagementController::class, 'exportCSV'])->name('groupes.export');
     Route::get('groupes/{readingGroup}', [\App\Http\Controllers\Admin\GroupManagementController::class, 'show'])->name('groupes.show');
     Route::get('groupes/{readingGroup}/edit', [\App\Http\Controllers\Admin\GroupManagementController::class, 'edit'])->name('groupes.edit');
     Route::put('groupes/{readingGroup}', [\App\Http\Controllers\Admin\GroupManagementController::class, 'update'])->name('groupes.update');
@@ -330,6 +390,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     // Admin Événements management (minimal CRUD view/edit/delete)
     Route::get('evenements', [\App\Http\Controllers\Admin\EventManagementController::class, 'index'])->name('evenements.index');
+    Route::get('evenements/export/csv', [\App\Http\Controllers\Admin\EventManagementController::class, 'exportCSV'])->name('evenements.export');
     Route::get('evenements/{groupEvent}', [\App\Http\Controllers\Admin\EventManagementController::class, 'show'])->name('evenements.show');
     Route::get('evenements/{groupEvent}/edit', [\App\Http\Controllers\Admin\EventManagementController::class, 'edit'])->name('evenements.edit');
     Route::put('evenements/{groupEvent}', [\App\Http\Controllers\Admin\EventManagementController::class, 'update'])->name('evenements.update');

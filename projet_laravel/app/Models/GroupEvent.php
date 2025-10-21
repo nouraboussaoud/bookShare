@@ -94,6 +94,27 @@ class GroupEvent extends Model
     }
 
     /**
+     * Get all polls for this event
+     */
+    public function polls()
+    {
+        return $this->hasMany(Poll::class, 'event_id');
+    }
+
+    /**
+     * Get active polls for this event
+     */
+    public function activePolls()
+    {
+        return $this->polls()
+                    ->where('is_active', true)
+                    ->where(function ($query) {
+                        $query->whereNull('closes_at')
+                              ->orWhere('closes_at', '>', now());
+                    });
+    }
+
+    /**
      * Get the count of confirmed attendees
      */
     public function confirmedAttendeesCount()
@@ -136,5 +157,30 @@ class GroupEvent extends Model
         $eventEndTime = $eventDateTime->copy()->addMinutes($durationMinutes);
         
         return $now->between($eventDateTime, $eventEndTime);
+    }
+
+    /**
+     * Get event end time
+     */
+    public function getEventEndTime()
+    {
+        if (!$this->event_time) {
+            return null;
+        }
+
+        $eventDateTime = $this->event_date->setTimeFromTimeString($this->event_time->format('H:i:s'));
+        $durationMinutes = $this->duration_minutes ?? 120;
+        
+        return $eventDateTime->copy()->addMinutes($durationMinutes);
+    }
+
+    /**
+     * Auto-close all active polls for this event
+     */
+    public function closeAllPolls()
+    {
+        $this->polls()
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
     }
 }

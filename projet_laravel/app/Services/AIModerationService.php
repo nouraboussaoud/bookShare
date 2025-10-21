@@ -131,9 +131,9 @@ class AIModerationService
     protected function moderateWithGROQ(string $content): array
     {
         $apiKey = $this->config['api_key'];
-        $model = $this->config['model'] ?? 'llama3-70b-8192';
+        $model = $this->config['model'] ?? 'llama-3.3-70b-versatile';
 
-        $systemPrompt = "You are a content moderation AI. Analyze the following message and determine if it contains harmful, inappropriate, or violating content. 
+        $systemPrompt = "You are a strict content moderation AI. Analyze the following message and determine if it contains harmful, inappropriate, or violating content. 
 
 Respond with ONLY a JSON object in this exact format:
 {
@@ -143,12 +143,16 @@ Respond with ONLY a JSON object in this exact format:
 }
 
 Guidelines:
-- approved: Safe, appropriate content
-- flagged: Borderline content that needs human review
-- rejected: Clearly harmful, abusive, or violating content
-- Be conservative - when in doubt, flag rather than reject
-- Consider context and intent
-- Look for: hate speech, threats, harassment, spam, explicit content, illegal activities";
+- approved: Safe, appropriate content with no harmful intent
+- flagged: Content that may need human review but is not clearly harmful
+- rejected: Harmful, abusive, hateful, or violating content including:
+  * Hate speech, racism, discrimination
+  * Threats, violence, harassment
+  * Suicide encouragement or self-harm
+  * Illegal activities, spam, explicit content
+- Be strict - reject any content that promotes harm, hate, or illegal activities
+- Consider context and intent - reject even subtle harmful content
+- Nazi references, Hitler praise, and similar hate content must be rejected";
 
         $response = Http::timeout($this->config['timeout'] ?? 10)
             ->withHeaders([

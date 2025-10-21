@@ -61,6 +61,7 @@ class ChatMessageSent implements ShouldBroadcast
             'created_at' => $this->message->created_at->diffForHumans(),
             'timestamp' => $this->message->created_at->toIso8601String(),
             'moderation_status' => $this->message->moderation_status,
+            'ai_used' => $this->message->ai_used,
             'reply_to' => $this->message->reply_to_message_id ? [
                 'user' => $this->message->reply_to_user,
                 'message' => $this->message->reply_to_content

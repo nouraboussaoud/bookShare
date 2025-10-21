@@ -470,4 +470,217 @@ class NotificationService
             ],
         ]);
     }
+
+    /**
+     * Event Notifications - Poll Started
+     */
+    public function notifyPollStarted($poll)
+    {
+        $event = $poll->event;
+        $attendees = $event->attendees()->where('group_event_attendees.status', 'confirmed')->get();
+
+        if ($attendees->isEmpty()) {
+            return [];
+        }
+
+        $pollTypes = [
+            'yes_no' => 'Oui/Non',
+            'multiple_choice' => 'Choix multiples',
+            'rating' => 'Évaluation (1-5)',
+        ];
+
+        $pollTypeLabel = $pollTypes[$poll->type] ?? $poll->type;
+
+        $notifications = [];
+        foreach ($attendees as $attendee) {
+            $notification = Notification::create([
+                'user_id' => $attendee->id,
+                'type' => 'event_poll_started',
+                'title' => 'Nouveau sondage',
+                'message' => "Un nouveau sondage a commencé lors de l'événement \"{$event->title}\": {$poll->title} ({$pollTypeLabel})",
+                'data' => [
+                    'event_id' => $event->id,
+                    'poll_id' => $poll->id,
+                    'event_title' => $event->title,
+                    'poll_title' => $poll->title,
+                    'poll_type' => $poll->type,
+                ],
+            ]);
+            $notifications[] = $notification;
+        }
+
+        return $notifications;
+    }
+
+    /**
+     * Event Notifications - Attendee Joined
+     */
+    public function notifyAttendeeJoined($event, $user)
+    {
+        $organizers = $event->attendees()
+            ->whereIn('user_id', function ($query) use ($event) {
+                $query->select('user_id')
+                    ->from('group_event_attendees')
+                    ->where('group_event_id', $event->id);
+            })
+            ->get();
+
+        $notifications = [];
+        foreach ($organizers as $organizer) {
+            $notification = Notification::create([
+                'user_id' => $organizer->id,
+                'type' => 'event_attendee_joined',
+                'title' => 'Nouveau participant',
+                'message' => "{$user->name} a rejoint l'événement \"{$event->title}\".",
+                'data' => [
+                    'event_id' => $event->id,
+                    'user_id' => $user->id,
+                    'user_name' => $user->name,
+                    'event_title' => $event->title,
+                ],
+            ]);
+            $notifications[] = $notification;
+        }
+
+        return $notifications;
+    }
+
+    /**
+     * Event Notifications - Agenda Updated
+     */
+    public function notifyAgendaUpdated($event)
+    {
+        $attendees = $event->attendees()->where('group_event_attendees.status', 'confirmed')->get();
+
+        if ($attendees->isEmpty()) {
+            return [];
+        }
+
+        $notifications = [];
+        foreach ($attendees as $attendee) {
+            $notification = Notification::create([
+                'user_id' => $attendee->id,
+                'type' => 'event_agenda_updated',
+                'title' => 'Agenda mis à jour',
+                'message' => "L'agenda de l'événement \"{$event->title}\" a été mis à jour. Consultez les nouveaux détails.",
+                'data' => [
+                    'event_id' => $event->id,
+                    'event_title' => $event->title,
+                    'event_date' => $event->event_date->format('Y-m-d'),
+                    'event_time' => $event->event_time?->format('H:i'),
+                ],
+            ]);
+            $notifications[] = $notification;
+        }
+
+        return $notifications;
+    }
+
+    /**
+     * Event Notifications - Event Reminder (24 hours before)
+     */
+    public function notifyEventReminder24h($event)
+    {
+        $attendees = $event->attendees()->where('group_event_attendees.status', 'confirmed')->get();
+
+        if ($attendees->isEmpty()) {
+            return [];
+        }
+
+        $notifications = [];
+        foreach ($attendees as $attendee) {
+            $notification = Notification::create([
+                'user_id' => $attendee->id,
+                'type' => 'event_reminder_24h',
+                'title' => 'Rappel: Événement dans 24 heures',
+                'message' => "N'oubliez pas ! L'événement \"{$event->title}\" commence demain à {$event->event_time?->format('H:i')} ({$event->event_date->format('d/m/Y')}).",
+                'data' => [
+                    'event_id' => $event->id,
+                    'event_title' => $event->title,
+                    'event_date' => $event->event_date->format('Y-m-d'),
+                    'event_time' => $event->event_time?->format('H:i'),
+                    'location' => $event->location,
+                ],
+            ]);
+            $notifications[] = $notification;
+        }
+
+        return $notifications;
+    }
+
+    /**
+     * Event Notifications - Event Reminder (1 hour before)
+     */
+    public function notifyEventReminder1h($event)
+    {
+        $attendees = $event->attendees()->where('group_event_attendees.status', 'confirmed')->get();
+
+        if ($attendees->isEmpty()) {
+            return [];
+        }
+
+        $notifications = [];
+        foreach ($attendees as $attendee) {
+            $notification = Notification::create([
+                'user_id' => $attendee->id,
+                'type' => 'event_reminder_1h',
+                'title' => 'Rappel: Événement dans 1 heure',
+                'message' => "L'événement \"{$event->title}\" commence dans 1 heure! Dépêchez-vous de rejoindre.",
+                'data' => [
+                    'event_id' => $event->id,
+                    'event_title' => $event->title,
+                    'event_date' => $event->event_date->format('Y-m-d'),
+                    'event_time' => $event->event_time?->format('H:i'),
+                    'location' => $event->location,
+                ],
+            ]);
+            $notifications[] = $notification;
+        }
+
+        return $notifications;
+    }
+
+    /**
+     * Event Notifications - Chat Message Posted (with real-time capability)
+     */
+    public function notifyChatMessagePosted($eventChatMessage)
+    {
+        $event = $eventChatMessage->event;
+        $sender = $eventChatMessage->user;
+        $attendees = $event->attendees()
+            ->where('group_event_attendees.status', 'confirmed')
+            ->where('user_id', '!=', $sender->id)
+            ->get();
+
+        if ($attendees->isEmpty()) {
+            return [];
+        }
+
+        // Truncate message preview to 100 chars
+        $messagePreview = substr($eventChatMessage->message, 0, 100);
+        if (strlen($eventChatMessage->message) > 100) {
+            $messagePreview .= '...';
+        }
+
+        $notifications = [];
+        foreach ($attendees as $attendee) {
+            $notification = Notification::create([
+                'user_id' => $attendee->id,
+                'type' => 'event_chat_message',
+                'title' => 'Nouveau message',
+                'message' => "{$sender->name}: {$messagePreview}",
+                'data' => [
+                    'event_id' => $event->id,
+                    'message_id' => $eventChatMessage->id,
+                    'sender_id' => $sender->id,
+                    'sender_name' => $sender->name,
+                    'event_title' => $event->title,
+                    'message_preview' => $messagePreview,
+                ],
+            ]);
+            $notifications[] = $notification;
+        }
+
+        return $notifications;
+    }
 }

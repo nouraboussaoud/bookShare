@@ -40,6 +40,7 @@ class EventChatController extends Controller
                     'timestamp' => $message->created_at->toIso8601String(),
                     'is_own' => $message->user_id === auth()->id(),
                     'moderation_status' => $message->moderation_status,
+                    'ai_used' => $message->ai_used,
                     'reply_to' => $message->reply_to_message_id ? [
                         'user' => $message->reply_to_user,
                         'message' => $message->reply_to_content
@@ -77,6 +78,7 @@ class EventChatController extends Controller
             'user_id' => auth()->id(),
             'message' => $sanitizedMessage,
             'is_moderated' => !$moderation['approved'] || $moderation['status'] !== 'approved',
+            'ai_used' => $moderation['ai_used'] ?? false,
             'moderation_reason' => $moderation['reason'],
             'moderation_status' => $moderation['status'],
             'reply_to_message_id' => $request->reply_to,
@@ -167,6 +169,7 @@ class EventChatController extends Controller
                     'created_at' => $chatMessage->created_at->diffForHumans(),
                     'timestamp' => $chatMessage->created_at->toIso8601String(),
                     'is_own' => true,
+                    'ai_used' => $chatMessage->ai_used,
                     'reply_to' => $request->reply_to ? [
                         'user' => $request->reply_user,
                         'message' => $request->reply_message
@@ -189,6 +192,7 @@ class EventChatController extends Controller
                 'created_at' => $chatMessage->created_at->diffForHumans(),
                 'timestamp' => $chatMessage->created_at->toIso8601String(),
                 'is_own' => true,
+                'ai_used' => $chatMessage->ai_used,
                 'reply_to' => $request->reply_to ? [
                     'user' => $request->reply_user,
                     'message' => $request->reply_message

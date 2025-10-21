@@ -14,6 +14,7 @@ class EventChatMessage extends Model
         'user_id',
         'message',
         'is_moderated',
+        'ai_used',
         'moderation_reason',
         'moderation_status',
         'reply_to_message_id',

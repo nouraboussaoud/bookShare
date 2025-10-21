@@ -234,6 +234,9 @@
                             @endforelse
                         </div>
                     </div>
+
+                    <!-- Polls Section -->
+                    @include('polls.event-polls-widget', ['event' => $event])
                 </div>
             </div>
         </div>

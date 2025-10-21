@@ -13,7 +13,8 @@ class ChatModerationService
             try {
                 $aiModerationService = app(AIModerationService::class);
             } catch (\Exception $e) {
-                \Log::warning('Could not resolve AIModerationService: ' . $e->getMessage());
+                // \Log::warning('Could not resolve AIModerationService: ' . $e->getMessage());
+                echo 'Could not resolve AIModerationService: ' . $e->getMessage() . "\n";
             }
         }
 
@@ -57,46 +58,49 @@ class ChatModerationService
      * Moderate a chat message using AI-like rules with banned words and AI integration
      *
      * @param string $message
-     * @return array ['approved' => bool, 'reason' => string|null, 'status' => string]
+     * @return array ['approved' => bool, 'reason' => string|null, 'status' => string, 'ai_used' => bool]
      */
     public function moderateMessage(string $message): array
     {
         $message = trim($message);
 
-        \Log::debug('Starting message moderation', [
-            'message_length' => strlen($message),
-            'message_preview' => substr($message, 0, 30) . (strlen($message) > 30 ? '...' : '')
-        ]);
+        // \Log::debug('Starting message moderation', [
+        //     'message_length' => strlen($message),
+        //     'message_preview' => substr($message, 0, 30) . (strlen($message) > 30 ? '...' : '')
+        // ]);
 
         // Check if message is empty
         if (empty($message)) {
-            \Log::info('Message rejected: empty content');
+            // \Log::info('Message rejected: empty content');
             $this->recordMessageMetrics('rejected', false);
             return [
                 'approved' => false,
                 'reason' => 'Votre message semble vide. Veuillez écrire quelque chose avant d\'envoyer.',
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'ai_used' => false
             ];
         }
 
         // Check message length
         if (strlen($message) < 2) {
-            \Log::info('Message rejected: too short', ['length' => strlen($message)]);
+            // \Log::info('Message rejected: too short', ['length' => strlen($message)]);
             $this->recordMessageMetrics('rejected', false);
             return [
                 'approved' => false,
                 'reason' => 'Votre message est trop court. Essayez d\'écrire au moins quelques mots.',
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'ai_used' => false
             ];
         }
 
         if (strlen($message) > 1000) {
-            \Log::info('Message rejected: too long', ['length' => strlen($message)]);
+            // \Log::info('Message rejected: too long', ['length' => strlen($message)]);
             $this->recordMessageMetrics('rejected', false);
             return [
                 'approved' => false,
                 'reason' => 'Votre message est trop long (maximum 1000 caractères). Veuillez le raccourcir.',
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'ai_used' => false
             ];
         }
 
@@ -104,46 +108,49 @@ class ChatModerationService
         $bannedCheck = $this->checkBannedWords($message);
         if (!$bannedCheck['clean']) {
             $foundWords = implode(', ', $bannedCheck['found']);
-            \Log::warning('Message rejected: banned words found', [
-                'banned_words' => $foundWords,
-                'message_preview' => substr($message, 0, 50) . '...'
-            ]);
+            // \Log::warning('Message rejected: banned words found', [
+            //     'banned_words' => $foundWords,
+            //     'message_preview' => substr($message, 0, 50) . '...'
+            // ]);
 
             $this->recordMessageMetrics('rejected', false);
             return [
                 'approved' => false,
                 'reason' => 'Votre message contient des mots interdits : "' . $foundWords . '". Ce type de langage n\'est pas autorisé.',
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'ai_used' => false
             ];
         }
 
         // Check for offensive words - flagged for review
         $offensiveCheck = $this->checkOffensiveContent($message);
         if (!$offensiveCheck['clean']) {
-            \Log::info('Message flagged: offensive content', [
-                'offensive_words' => implode(', ', $offensiveCheck['found'])
-            ]);
+            // \Log::info('Message flagged: offensive content', [
+            //     'offensive_words' => implode(', ', $offensiveCheck['found'])
+            // ]);
 
             $this->recordMessageMetrics('flagged', false);
             return [
                 'approved' => true,
                 'reason' => 'Votre message contient des termes potentiellement offensants. Il sera signalé pour modération.',
-                'status' => 'flagged'
+                'status' => 'flagged',
+                'ai_used' => false
             ];
         }
 
         // Check for spam patterns
         $spamCheck = $this->checkSpamPatterns($message);
         if ($spamCheck['isSpam']) {
-            \Log::warning('Message rejected: spam pattern detected', [
-                'spam_reason' => $spamCheck['reason']
-            ]);
+            // \Log::warning('Message rejected: spam pattern detected', [
+            //     'spam_reason' => $spamCheck['reason']
+            // ]);
 
             $this->recordMessageMetrics('rejected', false);
             return [
                 'approved' => false,
                 'reason' => $this->getSpamMessage($spamCheck['reason']),
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'ai_used' => false
             ];
         }
 
@@ -154,7 +161,8 @@ class ChatModerationService
                 return [
                     'approved' => true,
                     'reason' => 'Vous mentionnez beaucoup de personnes. Assurez-vous que c\'est nécessaire.',
-                    'status' => 'flagged'
+                    'status' => 'flagged',
+                    'ai_used' => false
                 ];
             }
         }
@@ -165,7 +173,8 @@ class ChatModerationService
             return [
                 'approved' => false,
                 'reason' => 'Il semble que vous essayez de contourner nos filtres. Veuillez utiliser un langage normal.',
-                'status' => 'rejected'
+                'status' => 'rejected',
+                'ai_used' => false
             ];
         }
 
@@ -176,56 +185,59 @@ class ChatModerationService
             return [
                 'approved' => true,
                 'reason' => 'Votre message contient beaucoup d\'émojis. Il sera signalé pour modération.',
-                'status' => 'flagged'
+                'status' => 'flagged',
+                'ai_used' => false
             ];
         }
 
         // For messages that pass basic checks but might be borderline, use AI moderation sparingly
         // Only call AI for messages that contain potentially sensitive content
         if ($this->shouldUseAIModeration($message)) {
-            \Log::info('AI moderation triggered for message', [
-                'message_preview' => substr($message, 0, 50) . (strlen($message) > 50 ? '...' : ''),
-                'reason' => 'contains sensitive content or meets AI criteria'
-            ]);
+            // \Log::info('AI moderation triggered for message', [
+            //     'message_preview' => substr($message, 0, 50) . (strlen($message) > 50 ? '...' : ''),
+            //     'reason' => 'contains sensitive content or meets AI criteria'
+            // ]);
 
             $aiResult = $this->moderateWithAI($message, false); // Don't force - respect rate limits
             if ($aiResult['status'] === 'rejected') {
-                \Log::warning('Message rejected by AI during initial check', [
-                    'reason' => $aiResult['reason'],
-                    'confidence' => $aiResult['confidence'] ?? 0.5
-                ]);
+                // \Log::warning('Message rejected by AI during initial check', [
+                //     'reason' => $aiResult['reason'],
+                //     'confidence' => $aiResult['confidence'] ?? 0.5
+                // ]);
 
                 $this->recordMessageMetrics('rejected', true);
                 return [
                     'approved' => false,
                     'reason' => $aiResult['reason'] ?? 'Votre message a été rejeté par notre système de modération IA.',
-                    'status' => 'rejected'
+                    'status' => 'rejected',
+                    'ai_used' => true
                 ];
             } elseif ($aiResult['status'] === 'flagged') {
-                \Log::info('Message flagged by AI during initial check', [
-                    'reason' => $aiResult['reason'],
-                    'confidence' => $aiResult['confidence'] ?? 0.5
-                ]);
+                // \Log::info('Message flagged by AI during initial check', [
+                //     'reason' => $aiResult['reason'],
+                //     'confidence' => $aiResult['confidence'] ?? 0.5
+                // ]);
 
                 $this->recordMessageMetrics('flagged', true);
                 return [
                     'approved' => true,
                     'reason' => $aiResult['reason'] ?? 'Votre message sera examiné par nos modérateurs.',
-                    'status' => 'flagged'
+                    'status' => 'flagged',
+                    'ai_used' => true
                 ];
             } else {
-                \Log::info('Message approved by AI during initial check', [
-                    'confidence' => $aiResult['confidence'] ?? 0.5
-                ]);
+                // \Log::info('Message approved by AI during initial check', [
+                //     'confidence' => $aiResult['confidence'] ?? 0.5
+                // ]);
             }
         }
 
         // Message is clean
         $aiTriggered = $this->shouldUseAIModeration($message);
-        \Log::info('Message approved: passed all basic moderation checks', [
-            'message_length' => strlen($message),
-            'will_use_ai' => $aiTriggered
-        ]);
+        // \Log::info('Message approved: passed all basic moderation checks', [
+        //     'message_length' => strlen($message),
+        //     'will_use_ai' => $aiTriggered
+        // ]);
 
         // Record metrics
         $this->recordMessageMetrics('approved', $aiTriggered);
@@ -233,7 +245,8 @@ class ChatModerationService
         return [
             'approved' => true,
             'reason' => null,
-            'status' => 'approved'
+            'status' => 'approved',
+            'ai_used' => false
         ];
     }
 
@@ -250,6 +263,50 @@ class ChatModerationService
 
         // HIGH PRIORITY: Strong indicators of sensitive content (whole words only)
         $highRiskIndicators = [
+            'violence', 'death', 'abuse', 'suicide', 'drugs', 'alcohol',
+            'mort', 'abus', 'mal', 'suicide', 'drogues', 'alcool',
+            'kill', 'die', 'hurt', 'tuer', 'mourir', 'blesser',
+            'racism', 'raciste', 'hate', 'haine', 'discrimination',
+            'sex', 'sexe', 'porn', 'porno', 'nude', 'nudité',
+            'hitler', 'nazi', 'nazis', 'heil', 'swastika'
+        ];
+
+        foreach ($highRiskIndicators as $indicator) {
+            // Use word boundaries to avoid false positives (e.g., "mal" in "normal")
+            if (preg_match('/\b' . preg_quote($indicator, '/') . '\b/u', $lowerMessage)) {
+                // \Log::info('AI moderation triggered: high-risk keyword detected', [
+                //     'keyword' => $indicator,
+                //     'message_length' => strlen($message)
+                // ]);
+                return true;
+            }
+        }
+
+        // MEDIUM PRIORITY: Very long messages that might contain complex content
+        if (strlen($message) > 300) {
+            // \Log::info('AI moderation triggered: very long message', [
+            //     'message_length' => strlen($message)
+            // ]);
+            return true;
+        }
+
+        // MEDIUM PRIORITY: Messages with multiple complex sentences
+        $sentenceCount = substr_count($message, '.') + substr_count($message, '!') + substr_count($message, '?');
+        if ($sentenceCount > 3) {
+            // \Log::info('AI moderation triggered: complex multi-sentence message', [
+            //     'sentence_count' => $sentenceCount,
+            //     'message_length' => strlen($message)
+            // ]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /* private function tempMethod(string $message) {
+        $lowerMessage = strtolower($message);
+        // HIGH PRIORITY: Strong indicators of sensitive content (whole words only)
+        $highRiskIndicators = [
             'violence', 'death', 'abuse', 'harm', 'suicide', 'drugs', 'alcohol',
             'mort', 'abus', 'mal', 'suicide', 'drogues', 'alcool',
             'kill', 'die', 'hurt', 'tuer', 'mourir', 'blesser',
@@ -260,10 +317,10 @@ class ChatModerationService
         foreach ($highRiskIndicators as $indicator) {
             // Use word boundaries to avoid false positives (e.g., "mal" in "normal")
             if (preg_match('/\b' . preg_quote($indicator, '/') . '\b/u', $lowerMessage)) {
-                \Log::info('AI moderation triggered: high-risk keyword detected', [
-                    'keyword' => $indicator,
-                    'message_length' => strlen($message)
-                ]);
+                // \Log::info('AI moderation triggered: high-risk keyword detected', [
+                //     'keyword' => $indicator,
+                //     'message_length' => strlen($message)
+                // ]);
                 return true;
             }
         }
@@ -382,20 +439,20 @@ class ChatModerationService
         $today = date('Y-m-d');
 
         // Increment total messages processed
-        \Cache::increment('chat_messages_processed_' . $today);
+        // \Cache::increment('chat_messages_processed_' . $today);
 
         // Increment AI triggered counter
         if ($aiTriggered) {
-            \Cache::increment('chat_messages_ai_triggered_' . $today);
+            // \Cache::increment('chat_messages_ai_triggered_' . $today);
         }
 
         // Increment status counters
         switch ($status) {
             case 'rejected':
-                \Cache::increment('chat_messages_rejected_' . $today);
+                // \Cache::increment('chat_messages_rejected_' . $today);
                 break;
             case 'flagged':
-                \Cache::increment('chat_messages_flagged_' . $today);
+                // \Cache::increment('chat_messages_flagged_' . $today);
                 break;
         }
     }

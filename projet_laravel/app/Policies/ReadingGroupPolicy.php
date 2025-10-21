@@ -62,7 +62,10 @@ class ReadingGroupPolicy
             return true;
         }
 
-        // quick check membership (uses membership relationship)
-        return $readingGroup->members()->where('user_id', $user->id)->exists();
+        // Check if user is an approved/active member
+        return $readingGroup->members()
+                    ->where('user_id', $user->id)
+                    ->whereIn('status', ['approved', 'active', 'accepted'])
+                    ->exists();
     }
 }
