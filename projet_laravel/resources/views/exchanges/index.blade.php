@@ -139,38 +139,61 @@
                                 <tbody>
                                     @foreach($exchanges as $exchange)
                                     <tr class="exchange-row" data-exchange-id="{{ $exchange->id }}">
-                                        <td class="text-center font-weight-bold text-primary">#{{ $exchange->id }}</td>
+                                        <td class="text-center font-weight-bold text-dark">#{{ $exchange->id }}</td>
                                         <td>
                                             @php
                                                 $typeClass = 'info';
                                                 $typeIcon = 'fas fa-exchange-alt';
+                                                $typeStyle = '';
                                                 switch($exchange->type) {
                                                     case 'PRET':
-                                                        $typeClass = 'success';
+                                                        $typeClass = 'custom-success';
                                                         $typeIcon = 'fas fa-hand-holding';
+                                                        $typeStyle = 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;';
                                                         break;
                                                     case 'ECHANGE':
-                                                        $typeClass = 'primary';
+                                                        $typeClass = 'custom-primary';
                                                         $typeIcon = 'fas fa-sync-alt';
+                                                        $typeStyle = 'background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none;';
                                                         break;
                                                 }
                                             @endphp
-                                            <span class="badge badge-{{ $typeClass }} badge-pill">
-                                                <i class="{{ $typeIcon }} mr-1"></i>{{ $exchange->type }}
+                                            <span class="badge badge-pill px-3 py-2" style="{{ $typeStyle }}">
+                                                <i class="{{ $typeIcon }} mr-1"></i><strong>{{ $exchange->type }}</strong>
                                             </span>
                                         </td>
                                         <td class="text-center">
                                             @php
                                                 $statusConfig = [
-                                                    'EN_ATTENTE' => ['class' => 'warning', 'icon' => 'fas fa-clock', 'text' => 'En Attente'],
-                                                    'EN_COURS' => ['class' => 'primary', 'icon' => 'fas fa-sync fa-spin', 'text' => 'En Cours'],
-                                                    'TERMINE' => ['class' => 'success', 'icon' => 'fas fa-check-circle', 'text' => 'Terminé'],
-                                                    'ANNULE' => ['class' => 'danger', 'icon' => 'fas fa-times-circle', 'text' => 'Annulé']
+                                                    'EN_ATTENTE' => [
+                                                        'style' => 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none;',
+                                                        'icon' => 'fas fa-clock',
+                                                        'text' => 'En Attente'
+                                                    ],
+                                                    'EN_COURS' => [
+                                                        'style' => 'background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none;',
+                                                        'icon' => 'fas fa-sync fa-spin',
+                                                        'text' => 'En Cours'
+                                                    ],
+                                                    'TERMINE' => [
+                                                        'style' => 'background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; border: none;',
+                                                        'icon' => 'fas fa-check-circle',
+                                                        'text' => 'Terminé'
+                                                    ],
+                                                    'ANNULE' => [
+                                                        'style' => 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none;',
+                                                        'icon' => 'fas fa-times-circle',
+                                                        'text' => 'Annulé'
+                                                    ]
                                                 ];
-                                                $status = $statusConfig[$exchange->status] ?? ['class' => 'secondary', 'icon' => 'fas fa-question', 'text' => $exchange->status];
+                                                $status = $statusConfig[$exchange->status] ?? [
+                                                    'style' => 'background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; border: none;',
+                                                    'icon' => 'fas fa-question',
+                                                    'text' => $exchange->status
+                                                ];
                                             @endphp
-                                            <span class="badge badge-{{ $status['class'] }} badge-pill p-2">
-                                                <i class="{{ $status['icon'] }} mr-1"></i>{{ $status['text'] }}
+                                            <span class="badge badge-pill px-3 py-2" style="{{ $status['style'] }}">
+                                                <i class="{{ $status['icon'] }} mr-1"></i><strong>{{ $status['text'] }}</strong>
                                             </span>
                                         </td>
                                         <td>
@@ -179,13 +202,13 @@
                                                     <i class="fas fa-book text-primary"></i>
                                                 </div>
                                                 <div>
-                                                    <div class="font-weight-bold text-gray-800">
+                                                    <div class="font-weight-bold text-dark">
                                                         {{ $exchange->bookDemande ? $exchange->bookDemande->title : 'Livre non spécifié' }}
                                                     </div>
                                                     @if($exchange->bookDemande && $exchange->bookDemande->user)
-                                                        <small class="text-muted">
+                                                        <small class="text-secondary">
                                                             <i class="fas fa-user fa-sm mr-1"></i>
-                                                            Propriétaire: {{ $exchange->bookDemande->user->name }}
+                                                            Propriétaire: <strong>{{ $exchange->bookDemande->user->name }}</strong>
                                                         </small>
                                                     @endif
                                                 </div>
@@ -194,10 +217,10 @@
                                         <td class="text-center">
                                             @if($exchange->initiateur)
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <span class="badge badge-outline-primary mb-1">
-                                                        <i class="fas fa-user mr-1"></i>{{ $exchange->initiateur->name }}
+                                                    <span class="badge badge-outline-primary mb-1 px-3 py-2">
+                                                        <i class="fas fa-user mr-1"></i><strong>{{ $exchange->initiateur->name }}</strong>
                                                     </span>
-                                                    <small class="text-muted">{{ $exchange->initiateur->email }}</small>
+                                                    <small class="text-secondary font-weight-semibold">{{ $exchange->initiateur->email }}</small>
                                                 </div>
                                             @else
                                                 <span class="text-muted">N/A</span>
@@ -206,10 +229,10 @@
                                         <td class="text-center">
                                             @if($exchange->recepteur)
                                                 <div class="d-flex flex-column align-items-center">
-                                                    <span class="badge badge-outline-secondary mb-1">
-                                                        <i class="fas fa-user-check mr-1"></i>{{ $exchange->recepteur->name }}
+                                                    <span class="badge badge-outline-secondary mb-1 px-3 py-2">
+                                                        <i class="fas fa-user-check mr-1"></i><strong>{{ $exchange->recepteur->name }}</strong>
                                                     </span>
-                                                    <small class="text-muted">{{ $exchange->recepteur->email }}</small>
+                                                    <small class="text-secondary font-weight-semibold">{{ $exchange->recepteur->email }}</small>
                                                 </div>
                                             @else
                                                 <span class="text-muted">Non assigné</span>
@@ -217,14 +240,14 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex flex-column">
-                                                <span class="font-weight-bold">{{ \Carbon\Carbon::parse($exchange->dateDebut)->format('d/m/Y') }}</span>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($exchange->dateDebut)->format('H:i') }}</small>
+                                                <span class="font-weight-bold text-dark">{{ \Carbon\Carbon::parse($exchange->dateDebut)->format('d/m/Y') }}</span>
+                                                <small class="text-secondary font-weight-semibold">{{ \Carbon\Carbon::parse($exchange->dateDebut)->format('H:i') }}</small>
                                             </div>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex flex-column">
-                                                <span class="font-weight-bold">{{ \Carbon\Carbon::parse($exchange->dateFin)->format('d/m/Y') }}</span>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($exchange->dateFin)->format('H:i') }}</small>
+                                                <span class="font-weight-bold text-dark">{{ \Carbon\Carbon::parse($exchange->dateFin)->format('d/m/Y') }}</span>
+                                                <small class="text-secondary font-weight-semibold">{{ \Carbon\Carbon::parse($exchange->dateFin)->format('H:i') }}</small>
                                             </div>
                                         </td>
                                         <td class="text-center">
@@ -295,15 +318,17 @@
     }
     
     .badge-outline-primary {
-        color: #4e73df;
-        background-color: transparent;
-        border: 1px solid #4e73df;
+        color: #1e3a8a;
+        background-color: #eff6ff;
+        border: 2px solid #3b82f6;
+        font-weight: 600;
     }
     
     .badge-outline-secondary {
-        color: #858796;
-        background-color: transparent;
-        border: 1px solid #858796;
+        color: #374151;
+        background-color: #f9fafb;
+        border: 2px solid #6b7280;
+        font-weight: 600;
     }
     
     .card-header {
@@ -317,10 +342,30 @@
     
     .table th {
         border-top: none;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        color: #1f2937;
+        background-color: #f3f4f6;
+    }
+    
+    .table td {
+        color: #111827;
+        font-weight: 500;
+    }
+    
+    .text-dark {
+        color: #111827 !important;
+        font-weight: 600;
+    }
+    
+    .text-secondary {
+        color: #4b5563 !important;
+    }
+    
+    .font-weight-semibold {
+        font-weight: 600;
     }
     
     .btn-group .btn {
@@ -328,8 +373,14 @@
     }
     
     .badge-pill {
-        font-size: 0.75rem;
-        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        padding: 0.5rem 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+    
+    .badge strong {
+        font-weight: 700;
     }
     
     .border-left-primary {
