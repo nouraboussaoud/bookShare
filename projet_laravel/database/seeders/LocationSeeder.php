@@ -16,74 +16,155 @@ class LocationSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer quelques utilisateurs et livres existants
+        $this->command->info('Seeding Locations...');
+
+        // Récupérer les utilisateurs et livres existants
         $users = User::all();
         $books = Book::all();
 
         if ($users->count() < 2 || $books->count() < 1) {
-            $this->command->info('Pas assez d\'utilisateurs ou de livres pour créer des locations de test.');
+            $this->command->warn('Pas assez d\'utilisateurs ou de livres pour créer des locations de test.');
             return;
         }
 
-        // Créer des locations d'exemple
-        $locations = [
-            [
-                'book_id' => $books->first()->id,
-                'proprietaire_id' => $books->first()->user_id,
-                'locataire_id' => $users->where('id', '!=', $books->first()->user_id)->first()->id,
-                'date_location' => Carbon::now()->addDays(1),
-                'duree_jours' => 14,
-                'localisation' => 'Bibliothèque Centrale',
-                'prix' => 5.00,
-                'statut' => 'en_attente',
-                'notes' => 'Première demande de location pour tester le système.'
-            ],
-            [
-                'book_id' => $books->skip(1)->first()->id ?? $books->first()->id,
-                'proprietaire_id' => $books->skip(1)->first()->user_id ?? $books->first()->user_id,
-                'locataire_id' => $users->where('id', '!=', ($books->skip(1)->first()->user_id ?? $books->first()->user_id))->first()->id,
-                'date_location' => Carbon::now()->subDays(5),
-                'duree_jours' => 7,
-                'localisation' => 'Café du Coin',
-                'prix' => 3.50,
-                'statut' => 'en_cours',
-                'notes' => 'Location en cours pour tester le suivi.'
-            ],
-            [
-                'book_id' => $books->skip(2)->first()->id ?? $books->first()->id,
-                'proprietaire_id' => $books->skip(2)->first()->user_id ?? $books->first()->user_id,
-                'locataire_id' => $users->where('id', '!=', ($books->skip(2)->first()->user_id ?? $books->first()->user_id))->skip(1)->first()->id ?? $users->first()->id,
-                'date_location' => Carbon::now()->subDays(20),
-                'duree_jours' => 10,
-                'localisation' => 'Parc Municipal',
-                'prix' => 4.00,
-                'statut' => 'terminee',
-                'notes' => 'Location terminée avec succès.',
-                'date_retour_effective' => Carbon::now()->subDays(10)
-            ]
+        $localisations = [
+            'Bibliothèque Centrale',
+            'Café du Coin',
+            'Parc Municipal',
+            'Centre Commercial Les Halles',
+            'Station de Métro République',
+            'Place de la Mairie',
+            'Librairie du Centre',
+            'Starbucks Downtown',
+            'McDonald\'s Gare',
+            'Université - Campus Principal',
+            'Centre Culturel',
+            'À domicile - Chez le propriétaire',
+            'À domicile - Chez le locataire',
+            'Bureau de Poste Central',
+            'Salle Polyvalente',
         ];
 
-        foreach ($locations as $locationData) {
-            $location = new Location();
-            $location->book_id = $locationData['book_id'];
-            $location->proprietaire_id = $locationData['proprietaire_id'];
-            $location->locataire_id = $locationData['locataire_id'];
-            $location->date_location = $locationData['date_location'];
-            $location->duree_jours = $locationData['duree_jours'];
-            $location->localisation = $locationData['localisation'];
-            $location->prix = $locationData['prix'];
-            $location->statut = $locationData['statut'];
-            $location->notes = $locationData['notes'];
+        $notesExamples = [
+            'J\'aimerais lire ce livre pour mes études.',
+            'Très intéressé par ce titre, merci !',
+            'Besoin urgent pour un projet scolaire.',
+            'Je cherchais ce livre depuis longtemps.',
+            'Lecture pour le club de lecture.',
+            'Recommandé par un ami.',
+            'Pour des vacances relaxantes.',
+            'Cadeau pour un proche.',
+            'Préparation d\'un exposé.',
+            'Simple curiosité littéraire.',
+            null, // Certaines sans notes
+            null,
+            null,
+        ];
+
+        $count = 0;
+        $statuts = [
+            'en_attente' => 0,
+            'confirmee' => 0,
+            'en_cours' => 0,
+            'terminee' => 0,
+            'annulee' => 0,
+        ];
+
+        // Créer des locations variées pour chaque livre
+        foreach ($books as $book) {
+            // Nombre aléatoire de locations par livre (0-4)
+            $locationCount = rand(0, 4);
             
-            if (isset($locationData['date_retour_effective'])) {
-                $location->date_retour_effective = $locationData['date_retour_effective'];
+            for ($i = 0; $i < $locationCount; $i++) {
+                // Trouver un locataire différent du propriétaire
+                $potentialTenants = $users->where('id', '!=', $book->user_id);
+                if ($potentialTenants->isEmpty()) {
+                    continue;
+                }
+
+                $locataire = $potentialTenants->random();
+                
+                // Répartition des statuts
+                $statutWeights = [
+                    'en_attente' => 20,   // 20%
+                    'confirmee' => 15,    // 15%
+                    'en_cours' => 25,     // 25%
+                    'terminee' => 30,     // 30%
+                    'annulee' => 10,      // 10%
+                ];
+                
+                $rand = rand(1, 100);
+                $cumulative = 0;
+                $statut = 'en_attente';
+                
+                foreach ($statutWeights as $status => $weight) {
+                    $cumulative += $weight;
+                    if ($rand <= $cumulative) {
+                        $statut = $status;
+                        break;
+                    }
+                }
+
+                // Dates selon le statut
+                $dateLocation = null;
+                $dateRetour = null;
+                $dureeJours = rand(3, 30);
+                
+                switch ($statut) {
+                    case 'en_attente':
+                        $dateLocation = Carbon::now()->addDays(rand(1, 10));
+                        break;
+                    case 'confirmee':
+                        $dateLocation = Carbon::now()->addDays(rand(1, 5));
+                        break;
+                    case 'en_cours':
+                        $dateLocation = Carbon::now()->subDays(rand(1, 20));
+                        break;
+                    case 'terminee':
+                        $dateLocation = Carbon::now()->subDays(rand(20, 90));
+                        $dateRetour = Carbon::parse($dateLocation)->addDays($dureeJours)->subDays(rand(-2, 2));
+                        break;
+                    case 'annulee':
+                        $dateLocation = Carbon::now()->addDays(rand(-10, 10));
+                        break;
+                }
+
+                $location = new Location();
+                $location->book_id = $book->id;
+                $location->proprietaire_id = $book->user_id;
+                $location->locataire_id = $locataire->id;
+                $location->date_location = $dateLocation;
+                $location->duree_jours = $dureeJours;
+                $location->localisation = $localisations[array_rand($localisations)];
+                $location->prix = round(rand(200, 1500) / 100, 2); // Entre 2€ et 15€
+                $location->statut = $statut;
+                $location->notes = $notesExamples[array_rand($notesExamples)];
+                
+                if ($dateRetour) {
+                    $location->date_retour_effective = $dateRetour;
+                }
+                
+                // Calculer la date de fin
+                $location->calculerDateFin();
+                $location->save();
+                
+                $count++;
+                $statuts[$statut]++;
             }
-            
-            // Calculer la date de fin
-            $location->calculerDateFin();
-            $location->save();
         }
 
-        $this->command->info('Locations de test créées avec succès !');
+        $this->command->info("✓ Créé $count locations avec succès!");
+        $this->command->newLine();
+        $this->command->table(
+            ['Statut', 'Nombre'],
+            [
+                ['En attente', $statuts['en_attente']],
+                ['Confirmée', $statuts['confirmee']],
+                ['En cours', $statuts['en_cours']],
+                ['Terminée', $statuts['terminee']],
+                ['Annulée', $statuts['annulee']],
+                ['TOTAL', $count],
+            ]
+        );
     }
 }

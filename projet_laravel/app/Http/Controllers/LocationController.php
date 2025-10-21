@@ -246,8 +246,28 @@ class LocationController extends Controller
         $location->statut = 'confirmee';
         $location->save();
         
+        // Créer automatiquement une demande de paiement pour le locataire
+        $payment = \App\Models\ReservationPayment::create([
+            'location_id' => $location->id,
+            'montant' => $location->prix,
+            'type_paiement' => 'location',
+            'statut_paiement' => 'en_attente',
+            'notes' => 'Paiement pour la location du livre: ' . $location->book->title
+        ]);
+        
+        // Envoyer une notification au locataire
+        \App\Models\Notification::create([
+            'user_id' => $location->locataire_id,
+            'type' => 'payment_request',
+            'title' => 'Demande de paiement',
+            'message' => 'Votre demande de location a été acceptée. Veuillez effectuer le paiement de ' . number_format($location->prix, 2) . '€ pour confirmer la réservation.',
+            'related_id' => $payment->id,
+            'related_type' => 'payment',
+            'is_read' => false
+        ]);
+        
         return redirect()->route('locations.show', $location)
-            ->with('success', 'Location confirmée avec succès.');
+            ->with('success', 'Location confirmée avec succès. Une demande de paiement a été envoyée au locataire.');
     }
     
     /**

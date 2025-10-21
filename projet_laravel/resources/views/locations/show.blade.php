@@ -175,6 +175,27 @@
                     </h6>
                 </div>
                 <div class="card-body">
+<<<<<<< Updated upstream
+=======
+                    <!-- Bouton voir les paiements -->
+                    @php
+                        $payment = $location->payments()->where('statut_paiement', 'en_attente')->first();
+                    @endphp
+                    @if($payment && Auth::id() === $location->locataire_id)
+                        <div class="mb-3">
+                            <a href="{{ route('payments.show', $payment) }}" class="btn btn-success btn-block">
+                                <i class="fas fa-credit-card"></i> Payer maintenant ({{ number_format($payment->montant, 2) }}€)
+                            </a>
+                        </div>
+                    @elseif($location->payments()->where('statut_paiement', 'complete')->exists())
+                        <div class="mb-3">
+                            <button class="btn btn-info btn-block" disabled>
+                                <i class="fas fa-check-circle"></i> Paiement complété
+                            </button>
+                        </div>
+                    @endif
+
+>>>>>>> Stashed changes
                     @if(Auth::id() === $location->locataire_id)
                         <!-- Actions pour le locataire -->
                         @if($location->statut === 'en_attente')

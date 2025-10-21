@@ -10,12 +10,113 @@
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
 
+<<<<<<< Updated upstream
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
         <a class="nav-link" href="{{ route('dashboard') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
+=======
+    @if(Auth::user()->isAdmin())
+        <!-- Divider avec style -->
+        <hr class="sidebar-divider" style="border-color: rgba(255,255,255,0.2); margin: 1rem 0;">
+
+        <!-- Heading Admin avec badge -->
+        <div class="sidebar-heading" style="color: #fbbf24; font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; padding: 0 1rem;">
+            👑 ADMINISTRATION
+        </div>
+
+        <!-- Nav Item - Dashboard Admin -->
+        <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.dashboard') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s; background: rgba(96, 165, 250, 0.15);">
+                <i class="fas fa-fw fa-crown" style="color: #fbbf24;"></i>
+                <span style="font-weight: 700; color: #fbbf24;">Dashboard Admin</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - User Management -->
+        <li class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.users.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-users-cog" style="color: #60a5fa;"></i>
+                <span style="font-weight: 600;">Utilisateurs</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Categories Management -->
+        <li class="nav-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.categories.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-tags" style="color: #a78bfa;"></i>
+                <span style="font-weight: 600;">Catégories</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Admin Reviews Management -->
+        <li class="nav-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.reviews.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-star-half-alt" style="color: #fbbf24;"></i>
+                <span style="font-weight: 600;">Avis (Modération)</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Exchanges Management -->
+        <li class="nav-item {{ request()->routeIs('admin.exchanges.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.exchanges.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-exchange-alt" style="color: #60a5fa;"></i>
+                <span style="font-weight: 600;">Échanges</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Locations (Réservations) Management -->
+        <li class="nav-item {{ request()->routeIs('admin.locations.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.locations.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-calendar-check" style="color: #8b5cf6;"></i>
+                <span style="font-weight: 600;">Réservations</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Payments Management -->
+        <li class="nav-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.payments.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-money-bill-wave" style="color: #10b981;"></i>
+                <span style="font-weight: 600;">Paiements</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Groupes Management -->
+        <li class="nav-item {{ request()->routeIs('admin.groupes.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.groupes.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-user-friends" style="color: #34d399;"></i>
+                <span style="font-weight: 600;">Groupes</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Événements Management -->
+        <li class="nav-item {{ request()->routeIs('admin.evenements.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.evenements.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s;">
+                <i class="fas fa-fw fa-calendar-alt" style="color: #93c5fd;"></i>
+                <span style="font-weight: 600;">Événements</span>
+            </a>
+        </li>
+
+        <!-- Nav Item - Reports Management avec badge urgent -->
+        @php 
+            $pendingReports = \App\Models\Report::pending()->count(); 
+            $urgentReports = \App\Models\Report::urgent()->pending()->count();
+        @endphp
+        <li class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.reports.index') }}" style="border-radius: 8px; margin: 0.5rem 1rem; transition: all 0.3s; position: relative;">
+                <i class="fas fa-fw fa-flag" style="color: #ef4444;"></i>
+                <span style="font-weight: 600;">Signalements</span>
+                @if($urgentReports > 0)
+                    <span class="badge badge-danger ml-auto" style="font-size: 0.7rem; animation: pulse 2s infinite; position: absolute; right: 1rem;">{{ $urgentReports }}</span>
+                @elseif($pendingReports > 0)
+                    <span class="badge badge-warning ml-auto" style="font-size: 0.7rem; position: absolute; right: 1rem;">{{ $pendingReports }}</span>
+                @endif
+            </a>
+        </li>
+    @endif
+>>>>>>> Stashed changes
 
     <!-- Divider -->
     <hr class="sidebar-divider">
