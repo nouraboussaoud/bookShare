@@ -6,15 +6,63 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
             <i class="fas fa-store fa-sm text-success"></i>
-            Marketplace des Réservations
+            Marketplace des Locations
         </h1>
         <div>
             <a href="{{ route('locations.help') }}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2">
                 <i class="fas fa-question-circle fa-sm text-white-50"></i> Guide d'aide
             </a>
             <a href="{{ route('locations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-calendar-check fa-sm text-white-50"></i> Mes Réservations
+                <i class="fas fa-calendar-check fa-sm text-white-50"></i> Mes Locations
             </a>
+        </div>
+    </div>
+
+    <!-- Processus de location expliqué -->
+    <div class="alert alert-info border-left-info shadow-sm mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-1 text-center">
+                <i class="fas fa-info-circle fa-3x text-info"></i>
+            </div>
+            <div class="col-md-11">
+                <h5 class="font-weight-bold mb-2">
+                    <i class="fas fa-hand-point-right"></i> Comment ça marche ?
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="process-step">
+                            <span class="badge badge-primary badge-pill mr-2">1</span>
+                            <strong>Choisissez</strong><br>
+                            <small class="text-muted">Sélectionnez un livre disponible</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="process-step">
+                            <span class="badge badge-warning badge-pill mr-2">2</span>
+                            <strong>Demandez</strong><br>
+                            <small class="text-muted">Faites votre demande de location</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="process-step">
+                            <span class="badge badge-success badge-pill mr-2">3</span>
+                            <strong>Attendez</strong><br>
+                            <small class="text-muted">Le propriétaire confirme</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="process-step">
+                            <span class="badge badge-info badge-pill mr-2">4</span>
+                            <strong>Payez</strong><br>
+                            <small class="text-muted">Réglez via Stripe après confirmation</small>
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-shield-alt text-success"></i> 
+                    <strong>Sécurisé :</strong> Vous ne payez qu'après acceptation du propriétaire !
+                </p>
+            </div>
         </div>
     </div>
 
@@ -214,30 +262,39 @@
                                                 </span>
                                             @endif
                                             
-                                            <!-- Prix suggéré basé sur les locations récentes -->
-                                            @php
-                                                $prixSuggere = $locationsRecentes->where('book.title', $livre->title)->avg('prix') 
-                                                            ?? $locationsRecentes->avg('prix') 
-                                                            ?? 5.00;
-                                            @endphp
-                                            
-                                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                                <div>
-                                                    <small class="text-muted">Prix suggéré:</small><br>
-                                                    <span class="h6 text-success mb-0">
-                                                        ~{{ number_format($prixSuggere, 2) }}€
-                                                    </span>
+                                            <!-- Prix de l'offre -->
+                                            @if($livre->rentalOffer)
+                                                <div class="mb-2 mt-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <small class="text-muted"><i class="fas fa-euro-sign"></i> Prix/jour:</small><br>
+                                                            <span class="h5 text-success font-weight-bold mb-0">
+                                                                {{ number_format($livre->rentalOffer->prix_par_jour, 2) }}€
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Lieu:</small><br>
+                                                            <small class="font-weight-bold">{{ Str::limit($livre->rentalOffer->localisation, 15) }}</small>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 
                                                 @if(Auth::id() != $livre->user_id)
-                                                    <a href="{{ route('locations.create', ['book_id' => $livre->id]) }}" 
-                                                       class="btn btn-success btn-sm">
-                                                        <i class="fas fa-calendar-check"></i> Réserver
-                                                    </a>
+                                                    <form action="{{ route('rental-offers.rent-now', $livre->rentalOffer) }}" method="POST" class="mt-2">
+                                                        @csrf
+                                                        <button type="submit" 
+                                                                class="btn btn-success btn-block shadow-sm"
+                                                                onclick="return confirm('Voulez-vous louer ce livre pour {{ $livre->rentalOffer->duree_min_jours }} jour(s) à {{ number_format($livre->rentalOffer->calculatePrice($livre->rentalOffer->duree_min_jours), 2) }}€ ?')">
+                                                            <i class="fas fa-bolt"></i> Louer en 1 Clic
+                                                        </button>
+                                                    </form>
+                                                    <small class="text-muted d-block text-center mt-1">
+                                                        <i class="fas fa-info-circle"></i> {{ $livre->rentalOffer->duree_min_jours }}-{{ $livre->rentalOffer->duree_max_jours }} jours
+                                                    </small>
                                                 @else
-                                                    <span class="badge badge-secondary">Votre livre</span>
+                                                    <span class="badge badge-secondary badge-pill">Votre livre</span>
                                                 @endif
-                                            </div>
+                                            @endif
                                         </div>
                                     </div>
                                     
@@ -317,4 +374,71 @@
         </div>
     @endif
 </div>
+
+<style>
+/* Bannière processus */
+.border-left-info {
+    border-left: 4px solid #36b9cc;
+}
+
+.process-step {
+    padding: 10px;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.process-step:hover {
+    transform: translateY(-3px);
+}
+
+.process-step .badge-pill {
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+/* Cards livres améliorées */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.btn-success {
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(28, 200, 138, 0.4);
+}
+
+/* Amélioration des badges */
+.badge-pill {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+/* Statistiques */
+.border-left-success {
+    border-left: 4px solid #1cc88a;
+}
+
+.border-left-primary {
+    border-left: 4px solid #4e73df;
+}
+
+.border-left-warning {
+    border-left: 4px solid #f6c23e;
+}
+</style>
+
+<script>
+    // Activer les tooltips Bootstrap
+    $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
 @endsection

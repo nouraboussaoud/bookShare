@@ -154,7 +154,25 @@ Route::resource('locations', LocationController::class);
         return view('locations.help');
     })->name('locations.help');
 
-    // Routes pour les paiements de réservation
+    // Routes pour les offres de location (RentalOffer)
+    Route::get('rental-offers/create/{book}', [\App\Http\Controllers\RentalOfferController::class, 'create'])->name('rental-offers.create');
+    Route::post('rental-offers/store/{book}', [\App\Http\Controllers\RentalOfferController::class, 'store'])->name('rental-offers.store');
+    Route::post('rental-offers/{offer}/rent-now', [\App\Http\Controllers\RentalOfferController::class, 'rentNow'])->name('rental-offers.rent-now');
+    Route::patch('rental-offers/{offer}/deactivate', [\App\Http\Controllers\RentalOfferController::class, 'deactivate'])->name('rental-offers.deactivate');
+    Route::patch('rental-offers/{offer}/activate', [\App\Http\Controllers\RentalOfferController::class, 'activate'])->name('rental-offers.activate');
+
+    // Routes pour les paiements côté locataire
+    Route::get('payments', [\App\Http\Controllers\PaymentController::class, 'index'])->name('payments.index');
+    Route::get('payments/{payment}', [\App\Http\Controllers\PaymentController::class, 'show'])->name('payments.show');
+    Route::post('payments/{payment}/process', [\App\Http\Controllers\PaymentController::class, 'process'])->name('payments.process');
+    Route::post('payments/{payment}/cancel', [\App\Http\Controllers\PaymentController::class, 'cancel'])->name('payments.cancel');
+    
+    // Routes Stripe
+    Route::post('payments/{payment}/stripe/checkout', [\App\Http\Controllers\PaymentController::class, 'createStripeCheckout'])->name('payments.stripe.checkout');
+    Route::get('payments/{payment}/stripe/success', [\App\Http\Controllers\PaymentController::class, 'stripeSuccess'])->name('payments.stripe.success');
+    Route::get('payments/{payment}/stripe/cancel', [\App\Http\Controllers\PaymentController::class, 'stripeCancel'])->name('payments.stripe.cancel');
+
+    // Routes pour les paiements de réservation (admin/propriétaire)
     Route::resource('reservation-payments', ReservationPaymentController::class);
     Route::patch('reservation-payments/{reservationPayment}/marquer-complete', [ReservationPaymentController::class, 'marquerComplete'])->name('reservation-payments.marquer-complete');
     Route::patch('reservation-payments/{reservationPayment}/rembourser', [ReservationPaymentController::class, 'rembourser'])->name('reservation-payments.rembourser');

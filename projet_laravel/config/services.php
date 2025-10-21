@@ -54,4 +54,10 @@ return [
         'call_interval' => env('AI_MODERATION_CALL_INTERVAL', 120), // Increased from 60 to 120 seconds between calls
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
 ];

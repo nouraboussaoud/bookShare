@@ -209,7 +209,7 @@
                                 Votre demande a été envoyée au propriétaire. Vous recevrez une notification dès qu'il aura pris une décision.
                             @elseif($location->statut === 'confirmee')
                                 <strong>Confirmée</strong><br>
-                                Votre demande a été acceptée ! Contactez le propriétaire pour organiser la récupération.
+                                Votre demande a été acceptée ! Veuillez effectuer le paiement ci-dessous.
                             @elseif($location->statut === 'en_cours')
                                 <strong>En cours</strong><br>
                                 Profitez de votre lecture ! N'oubliez pas de retourner le livre avant le {{ $location->date_fin_prevue->format('d/m/Y') }}.
@@ -221,6 +221,84 @@
                                 Cette demande de location a été annulée.
                             @endif
                         </div>
+
+                        {{-- Section Paiement pour le locataire (location confirmée) --}}
+                        @if($location->statut === 'confirmee')
+                            @php
+                                $paiementEnAttente = $location->getPaiementEnAttente();
+                                $paiementComplete = $location->getPaiementComplete();
+                            @endphp
+
+                            @if($paiementComplete)
+                                {{-- Paiement déjà effectué --}}
+                                <div class="card border-left-success shadow-sm mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-check-circle fa-2x text-success mr-3"></i>
+                                            <div>
+                                                <h6 class="font-weight-bold text-success mb-1">Paiement effectué ✓</h6>
+                                                <p class="small text-muted mb-0">
+                                                    Montant: <strong>{{ number_format($paiementComplete->montant, 2) }}€</strong><br>
+                                                    Référence: {{ $paiementComplete->reference_transaction }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($paiementEnAttente)
+                                {{-- Facture en attente de paiement --}}
+                                <div class="card border-left-warning shadow-sm mb-3">
+                                    <div class="card-header bg-gradient-warning text-white py-2">
+                                        <h6 class="m-0 font-weight-bold">
+                                            <i class="fas fa-file-invoice-dollar"></i> Facture à Payer
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="payment-summary mb-3">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Location de livre:</span>
+                                                <strong>{{ $location->duree_jours }} jours</strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Prix par jour:</span>
+                                                <span>{{ number_format($location->prix / $location->duree_jours, 2) }}€</span>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">Total à payer:</h5>
+                                                <h4 class="text-success font-weight-bold mb-0">
+                                                    {{ number_format($paiementEnAttente->montant, 2) }}€
+                                                </h4>
+                                            </div>
+                                        </div>
+
+                                        {{-- Bouton Paiement Stripe Direct --}}
+                                        <form action="{{ route('payments.stripe.checkout', $paiementEnAttente) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-stripe btn-lg btn-block shadow mb-2">
+                                                <i class="fab fa-stripe fa-lg"></i> Payer avec Stripe
+                                                <span class="badge badge-light ml-2">{{ number_format($paiementEnAttente->montant, 2) }}€</span>
+                                            </button>
+                                        </form>
+
+                                        <div class="text-center my-2">
+                                            <small class="text-muted">OU</small>
+                                        </div>
+
+                                        {{-- Bouton Autres Méthodes --}}
+                                        <a href="{{ route('payments.show', $paiementEnAttente) }}" class="btn btn-outline-primary btn-block">
+                                            <i class="fas fa-credit-card"></i> Autres méthodes de paiement
+                                        </a>
+
+                                        <div class="text-center mt-3">
+                                            <small class="text-muted">
+                                                <i class="fas fa-lock"></i> Paiement 100% sécurisé
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
                         
                     @elseif(Auth::id() === $location->proprietaire_id)
                         <!-- Actions pour le propriétaire -->
@@ -389,6 +467,68 @@
 .badge-lg {
     font-size: 0.9em;
     padding: 0.5em 0.75em;
+}
+
+/* Styles pour la section paiement */
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #f6c23e 0%, #e8a825 100%);
+}
+
+.border-left-success {
+    border-left: 4px solid #1cc88a;
+}
+
+.border-left-warning {
+    border-left: 4px solid #f6c23e;
+}
+
+.payment-summary {
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Bouton Stripe stylisé */
+.btn-stripe {
+    background: linear-gradient(135deg, #635bff 0%, #4a45d6 100%);
+    color: white;
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-stripe:hover {
+    background: linear-gradient(135deg, #4a45d6 0%, #3730c7 100%);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(99, 91, 255, 0.3);
+}
+
+.btn-stripe .badge-light {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+}
+
+.btn-outline-primary {
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+}
+
+/* Amélioration des cards */
+.card {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
 }
 </style>
 @endsection

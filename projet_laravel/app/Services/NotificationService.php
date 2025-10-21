@@ -184,4 +184,290 @@ class NotificationService
             ],
         ]);
     }
+
+    /**
+     * Notifier le propriétaire d'une nouvelle demande de location
+     */
+    public function notifyOwnerOfLocationRequest($location)
+    {
+        $proprietaire = $location->proprietaire;
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$proprietaire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $proprietaire->id,
+            'type' => 'location_request',
+            'title' => 'Nouvelle demande de location',
+            'message' => "{$locataire->name} souhaite louer votre livre \"{$book->title}\" pour {$location->duree_jours} jours à {$location->prix}€.",
+            'data' => [
+                'location_id' => $location->id,
+                'book_id' => $book->id,
+                'locataire_id' => $locataire->id,
+                'locataire_name' => $locataire->name,
+                'book_title' => $book->title,
+                'date_location' => $location->date_location->format('Y-m-d'),
+                'duree_jours' => $location->duree_jours,
+                'prix' => $location->prix,
+                'localisation' => $location->localisation,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le locataire que sa demande a été acceptée et qu'il doit payer
+     */
+    public function notifyTenantLocationAccepted($location, $payment)
+    {
+        $locataire = $location->locataire;
+        $proprietaire = $location->proprietaire;
+        $book = $location->book;
+
+        if (!$locataire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $locataire->id,
+            'type' => 'location_accepted_payment_required',
+            'title' => 'Location acceptée - Paiement requis',
+            'message' => "{$proprietaire->name} a accepté votre demande de location pour \"{$book->title}\". Veuillez effectuer le paiement de {$payment->montant}€ pour confirmer la réservation.",
+            'data' => [
+                'location_id' => $location->id,
+                'payment_id' => $payment->id,
+                'book_id' => $book->id,
+                'proprietaire_id' => $proprietaire->id,
+                'proprietaire_name' => $proprietaire->name,
+                'book_title' => $book->title,
+                'montant' => $payment->montant,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le locataire que sa demande a été refusée
+     */
+    public function notifyTenantLocationRejected($location)
+    {
+        $locataire = $location->locataire;
+        $proprietaire = $location->proprietaire;
+        $book = $location->book;
+
+        if (!$locataire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $locataire->id,
+            'type' => 'location_rejected',
+            'title' => 'Demande de location refusée',
+            'message' => "{$proprietaire->name} a refusé votre demande de location pour \"{$book->title}\".",
+            'data' => [
+                'location_id' => $location->id,
+                'book_id' => $book->id,
+                'proprietaire_id' => $proprietaire->id,
+                'proprietaire_name' => $proprietaire->name,
+                'book_title' => $book->title,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le propriétaire qu'un paiement a été effectué
+     */
+    public function notifyOwnerPaymentReceived($location, $payment)
+    {
+        $proprietaire = $location->proprietaire;
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$proprietaire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $proprietaire->id,
+            'type' => 'payment_received',
+            'title' => 'Paiement reçu',
+            'message' => "{$locataire->name} a effectué le paiement de {$payment->montant}€ pour la location de \"{$book->title}\". Vous pouvez maintenant démarrer la location.",
+            'data' => [
+                'location_id' => $location->id,
+                'payment_id' => $payment->id,
+                'book_id' => $book->id,
+                'locataire_id' => $locataire->id,
+                'locataire_name' => $locataire->name,
+                'book_title' => $book->title,
+                'montant' => $payment->montant,
+                'methode_paiement' => $payment->methode_paiement,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le locataire que son paiement a été confirmé
+     */
+    public function notifyTenantPaymentConfirmed($location, $payment)
+    {
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$locataire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $locataire->id,
+            'type' => 'payment_confirmed',
+            'title' => 'Paiement confirmé',
+            'message' => "Votre paiement de {$payment->montant}€ pour la location de \"{$book->title}\" a été confirmé. Référence: {$payment->reference_transaction}",
+            'data' => [
+                'location_id' => $location->id,
+                'payment_id' => $payment->id,
+                'book_id' => $book->id,
+                'book_title' => $book->title,
+                'montant' => $payment->montant,
+                'reference' => $payment->reference_transaction,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le locataire que la location a démarré
+     */
+    public function notifyTenantLocationStarted($location)
+    {
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$locataire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $locataire->id,
+            'type' => 'location_started',
+            'title' => 'Location démarrée',
+            'message' => "La location de \"{$book->title}\" a démarré. N'oubliez pas de retourner le livre avant le {$location->date_fin_prevue->format('d/m/Y')}.",
+            'data' => [
+                'location_id' => $location->id,
+                'book_id' => $book->id,
+                'book_title' => $book->title,
+                'date_fin_prevue' => $location->date_fin_prevue->format('Y-m-d'),
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le propriétaire que la location a démarré
+     */
+    public function notifyOwnerLocationStarted($location)
+    {
+        $proprietaire = $location->proprietaire;
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$proprietaire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $proprietaire->id,
+            'type' => 'location_started_owner',
+            'title' => 'Location démarrée',
+            'message' => "La location de \"{$book->title}\" à {$locataire->name} a démarré. Retour prévu le {$location->date_fin_prevue->format('d/m/Y')}.",
+            'data' => [
+                'location_id' => $location->id,
+                'book_id' => $book->id,
+                'locataire_id' => $locataire->id,
+                'locataire_name' => $locataire->name,
+                'book_title' => $book->title,
+                'date_fin_prevue' => $location->date_fin_prevue->format('Y-m-d'),
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le locataire que la location est terminée
+     */
+    public function notifyTenantLocationCompleted($location)
+    {
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$locataire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $locataire->id,
+            'type' => 'location_completed',
+            'title' => 'Location terminée',
+            'message' => "Merci d'avoir retourné \"{$book->title}\". Nous espérons que vous avez apprécié votre lecture !",
+            'data' => [
+                'location_id' => $location->id,
+                'book_id' => $book->id,
+                'book_title' => $book->title,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le propriétaire que la location est terminée
+     */
+    public function notifyOwnerLocationCompleted($location)
+    {
+        $proprietaire = $location->proprietaire;
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$proprietaire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $proprietaire->id,
+            'type' => 'location_completed_owner',
+            'title' => 'Location terminée',
+            'message' => "{$locataire->name} a retourné \"{$book->title}\". La location est maintenant terminée.",
+            'data' => [
+                'location_id' => $location->id,
+                'book_id' => $book->id,
+                'locataire_id' => $locataire->id,
+                'locataire_name' => $locataire->name,
+                'book_title' => $book->title,
+            ],
+        ]);
+    }
+
+    /**
+     * Notifier le propriétaire qu'un paiement a été annulé
+     */
+    public function notifyOwnerPaymentCancelled($location, $payment)
+    {
+        $proprietaire = $location->proprietaire;
+        $locataire = $location->locataire;
+        $book = $location->book;
+
+        if (!$proprietaire) {
+            return;
+        }
+
+        return Notification::create([
+            'user_id' => $proprietaire->id,
+            'type' => 'payment_cancelled',
+            'title' => 'Paiement annulé',
+            'message' => "{$locataire->name} a annulé le paiement pour la location de \"{$book->title}\". La location a été annulée.",
+            'data' => [
+                'location_id' => $location->id,
+                'payment_id' => $payment->id,
+                'book_id' => $book->id,
+                'locataire_id' => $locataire->id,
+                'locataire_name' => $locataire->name,
+                'book_title' => $book->title,
+            ],
+        ]);
+    }
 }

@@ -38,6 +38,11 @@ class DatabaseSeeder extends Seeder
             ExchangeSeeder::class,
         ]);
         
+        // Create locations/reservations (depends on users and books)
+        $this->call([
+            LocationSeeder::class,
+        ]);
+        
         // Create reports (depends on users and exchanges)
         $this->call([
             ReportSeeder::class,

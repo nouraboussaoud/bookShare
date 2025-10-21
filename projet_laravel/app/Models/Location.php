@@ -86,4 +86,34 @@ class Location extends Model
         $this->statut = 'terminee';
         $this->save();
     }
+
+    /**
+     * Obtenir le paiement en attente pour cette location
+     */
+    public function getPaiementEnAttente()
+    {
+        return $this->payments()
+            ->where('statut_paiement', 'en_attente')
+            ->first();
+    }
+
+    /**
+     * Vérifier si la location a un paiement complété
+     */
+    public function hasPaiementComplete(): bool
+    {
+        return $this->payments()
+            ->where('statut_paiement', 'complete')
+            ->exists();
+    }
+
+    /**
+     * Obtenir le paiement complété
+     */
+    public function getPaiementComplete()
+    {
+        return $this->payments()
+            ->where('statut_paiement', 'complete')
+            ->first();
+    }
 }

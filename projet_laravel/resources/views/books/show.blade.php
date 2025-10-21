@@ -88,12 +88,24 @@
                             @else
                                 <hr>
                                 <!-- Actions pour le propriétaire -->
-                                <a href="{{ route('books.edit', $book) }}" class="btn btn-primary">
+                                <a href="{{ route('books.edit', $book) }}" class="btn btn-primary w-100 mb-2">
                                     <i class="fas fa-edit"></i> Modifier
                                 </a>
                                 
+                                <!-- Bouton pour mettre en location -->
+                                <a href="{{ route('rental-offers.create', $book) }}" 
+                                   class="btn btn-success w-100 mb-2"
+                                   title="Créer une offre de location">
+                                    <i class="fas fa-store"></i> Mettre en Location
+                                </a>
+                                
+                                <div class="alert alert-info small mb-2">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <strong>Astuce:</strong> Votre livre apparaîtra automatiquement sur le marketplace pour être loué par d'autres utilisateurs.
+                                </div>
+                                
                                 @if($book->estEnLocation())
-                                    <div class="alert alert-info mt-2 mb-0">
+                                    <div class="alert alert-warning mt-2 mb-0">
                                         <i class="fas fa-info-circle"></i>
                                         Ce livre est actuellement en location.
                                     </div>

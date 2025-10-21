@@ -58,6 +58,11 @@ class Book extends Model
         return $this->hasMany(Location::class);
     }
 
+    public function rentalOffer()
+    {
+        return $this->hasOne(RentalOffer::class);
+    }
+
     public function readingProgress()
     {
         return $this->hasMany(ReadingProgress::class);

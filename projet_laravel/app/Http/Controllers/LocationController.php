@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Location;
 use App\Models\Book;
 use App\Models\User;
+use App\Models\ReservationPayment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -43,10 +45,13 @@ class LocationController extends Controller
      */
     public function marketplace(Request $request)
     {
-        $query = Book::with(['user', 'category'])
+        $query = Book::with(['user', 'category', 'rentalOffer'])
             ->where('status', 'available')
             ->whereDoesntHave('locations', function($query) {
                 $query->whereIn('statut', ['confirmee', 'en_cours']);
+            })
+            ->whereHas('rentalOffer', function($query) {
+                $query->where('is_active', true);
             });
 
         // Filtrage par recherche (titre ou auteur)
@@ -63,6 +68,14 @@ class LocationController extends Controller
             $query->where('category_id', $request->get('category'));
         }
 
+        // Filtrer par prix maximum
+        if ($request->filled('price_max')) {
+            $priceMax = (float) $request->get('price_max');
+            $query->whereHas('rentalOffer', function($q) use ($priceMax) {
+                $q->where('prix_par_jour', '<=', $priceMax);
+            });
+        }
+
         // Récupérer les livres avec pagination
         $livresDisponibles = $query->orderBy('created_at', 'desc')->paginate(12);
 
@@ -72,12 +85,6 @@ class LocationController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(6)
             ->get();
-
-        // Filtrer par prix maximum si spécifié
-        if ($request->filled('price_max')) {
-            $priceMax = (float) $request->get('price_max');
-            // Ici on pourrait filtrer les livres selon un prix de location estimé
-        }
 
         // Récupérer les catégories pour le filtre
         $categories = \App\Models\Category::where('is_active', true)->get();
@@ -107,7 +114,17 @@ class LocationController extends Controller
             }
         }
         
-        return view('locations.create', compact('book'));
+        // Récupérer tous les livres disponibles à la location (qui n'appartiennent pas à l'utilisateur)
+        $livresDisponibles = Book::with(['user', 'category'])
+            ->where('status', 'available')
+            ->where('user_id', '!=', Auth::id())
+            ->whereDoesntHave('locations', function($query) {
+                $query->whereIn('statut', ['confirmee', 'en_cours']);
+            })
+            ->orderBy('title', 'asc')
+            ->get();
+        
+        return view('locations.create', compact('book', 'livresDisponibles'));
     }
 
     /**
@@ -149,6 +166,10 @@ class LocationController extends Controller
         // Calculer la date de fin
         $location->calculerDateFin();
         $location->save();
+
+        // Envoyer une notification au propriétaire
+        $notificationService = new NotificationService();
+        $notificationService->notifyOwnerOfLocationRequest($location);
 
         return redirect()->route('locations.show', $location)
             ->with('success', 'Demande de location créée avec succès. En attente de confirmation du propriétaire.');
@@ -245,9 +266,21 @@ class LocationController extends Controller
         
         $location->statut = 'confirmee';
         $location->save();
+
+        // Créer automatiquement un paiement
+        $payment = ReservationPayment::create([
+            'location_id' => $location->id,
+            'montant' => $location->prix,
+            'type_paiement' => 'location',
+            'statut_paiement' => 'en_attente',
+        ]);
+
+        // Envoyer notification au locataire qu'il doit payer
+        $notificationService = new NotificationService();
+        $notificationService->notifyTenantLocationAccepted($location, $payment);
         
         return redirect()->route('locations.show', $location)
-            ->with('success', 'Location confirmée avec succès.');
+            ->with('success', 'Location confirmée avec succès. Le locataire a été notifié pour effectuer le paiement.');
     }
     
     /**
@@ -261,9 +294,13 @@ class LocationController extends Controller
         
         $location->statut = 'annulee';
         $location->save();
+
+        // Notifier le locataire du refus
+        $notificationService = new NotificationService();
+        $notificationService->notifyTenantLocationRejected($location);
         
         return redirect()->route('locations.show', $location)
-            ->with('success', 'Location refusée.');
+            ->with('success', 'Location refusée. Le locataire a été notifié.');
     }
     
     /**
@@ -274,12 +311,23 @@ class LocationController extends Controller
         if ($location->proprietaire_id !== Auth::id() || $location->statut !== 'confirmee') {
             abort(403, 'Vous ne pouvez pas démarrer cette location.');
         }
+
+        // Vérifier que le paiement a été effectué
+        $payment = $location->payments()->where('statut_paiement', 'complete')->first();
+        if (!$payment) {
+            return redirect()->back()->with('error', 'Le locataire doit d\'abord effectuer le paiement.');
+        }
         
         $location->statut = 'en_cours';
         $location->save();
+
+        // Notifier les deux parties
+        $notificationService = new NotificationService();
+        $notificationService->notifyTenantLocationStarted($location);
+        $notificationService->notifyOwnerLocationStarted($location);
         
         return redirect()->route('locations.show', $location)
-            ->with('success', 'Location démarrée avec succès.');
+            ->with('success', 'Location démarrée avec succès. Les deux parties ont été notifiées.');
     }
     
     /**
@@ -292,8 +340,13 @@ class LocationController extends Controller
         }
         
         $location->marquerCommeTerminee();
+
+        // Notifier les deux parties
+        $notificationService = new NotificationService();
+        $notificationService->notifyTenantLocationCompleted($location);
+        $notificationService->notifyOwnerLocationCompleted($location);
         
         return redirect()->route('locations.show', $location)
-            ->with('success', 'Location terminée avec succès.');
+            ->with('success', 'Location terminée avec succès. Les deux parties ont été notifiées.');
     }
 }

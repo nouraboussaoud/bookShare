@@ -51,12 +51,20 @@
                     </div>
                     
                     <!-- Boutons d'action -->
-                    <div class="d-flex gap-3 justify-content-center">
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
                         <a href="{{ route('books.create') }}" class="btn btn-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
                             <i class="fas fa-plus me-2"></i>Ajouter un livre
                         </a>
+                        
                         @auth
                             @if(!$isAdmin && !$isOthers)
+                            <!-- Bouton Marketplace Location -->
+                            <a href="{{ route('locations.marketplace') }}" 
+                               class="btn btn-success btn-lg" 
+                               style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
+                                <i class="fas fa-store me-2"></i>Marketplace Location
+                            </a>
+                            
                             <a href="{{ route('books.index', ['scope' => 'others']) }}" class="btn btn-outline-purple btn-lg" style="border-radius: 0px; padding: 0.75rem 2rem; font-weight: 500;">
                                 <i class="fas fa-users me-2"></i> Livres
                             </a>
@@ -144,6 +152,12 @@
                                             </button>
                                         </form>
                                     @endif
+                                    
+                                    <a href="{{ route('rental-offers.create', $book) }}" 
+                                       class="btn btn-sm btn-outline-success" 
+                                       title="Créer une offre de location">
+                                        <i class="fas fa-store"></i>
+                                    </a>
                                     
                                     <form action="{{ route('books.toggleStatus', $book) }}" method="POST" class="d-inline">
                                         @csrf

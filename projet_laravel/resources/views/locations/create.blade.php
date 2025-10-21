@@ -8,9 +8,53 @@
             <i class="fas fa-plus fa-sm text-primary"></i>
             Demander une location
         </h1>
-        <a href="{{ route('locations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Retour aux locations
+        <a href="{{ route('locations.marketplace') }}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm mr-2">
+            <i class="fas fa-store fa-sm text-white-50"></i> Retour au Marketplace
         </a>
+        <a href="{{ route('locations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Mes Locations
+        </a>
+    </div>
+
+    <!-- Bannière Processus de paiement -->
+    <div class="alert alert-success border-left-success shadow-sm mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-1 text-center">
+                <i class="fas fa-shield-alt fa-3x text-success"></i>
+            </div>
+            <div class="col-md-11">
+                <h5 class="font-weight-bold text-success mb-2">
+                    <i class="fas fa-check-circle"></i> Paiement sécurisé APRÈS confirmation
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="process-box">
+                            <span class="badge badge-warning badge-pill">Étape 1</span>
+                            <p class="mb-0 mt-2"><strong>Vous faites la demande</strong><br>
+                            <small class="text-muted">Sans engagement financier</small></p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="process-box">
+                            <span class="badge badge-info badge-pill">Étape 2</span>
+                            <p class="mb-0 mt-2"><strong>Le propriétaire accepte</strong><br>
+                            <small class="text-muted">Vous recevez une notification</small></p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="process-box">
+                            <span class="badge badge-success badge-pill">Étape 3</span>
+                            <p class="mb-0 mt-2"><strong>Vous payez via Stripe</strong><br>
+                            <small class="text-muted">Paiement 100% sécurisé</small></p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-0 mt-3 text-success">
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>Important :</strong> Aucun paiement ne sera effectué avant l'acceptation du propriétaire !
+                </p>
+            </div>
+        </div>
     </div>
 
     @if(session('error'))
@@ -65,11 +109,48 @@
                                 <label for="book_id" class="form-label">Livre à louer</label>
                                 <select class="form-control @error('book_id') is-invalid @enderror" id="book_id" name="book_id" required>
                                     <option value="">Sélectionnez un livre</option>
-                                    <!-- Cette option nécessiterait une liste des livres disponibles -->
+                                    @foreach($livresDisponibles as $livre)
+                                        <option value="{{ $livre->id }}" {{ old('book_id') == $livre->id ? 'selected' : '' }}>
+                                            {{ $livre->title }} - {{ $livre->author }} 
+                                            (Propriétaire: {{ $livre->user->name }})
+                                            @if($livre->category)
+                                                [{{ $livre->category->name }}]
+                                            @endif
+                                        </option>
+                                    @endforeach
                                 </select>
                                 @error('book_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                @if($livresDisponibles->isEmpty())
+                                    <small class="form-text text-muted text-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        Aucun livre n'est actuellement disponible pour la location.
+                                    </small>
+                                @else
+                                    <small class="form-text text-muted">
+                                        {{ $livresDisponibles->count() }} livre(s) disponible(s)
+                                    </small>
+                                @endif
+                            </div>
+
+                            <!-- Aperçu du livre sélectionné -->
+                            <div id="book-preview" class="card mb-4 border-left-primary" style="display: none;">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div id="book-preview-image" class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 150px;">
+                                                <i class="fas fa-book fa-3x text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <h5 class="card-title" id="book-preview-title"></h5>
+                                            <p class="card-text"><strong>Auteur:</strong> <span id="book-preview-author"></span></p>
+                                            <p class="card-text"><strong>Propriétaire:</strong> <span id="book-preview-owner"></span></p>
+                                            <p class="card-text"><strong>Catégorie:</strong> <span id="book-preview-category"></span></p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         @endif
 
@@ -269,6 +350,113 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculer au chargement si les valeurs sont déjà remplies
     calculerDateFin();
+    
+    // Gérer l'aperçu du livre sélectionné
+    const bookSelect = document.getElementById('book_id');
+    const bookPreview = document.getElementById('book-preview');
+    
+    if (bookSelect && bookPreview) {
+        // Créer un objet avec les données des livres
+        const booksData = {
+            @if(isset($livresDisponibles))
+                @foreach($livresDisponibles as $livre)
+                    '{{ $livre->id }}': {
+                        title: '{{ addslashes($livre->title) }}',
+                        author: '{{ addslashes($livre->author) }}',
+                        owner: '{{ addslashes($livre->user->name) }}',
+                        category: '{{ $livre->category ? addslashes($livre->category->name) : "Non catégorisé" }}'
+                    },
+                @endforeach
+            @endif
+        };
+        
+        bookSelect.addEventListener('change', function() {
+            const bookId = this.value;
+            
+            if (bookId && booksData[bookId]) {
+                const book = booksData[bookId];
+                
+                document.getElementById('book-preview-title').textContent = book.title;
+                document.getElementById('book-preview-author').textContent = book.author;
+                document.getElementById('book-preview-owner').textContent = book.owner;
+                document.getElementById('book-preview-category').textContent = book.category;
+                
+                bookPreview.style.display = 'block';
+            } else {
+                bookPreview.style.display = 'none';
+            }
+        });
+        
+        // Afficher l'aperçu si un livre est déjà sélectionné (old value)
+        if (bookSelect.value) {
+            bookSelect.dispatchEvent(new Event('change'));
+        }
+    }
 });
 </script>
+
+<style>
+/* Bannière processus */
+.border-left-success {
+    border-left: 4px solid #1cc88a;
+}
+
+.process-box {
+    padding: 15px;
+    background: #f8f9fc;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.process-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.process-box .badge-pill {
+    font-size: 13px;
+    padding: 8px 15px;
+    margin-bottom: 10px;
+}
+
+/* Amélioration des alertes */
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-success h5 {
+    color: #155724;
+}
+
+/* Boutons améliorés */
+.btn-success {
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(28, 200, 138, 0.3);
+}
+
+.btn-secondary {
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(133, 135, 150, 0.3);
+}
+
+/* Cards */
+.card {
+    border-radius: 12px;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+}
+</style>
 @endsection

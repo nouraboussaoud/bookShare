@@ -52,9 +52,7 @@ class ReadingGroupFactory extends Factory
             'name' => $this->faker->unique()->randomElement($groupNames),
             'description' => $this->faker->randomElement($descriptions),
             'owner_id' => User::inRandomOrder()->first()->id ?? User::factory(),
-            'max_members' => $this->faker->randomElement([10, 15, 20, 25, 30]),
             'is_private' => $this->faker->boolean(30), // 30% chance of being private
-            'status' => $this->faker->randomElement(['active', 'active', 'active', 'inactive']), // 75% active
             'created_at' => $this->faker->dateTimeBetween('-6 months', 'now'),
         ];
     }

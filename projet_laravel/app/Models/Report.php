@@ -175,9 +175,11 @@ class Report extends Model
         }
 
         // Critère 4: Ancienneté du signalement (10%)
-        $hoursOld = $this->created_at->diffInHours(now());
-        if ($hoursOld >= 72) { // Plus de 3 jours
-            $score += 1;
+        if ($this->created_at) {
+            $hoursOld = $this->created_at->diffInHours(now());
+            if ($hoursOld >= 72) { // Plus de 3 jours
+                $score += 1;
+            }
         }
 
         // Bonus: Émotion forte détectée
